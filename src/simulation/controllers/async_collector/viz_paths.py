@@ -19,9 +19,10 @@ PATHS_FILE = os.path.join(HERE, "paths.json")
 OUT_DIR = os.path.join(HERE, "viz")
 
 # ── Wall geometry (from Tiago++'s world.wbt) ────────────────────────────────
-ROBOT_RADIUS = 0.30
-SAFETY_COEFF = 1.5
-SAFE_CLEARANCE = ROBOT_RADIUS * SAFETY_COEFF
+ROBOT_RADIUS = 0.55
+SAFETY_COEFF = 1.1
+EXTRA_MARGIN = 0.25
+SAFE_CLEARANCE = ROBOT_RADIUS * SAFETY_COEFF + EXTRA_MARGIN
 
 RAW_WALLS = [
     (1.48, -1.47, 2.2327, 0.2, 2.7),
