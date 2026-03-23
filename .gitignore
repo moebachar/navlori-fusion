@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+
+# Data (tracked by DVC)
+data/async_collection/
+!/data/.gitkeep
+
+# Experiment tracking
+mlruns/
+tb_logs/
+
+# Services (binaries + runtime)
+src/services/influxdb/
+src/services/grafana/bin/
+src/services/grafana/data/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+Thumbs.db
+.DS_Store
+
+# DVC local cache
+/dvc_store/

@@ -1,0 +1,22 @@
+defaults:
+  - stage_a/wifi: anchor2vec
+  - stage_a/vision: vit
+  - stage_a/imu: cnn1d
+  - stage_a/odom: linear
+  - stage_b: mtan
+  - stage_c: cross_attention
+  - stage_d: kalmannet
+  - stage_e: conformal
+  - data: simulation
+  - training: default
+  - _self_
+
+# Global settings
+seed: 42
+device: auto  # auto, cuda, cpu
+output_dir: ${hydra:runtime.cwd}/outputs
+
+# Pipeline control — which stages to run
+pipeline:
+  stages: [A, B, C, D, E]
+  # Set to a subset to test individual stages, e.g. [A] or [A, B]

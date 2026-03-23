@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NavLoRI Path Editor</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { display: flex; height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; background: #1a1a2e; color: #e0e0e0; }
+
+#sidebar {
+  width: 300px; min-width: 300px; background: #16213e; padding: 20px;
+  display: flex; flex-direction: column; gap: 16px; overflow-y: auto;
+  border-right: 2px solid #0f3460;
+}
+#sidebar h1 { font-size: 1.3em; color: #e94560; margin-bottom: 4px; }
+#sidebar h2 { font-size: 0.95em; color: #a0a0c0; font-weight: 400; margin-bottom: 8px; }
+
+.section { background: #1a1a3e; border-radius: 8px; padding: 14px; }
+.section h3 { font-size: 0.85em; color: #e94560; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+
+label { display: block; font-size: 0.82em; color: #a0a0c0; margin-bottom: 3px; }
+input[type=number] {
+  width: 100%; padding: 6px 10px; background: #0f3460; border: 1px solid #1a4a7a;
+  border-radius: 4px; color: #e0e0e0; font-size: 0.9em; margin-bottom: 8px;
+}
+input[type=number]:focus { outline: none; border-color: #e94560; }
+
+button {
+  width: 100%; padding: 10px; border: none; border-radius: 6px; font-size: 0.9em;
+  cursor: pointer; font-weight: 600; transition: all 0.2s;
+}
+.btn-primary { background: #e94560; color: #fff; }
+.btn-primary:hover { background: #ff6b81; }
+.btn-secondary { background: #0f3460; color: #e0e0e0; border: 1px solid #1a4a7a; }
+.btn-secondary:hover { background: #1a4a7a; }
+.btn-danger { background: #6b1a2a; color: #e0e0e0; }
+.btn-danger:hover { background: #8b2a3a; }
+
+.stats { font-size: 0.8em; color: #a0a0c0; line-height: 1.8; }
+.stats span { color: #e0e0e0; font-weight: 600; }
+
+#canvasWrap {
+  flex: 1; position: relative; background: #f0f0f5; overflow: hidden;
+}
+canvas { display: block; width: 100%; height: 100%; }
+
+#tooltip {
+  position: absolute; display: none; background: rgba(22,33,62,0.92); color: #e0e0e0;
+  padding: 5px 10px; border-radius: 4px; font-size: 0.78em; pointer-events: none;
+  border: 1px solid #0f3460; white-space: nowrap;
+}
+
+#instructions {
+  font-size: 0.75em; color: #707090; line-height: 1.7;
+}
+#instructions b { color: #a0a0c0; }
+
+.checkbox-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.checkbox-row input[type=checkbox] { accent-color: #e94560; }
+.checkbox-row label { margin: 0; }
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div>
+    <h1>NavLoRI Path Editor</h1>
+    <h2>Indoor Path Planning Tool</h2>
+  </div>
+
+  <div class="section">
+    <h3>Path Configuration</h3>
+    <label>Number of Paths</label>
+    <input type="number" id="numPaths" value="30" min="1" max="200">
+    <label>Min Waypoints per Path</label>
+    <input type="number" id="minWP" value="8" min="2" max="50">
+    <label>Max Waypoints per Path</label>
+    <input type="number" id="maxWP" value="16" min="2" max="50">
+    <label>Min Path Length (m)</label>
+    <input type="number" id="minLen" value="30" min="1" max="200" step="1">
+  </div>
+
+  <div class="section">
+    <h3>Display</h3>
+    <div class="checkbox-row">
+      <input type="checkbox" id="showSafety" checked>
+      <label for="showSafety">Show safety zones</label>
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="showGrid" checked>
+      <label for="showGrid">Show grid</label>
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="showLabels" checked>
+      <label for="showLabels">Show node labels</label>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Actions</h3>
+    <button class="btn-primary" onclick="generatePaths()" style="margin-bottom:8px">Generate Paths</button>
+    <button class="btn-secondary" onclick="exportJSON()" style="margin-bottom:8px">Export JSON</button>
+    <button class="btn-danger" onclick="clearAll()">Clear All</button>
+  </div>
+
+  <div class="section">
+    <h3>Statistics</h3>
+    <div class="stats">
+      Nodes placed: <span id="statNodes">0</span><br>
+      Visibility edges: <span id="statEdges">0</span><br>
+      Paths generated: <span id="statPaths">0</span><br>
+      Avg path length: <span id="statAvgLen">-</span> m
+    </div>
+  </div>
+
+  <div id="instructions">
+    <b>Left-click</b> &mdash; place waypoint node<br>
+    <b>Right-click</b> &mdash; remove nearest node<br>
+    <b>Scroll</b> &mdash; zoom in/out<br>
+    <b>Middle-drag / Shift+drag</b> &mdash; pan<br>
+    <b>Hover node</b> &mdash; show coordinates
+  </div>
+</div>
+
+<div id="canvasWrap">
+  <canvas id="canvas"></canvas>
+  <div id="tooltip"></div>
+</div>
+
+<script>
+// ======== WALL DATA ========
+const WALLS_RAW = [
+  [1.48,-1.47,2.2327,0.2,2.7],
+  [1.27,-3.35,-2.5454,0.2,2.707],
+  [-0.61,-6.52,2.2301,0.2,6.9709],
+  [-10.33,-5.40,2.15,0.2,7.5],
+  [-2.16,-10.77,-2.6475,0.2,5.0],
+  [1.10,-11.53,-1.0,0.2,5.1671],
+  [3.99,-11.34,-2.6168,0.2,3.0],
+  [-1.06,-16.10,2.1194,0.2,13.8],
+  [-8.01,-18.25,0.6777,0.2,1.9],
+  [-6.55,-16.13,-1.0151,0.2,5.1559],
+  [-5.62,-12.74,0.5114,0.2,4.6],
+  [-8.43,-11.76,2.1214,0.2,3.8606],
+  [-12.77,-8.61,0.5831,0.2,2.9],
+  [-10.79,-11.60,0.5831,0.2,2.7],
+  [-6.30,-4.47,-2.482,0.2,3.1004],
+  [-4.05,-4.58,-0.8897,0.2,3.6],
+  [-3.72,-1.98,0.5912,0.2,3.4447],
+  [-2.75,1.41,-0.8125,0.2,6.0],
+  [0.84,1.52,-2.5178,0.2,5.3],
+];
+
+const ROBOT_RADIUS = 0.30;
+const SAFETY_COEFF = 1.5;
+const SAFE_CLEARANCE = 0.45;
+
+// ======== GEOMETRY ========
+function wallCorners(tx, ty, angle, sx, sy, inflate = 0) {
+  const hx = sx / 2 + inflate;
+  const hy = sy / 2 + inflate;
+  const cos = Math.cos(angle), sin = Math.sin(angle);
+  const corners = [[-hx,-hy],[hx,-hy],[hx,hy],[-hx,hy]];
+  return corners.map(([lx,ly]) => [tx + lx*cos - ly*sin, ty + lx*sin + ly*cos]);
+}
+
+const walls = WALLS_RAW.map(([tx,ty,a,sx,sy]) => ({
+  tx, ty, angle: a, sx, sy,
+  corners: wallCorners(tx,ty,a,sx,sy,0),
+  inflated: wallCorners(tx,ty,a,sx,sy,SAFE_CLEARANCE),
+}));
+
+function cross2(ax,ay,bx,by) { return ax*by - ay*bx; }
+
+function segmentsIntersect(ax,ay,bx,by,cx,cy,dx,dy) {
+  const abx=bx-ax, aby=by-ay, cdx=dx-cx, cdy=dy-cy;
+  const denom = cross2(abx,aby,cdx,cdy);
+  if (Math.abs(denom) < 1e-12) return false;
+  const acx=cx-ax, acy=cy-ay;
+  const t = cross2(acx,acy,cdx,cdy) / denom;
+  const u = cross2(acx,acy,abx,aby) / denom;
+  return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+}
+
+function segIntersectsPolygon(ax,ay,bx,by,poly) {
+  for (let i = 0; i < poly.length; i++) {
+    const j = (i+1) % poly.length;
+    if (segmentsIntersect(ax,ay,bx,by,poly[i][0],poly[i][1],poly[j][0],poly[j][1]))
+      return true;
+  }
+  return false;
+}
+
+function pointInPolygon(px, py, poly) {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const xi = poly[i][0], yi = poly[i][1];
+    const xj = poly[j][0], yj = poly[j][1];
+    if (((yi > py) !== (yj > py)) && (px < (xj - xi) * (py - yi) / (yj - yi) + xi))
+      inside = !inside;
+  }
+  return inside;
+}
+
+function distPointToSegment(px,py,ax,ay,bx,by) {
+  const dx=bx-ax, dy=by-ay;
+  const lenSq = dx*dx+dy*dy;
+  if (lenSq < 1e-12) return Math.hypot(px-ax,py-ay);
+  let t = ((px-ax)*dx+(py-ay)*dy)/lenSq;
+  t = Math.max(0, Math.min(1, t));
+  return Math.hypot(px-(ax+t*dx), py-(ay+t*dy));
+}
+
+function minDistToWallSurface(px, py) {
+  let minD = Infinity;
+  for (const w of walls) {
+    const c = w.corners;
+    for (let i = 0; i < c.length; i++) {
+      const j = (i+1) % c.length;
+      const d = distPointToSegment(px,py,c[i][0],c[i][1],c[j][0],c[j][1]);
+      if (d < minD) minD = d;
+    }
+    // Also check if inside wall
+    if (pointInPolygon(px, py, c)) return 0;
+  }
+  return minD;
+}
+
+function isNodeValid(x, y) {
+  return minDistToWallSurface(x, y) >= SAFE_CLEARANCE;
+}
+
+function isSegmentClear(ax, ay, bx, by) {
+  for (const w of walls) {
+    if (segIntersectsPolygon(ax, ay, bx, by, w.inflated)) return false;
+  }
+  return true;
+}
+
+// ======== STATE ========
+let nodes = [];
+let paths = [];
+let visGraph = [];
+
+// ======== CANVAS / CAMERA ========
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const tooltip = document.getElementById('tooltip');
+
+let camX = -4, camY = -8;
+let camZoom = 35;
+let isPanning = false;
+let panStartX, panStartY, panCamX, panCamY;
+
+function resize() {
+  const wrap = document.getElementById('canvasWrap');
+  canvas.width = wrap.clientWidth * devicePixelRatio;
+  canvas.height = wrap.clientHeight * devicePixelRatio;
+  canvas.style.width = wrap.clientWidth + 'px';
+  canvas.style.height = wrap.clientHeight + 'px';
+  draw();
+}
+window.addEventListener('resize', resize);
+
+function worldToScreen(wx, wy) {
+  const cx = canvas.width / 2, cy = canvas.height / 2;
+  return [cx + (wx - camX) * camZoom, cy - (wy - camY) * camZoom];
+}
+
+function screenToWorld(sx, sy) {
+  const cx = canvas.width / 2, cy = canvas.height / 2;
+  return [(sx - cx) / camZoom + camX, -(sy - cy) / camZoom + camY];
+}
+
+// ======== DRAWING ========
+function drawPolygon(corners, fill, stroke, lineW) {
+  const pts = corners.map(([x,y]) => worldToScreen(x,y));
+  ctx.beginPath();
+  ctx.moveTo(pts[0][0], pts[0][1]);
+  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+  ctx.closePath();
+  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+  if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lineW || 1; ctx.stroke(); }
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#f5f5fa';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Grid
+  if (document.getElementById('showGrid').checked) {
+    const tl = screenToWorld(0, canvas.height);
+    const br = screenToWorld(canvas.width, 0);
+    const step = camZoom > 15 ? 1 : camZoom > 5 ? 5 : 10;
+    ctx.strokeStyle = '#ddd';
+    ctx.lineWidth = 0.5;
+    for (let x = Math.floor(tl[0]/step)*step; x <= br[0]; x += step) {
+      const [sx] = worldToScreen(x, 0);
+      ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, canvas.height); ctx.stroke();
+    }
+    for (let y = Math.floor(tl[1]/step)*step; y <= br[1]; y += step) {
+      const [, sy] = worldToScreen(0, y);
+      ctx.beginPath(); ctx.moveTo(0, sy); ctx.lineTo(canvas.width, sy); ctx.stroke();
+    }
+    // Axes
+    ctx.strokeStyle = '#bbb'; ctx.lineWidth = 1;
+    const [ox, oy] = worldToScreen(0, 0);
+    ctx.beginPath(); ctx.moveTo(ox, 0); ctx.lineTo(ox, canvas.height); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, oy); ctx.lineTo(canvas.width, oy); ctx.stroke();
+  }
+
+  // Safety zones
+  if (document.getElementById('showSafety').checked) {
+    for (const w of walls) {
+      drawPolygon(w.inflated, 'rgba(233,69,96,0.12)', 'rgba(233,69,96,0.25)', 1);
+    }
+  }
+
+  // Walls
+  for (const w of walls) {
+    drawPolygon(w.corners, '#3a3a5c', '#2a2a4c', 1.5);
+  }
+
+  // Paths
+  const pathColors = [
+    '#2196F3','#FF9800','#4CAF50','#9C27B0','#00BCD4','#FF5722','#8BC34A',
+    '#E91E63','#3F51B5','#CDDC39','#009688','#FFC107','#673AB7','#03A9F4',
+    '#F44336','#795548','#607D8B','#FFEB3B','#1B5E20','#AD1457',
+  ];
+  for (let pi = 0; pi < paths.length; pi++) {
+    const p = paths[pi];
+    if (p.length < 2) continue;
+    const col = pathColors[pi % pathColors.length];
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 2.5;
+    ctx.globalAlpha = 0.7;
+    ctx.beginPath();
+    const [sx0, sy0] = worldToScreen(p[0][0], p[0][1]);
+    ctx.moveTo(sx0, sy0);
+    for (let i = 1; i < p.length; i++) {
+      const [sx, sy] = worldToScreen(p[i][0], p[i][1]);
+      ctx.lineTo(sx, sy);
+    }
+    ctx.stroke();
+    ctx.globalAlpha = 1.0;
+
+    // Start = green square
+    const [stx, sty] = worldToScreen(p[0][0], p[0][1]);
+    ctx.fillStyle = '#4CAF50';
+    const ss = 6;
+    ctx.fillRect(stx-ss, sty-ss, ss*2, ss*2);
+
+    // End = red diamond
+    const [etx, ety] = worldToScreen(p[p.length-1][0], p[p.length-1][1]);
+    ctx.fillStyle = '#F44336';
+    ctx.beginPath();
+    ctx.moveTo(etx, ety-8); ctx.lineTo(etx+6, ety); ctx.lineTo(etx, ety+8); ctx.lineTo(etx-6, ety);
+    ctx.closePath(); ctx.fill();
+  }
+
+  // Nodes
+  const showLabels = document.getElementById('showLabels').checked;
+  for (let i = 0; i < nodes.length; i++) {
+    const [sx, sy] = worldToScreen(nodes[i][0], nodes[i][1]);
+    ctx.beginPath();
+    ctx.arc(sx, sy, 7, 0, Math.PI*2);
+    ctx.fillStyle = '#e94560';
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    if (showLabels) {
+      ctx.fillStyle = '#333';
+      ctx.font = `${11 * devicePixelRatio}px Segoe UI`;
+      ctx.fillText(`N${i}`, sx + 10, sy - 6);
+    }
+  }
+
+  // Visibility graph (faint)
+  if (visGraph.length > 0 && paths.length === 0) {
+    ctx.strokeStyle = 'rgba(100,100,200,0.15)';
+    ctx.lineWidth = 0.8;
+    for (const [i, j] of visGraph) {
+      const [ax, ay] = worldToScreen(nodes[i][0], nodes[i][1]);
+      const [bx, by] = worldToScreen(nodes[j][0], nodes[j][1]);
+      ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+    }
+  }
+}
+
+// ======== INTERACTION ========
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+canvas.addEventListener('mousedown', e => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = (e.clientX - rect.left) * devicePixelRatio;
+  const my = (e.clientY - rect.top) * devicePixelRatio;
+
+  if (e.button === 1 || (e.button === 0 && e.shiftKey)) {
+    isPanning = true;
+    panStartX = mx; panStartY = my;
+    panCamX = camX; panCamY = camY;
+    canvas.style.cursor = 'grabbing';
+    return;
+  }
+
+  const [wx, wy] = screenToWorld(mx, my);
+
+  if (e.button === 0) {
+    // Left click - place node
+    if (!isNodeValid(wx, wy)) {
+      flashMessage('Too close to wall!');
+      return;
+    }
+    nodes.push([wx, wy]);
+    paths = [];
+    rebuildVisGraph();
+    updateStats();
+    draw();
+  } else if (e.button === 2) {
+    // Right click - remove nearest node
+    if (nodes.length === 0) return;
+    let minD = Infinity, minI = -1;
+    for (let i = 0; i < nodes.length; i++) {
+      const [sx, sy] = worldToScreen(nodes[i][0], nodes[i][1]);
+      const d = Math.hypot(sx - mx, sy - my);
+      if (d < minD) { minD = d; minI = i; }
+    }
+    if (minD < 20 * devicePixelRatio) {
+      nodes.splice(minI, 1);
+      paths = [];
+      rebuildVisGraph();
+      updateStats();
+      draw();
+    }
+  }
+});
+
+canvas.addEventListener('mousemove', e => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = (e.clientX - rect.left) * devicePixelRatio;
+  const my = (e.clientY - rect.top) * devicePixelRatio;
+
+  if (isPanning) {
+    const dx = (mx - panStartX) / camZoom;
+    const dy = (my - panStartY) / camZoom;
+    camX = panCamX - dx;
+    camY = panCamY + dy;
+    draw();
+    return;
+  }
+
+  // Tooltip on hover
+  const [wx, wy] = screenToWorld(mx, my);
+  let found = false;
+  for (let i = 0; i < nodes.length; i++) {
+    const [sx, sy] = worldToScreen(nodes[i][0], nodes[i][1]);
+    if (Math.hypot(sx - mx, sy - my) < 14 * devicePixelRatio) {
+      tooltip.style.display = 'block';
+      tooltip.style.left = (e.clientX - document.getElementById('sidebar').offsetWidth + 12) + 'px';
+      tooltip.style.top = (e.clientY - 30) + 'px';
+      tooltip.textContent = `N${i}: (${nodes[i][0].toFixed(2)}, ${nodes[i][1].toFixed(2)})`;
+      found = true;
+      break;
+    }
+  }
+  if (!found) tooltip.style.display = 'none';
+});
+
+canvas.addEventListener('mouseup', () => { isPanning = false; canvas.style.cursor = 'crosshair'; });
+canvas.addEventListener('mouseleave', () => { isPanning = false; tooltip.style.display = 'none'; });
+
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const mx = (e.clientX - rect.left) * devicePixelRatio;
+  const my = (e.clientY - rect.top) * devicePixelRatio;
+  const [wx, wy] = screenToWorld(mx, my);
+
+  const factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
+  camZoom *= factor;
+  camZoom = Math.max(5, Math.min(200, camZoom));
+
+  // Zoom toward cursor
+  camX = wx - (mx - canvas.width / 2) / camZoom;
+  camY = wy + (my - canvas.height / 2) / camZoom;
+
+  draw();
+}, { passive: false });
+
+canvas.style.cursor = 'crosshair';
+
+// ======== VISIBILITY GRAPH ========
+function rebuildVisGraph() {
+  visGraph = [];
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      if (isSegmentClear(nodes[i][0], nodes[i][1], nodes[j][0], nodes[j][1])) {
+        visGraph.push([i, j]);
+      }
+    }
+  }
+}
+
+// Build adjacency list from visGraph
+function buildAdjacency() {
+  const adj = nodes.map(() => []);
+  for (const [i, j] of visGraph) {
+    adj[i].push(j);
+    adj[j].push(i);
+  }
+  return adj;
+}
+
+// ======== PATH GENERATION ========
+function generatePaths() {
+  if (nodes.length < 2) { flashMessage('Place at least 2 nodes!'); return; }
+
+  rebuildVisGraph();
+  const adj = buildAdjacency();
+
+  // Check connectivity
+  const isolated = nodes.findIndex((_, i) => adj[i].length === 0);
+  if (isolated >= 0) { flashMessage(`Node N${isolated} has no visibility edges!`); return; }
+
+  const numPaths = parseInt(document.getElementById('numPaths').value) || 30;
+  const minWP = parseInt(document.getElementById('minWP').value) || 8;
+  const maxWP = parseInt(document.getElementById('maxWP').value) || 16;
+  // Scale min length based on node count — 30m needs many nodes, relax for fewer
+  const userMinLen = parseFloat(document.getElementById('minLen').value) || 30;
+  const minLen = nodes.length < 10 ? Math.min(userMinLen, nodes.length * 2) : userMinLen;
+
+  paths = [];
+  let attempts = 0;
+  const maxAttempts = numPaths * 100;
+
+  while (paths.length < numPaths && attempts < maxAttempts) {
+    attempts++;
+    const targetWP = minWP + Math.floor(Math.random() * (maxWP - minWP + 1));
+    const path = randomWalk(adj, targetWP, minLen);
+    if (path) paths.push(path);
+  }
+
+  if (paths.length < numPaths) {
+    flashMessage(`Generated ${paths.length}/${numPaths} paths (some failed constraints)`);
+  }
+
+  updateStats();
+  draw();
+}
+
+function randomWalk(adj, targetWP, minLen) {
+  const start = Math.floor(Math.random() * nodes.length);
+  const visited = [start];
+  const visitedSet = new Set([start]);
+  let totalLen = 0;
+
+  for (let step = 1; step < targetWP; step++) {
+    const cur = visited[visited.length - 1];
+    const neighbors = adj[cur];
+    if (neighbors.length === 0) break;
+
+    // Filter out last 3 visited to prevent tight loops
+    const recent = new Set(visited.slice(-3));
+    let candidates = neighbors.filter(n => !recent.has(n));
+    if (candidates.length === 0) candidates = neighbors.filter(n => n !== cur);
+    if (candidates.length === 0) candidates = [...neighbors];
+
+    // Weight: prefer unvisited nodes and longer jumps
+    const weights = candidates.map(n => {
+      const d = Math.hypot(nodes[n][0]-nodes[cur][0], nodes[n][1]-nodes[cur][1]);
+      const bonus = visitedSet.has(n) ? 1 : 4;
+      return d * bonus;
+    });
+    const totalW = weights.reduce((a, b) => a + b, 0);
+    let r = Math.random() * totalW;
+    let chosen = candidates[0];
+    for (let i = 0; i < candidates.length; i++) {
+      r -= weights[i];
+      if (r <= 0) { chosen = candidates[i]; break; }
+    }
+
+    totalLen += Math.hypot(nodes[chosen][0]-nodes[cur][0], nodes[chosen][1]-nodes[cur][1]);
+    visited.push(chosen);
+    visitedSet.add(chosen);
+  }
+
+  const minWPVal = parseInt(document.getElementById('minWP').value) || 2;
+  if (visited.length < minWPVal) return null;
+  if (totalLen < minLen) return null;
+
+  return visited.map(i => [nodes[i][0], nodes[i][1]]);
+}
+
+// ======== EXPORT ========
+function exportJSON() {
+  if (paths.length === 0) { flashMessage('No paths to export!'); return; }
+
+  const data = {
+    metadata: {
+      created: new Date().toISOString(),
+      num_paths: paths.length,
+      num_nodes: nodes.length,
+      safe_clearance: SAFE_CLEARANCE,
+      robot_radius: ROBOT_RADIUS,
+    },
+    nodes: nodes.map(([x,y], i) => ({ id: i, x: +x.toFixed(4), y: +y.toFixed(4) })),
+    paths: paths.map((p, i) => ({
+      id: i,
+      waypoints: p.map(([x,y]) => ({ x: +x.toFixed(4), y: +y.toFixed(4) })),
+      length_m: +pathLength(p).toFixed(3),
+    })),
+  };
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'paths.json'; a.click();
+  URL.revokeObjectURL(url);
+  flashMessage('Exported paths.json');
+}
+
+function pathLength(p) {
+  let len = 0;
+  for (let i = 1; i < p.length; i++)
+    len += Math.hypot(p[i][0]-p[i-1][0], p[i][1]-p[i-1][1]);
+  return len;
+}
+
+// ======== UTILS ========
+function clearAll() {
+  nodes = []; paths = []; visGraph = [];
+  updateStats(); draw();
+}
+
+function updateStats() {
+  document.getElementById('statNodes').textContent = nodes.length;
+  document.getElementById('statEdges').textContent = visGraph.length;
+  document.getElementById('statPaths').textContent = paths.length;
+  if (paths.length > 0) {
+    const avg = paths.reduce((s, p) => s + pathLength(p), 0) / paths.length;
+    document.getElementById('statAvgLen').textContent = avg.toFixed(1);
+  } else {
+    document.getElementById('statAvgLen').textContent = '-';
+  }
+}
+
+let flashTimeout;
+function flashMessage(msg) {
+  tooltip.textContent = msg;
+  tooltip.style.display = 'block';
+  tooltip.style.left = '10px';
+  tooltip.style.top = '10px';
+  clearTimeout(flashTimeout);
+  flashTimeout = setTimeout(() => tooltip.style.display = 'none', 2500);
+}
+
+// Display toggles
+document.getElementById('showSafety').addEventListener('change', draw);
+document.getElementById('showGrid').addEventListener('change', draw);
+document.getElementById('showLabels').addEventListener('change', draw);
+
+// Init
+resize();
+</script>
+</body>
+</html>

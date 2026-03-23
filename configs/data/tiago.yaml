@@ -1,0 +1,15 @@
+# Data source: Real-world TIAGO++ trajectories from LAAS-CNRS
+data:
+  name: tiago
+  root: ${oc.env:NAVLORI_DATA_ROOT,../../data}/tiago
+  source: tiago
+  modalities: [wifi, vision, imu, odom]  # full 4-modality
+  split:
+    train_paths: [0, 3, 4]
+    val_paths: [1]
+    test_paths: [2]
+  preprocessing:
+    wifi_pca_components: 30
+    normalize: true
+    seq_length: 50
+    img_size: 224

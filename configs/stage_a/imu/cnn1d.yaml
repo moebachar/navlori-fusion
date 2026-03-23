@@ -1,0 +1,8 @@
+# Stage A — IMU Encoder: 1D-CNN
+encoder:
+  name: cnn1d
+  in_channels: 6  # accel_x/y/z + gyro_x/y/z
+  embed_dim: 128
+  kernel_sizes: [3, 5, 7]
+  n_filters: [64, 128, 128]
+  dropout: 0.1

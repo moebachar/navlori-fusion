@@ -1,0 +1,7 @@
+                                                    &²# Stage A — WiFi Encoder: Anchor2Vec
+encoder:
+  name: anchor2vec
+  n_anchors: 64
+  embed_dim: 128
+  dropout: 0.1
+  n_aps: 117  # number of access points

@@ -1,0 +1,577 @@
+#VRML_SIM R2025a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/floors/protos/RectangleArena.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/robots/pal_robotics/tiagopp/protos/Tiago++.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/appearances/protos/Roughcast.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/advertising_board/protos/AdvertisingBoard.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/apartment_structure/protos/Window.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/factory/fire_extinguisher/protos/FireExtinguisher.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/apartment_structure/protos/Radiator.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/mirror/protos/Mirror.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/television/protos/Television.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/stairs/protos/StraightStairsRail.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/paintings/protos/LandscapePainting.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/paintings/protos/PortraitPainting.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/school_furniture/protos/Blackboard.proto"
+
+WorldInfo {
+}
+Viewpoint {
+  orientation 0.2472390119576777 0.09413306252504185 -0.9643712135406407 2.567909037879846
+  position 22.850126210121317 13.72107643558067 19.632517122660428
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  translation -4.25 -8.23 0
+  floorSize 40 40
+  floorTileSize 5 5
+  wallThickness 0.8
+  wallHeight 1.6
+}
+Blackboard {
+  translation -2.09365 1.83223 1.11
+  rotation 0 0 1 -0.8125
+}
+LandscapePainting {
+  translation -5.07096 -13.4146 1.27
+  rotation 0 0 1 -2.2831853071795862
+}
+StraightStairsRail {
+  translation -1.79219 -11.705 0
+  rotation 0 0 1 2.0943956132800112
+}
+Television {
+  translation -3.81538 -17.6323 1.45
+  rotation 0 0 1 2.1194
+}
+Television {
+  translation 1.90383 -14.1522 1.55
+  rotation 0 0 1 2.1194
+  name "television(1)"
+}
+Mirror {
+  translation 3.94066 -11.4651 -5.75415e-05
+  rotation 0.3779641520510403 0.6546542633605892 0.6546532633601869 2.41886
+  width 1
+  height 1.7
+}
+Radiator {
+  translation -6.16821 -11.4028 1.15
+  rotation 0 0 1 0.5114
+  finAppearance Roughcast {
+    colorOverride 0.768627 0.768627 0.768627
+    textureTransform TextureTransform {
+      scale 3 3
+    }
+  }
+}
+FireExtinguisher {
+  translation -9.99 -12.54 0.59
+}
+Solid {
+  translation 1.47896 -1.47167 1
+  rotation 0 0 1 2.2327
+  children [
+    Shape {
+      appearance Roughcast {
+        textureTransform TextureTransform {
+          scale 2.4 1
+        }
+      }
+      geometry Box {
+        size 0.2 2.7 2.4
+      }
+    }
+  ]
+  name "wall(1)"
+}
+Window {
+  translation -11.7747 -10.1504 0
+  rotation 0 0 1 0.5831
+}
+Window {
+  translation -7.15025 -19.2677 0
+  rotation 0 0 1 0.6777
+  name "window(1)"
+}
+Solid {
+  translation 1.26667 -3.34771 1
+  rotation 0 0 1 -2.5454
+  children [
+    Shape {
+      appearance Roughcast {
+        textureTransform TextureTransform {
+          scale 2.4 1
+        }
+      }
+      geometry Box {
+        size 0.2 2.707 2.4
+      }
+    }
+  ]
+  name "wall(2)"
+}
+Solid {
+  translation -0.606763 -6.5245 1
+  rotation 0 0 1 2.2301
+  children [
+    Shape {
+      appearance Roughcast {
+        textureTransform TextureTransform {
+          scale 2.4 1
+        }
+      }
+      geometry Box {
+        size 0.2 6.9709 2.4
+      }
+    }
+  ]
+  name "wall(3)"
+}
+Solid {
+  translation -10.3346 -5.39984 1
+  rotation 0 0 -1 -2.15
+  children [
+    Shape {
+      appearance Roughcast {
+        textureTransform TextureTransform {
+          scale 2.4 1
+        }
+      }
+      geometry Box {
+        size 0.2 7.5 2.4
+      }
+    }
+  ]
+  name "wall(13)"
+}
+Solid {
+  translation -2.16284 -10.767 1
+  rotation 0 0 1 -2.6475
+  children [
+    Shape {
+      appearance Roughcast {
+        textureTransform TextureTransform {
+          scale 2.4 1
+        }
+      }
+      geometry Box {
+        size 0.2 5 2.4
+      }
+    }
+  ]
+  name "wall(4)"
+}
+Solid {
+  translation 1.1012 -11.5295 1
+  rotation 0 0 -1 1
+  children [
+    Shape {
+      appearance Roughcast {
+        textureTransform TextureTransform {
+          scale 2.4 1
+        }
+      }
+      geometry Box {
+        size 0.2 5.1671 2.4
+      }
+    }
+  ]
+  name "wall(5)"
+}
+Solid {
+  translation 3.98653 -11.3386 1
+  rotation 0 0 1 -2.6167996938995746
+  children [
+    Shape {
+      appearance Roughcast {
+        textureTransform TextureTransform {
+          scale 2.4 1
+        }
+      }
+      geometry Box {
+        size 0.2 3 2.4
+      }
+    }
+  ]
+  name "wall(6)"
+}
+Solid {
+  translation -1.057 -16.0991 1
+  rotation 0 0 1 2.1194
+  children [
+    Shape {
+      appearance Roughcast {
+        textureTransform TextureTransform {
+          scale 2.4 1
+        }
+      }
+      geometry Box {
+        size 0.2 13.8 2.4
+      }
+    }
+  ]
+  name "wall(7)"
+}
+Solid {
+  translation -8.01497 -18.2453 1
+  rotation 0 0 1 0.6777
+  children [
+    Shape {
+      appearance Roughcast {
+        textureTransform TextureTransform {
+          scale 2.4 1
+        }
+      }
+      geometry Box {
+        size 0.2 1.9 2.4
+      }
+    }
+  ]
+  name "wall(8)"
+}
+Solid {
+  translation -6.5477 -16.1282 1
+  rotation 0 0 1 -1.0151
+  children [
+    Shape {
+      appearance Roughcast {
+        textureTransform TextureTransform {
+          scale 2.4 1
+        }
+      }
+      geometry Box {
+        size 0.2 5.1559 2.4
+      }
+    }
+  ]
+  name "wall(9)"
+}
+PortraitPainting {
+  translation -4.10668 -4.79572 1.205
+  rotation 0 0 1 -0.8897
+}
+Solid {
+  translation -5.61656 -12.7403 1
+  rotation 0 0 1 0.5114
+  children [
+    Shape {
+      appearance Roughcast {
+        textureTransform TextureTransform {
+          scale 2.4 1
+        }
+      }
+      geometry Box {
+        size 0.2 4.6 2.4
+      }
+    }
+  ]
+  name "wall(10)"
+}
+Solid {
+  translation -8.43362 -11.758 1
+  rotation 0 0 1 2.1214
+  children [
+    Shape {
+      appearance Roughcast {
+        textureTransform TextureTransform {
+          scale 2.4 1
+        }
+      }
+      geometry Box {
+        size 0.2 3.8606 2.4
+      }
+    }
+  ]
+  name "wall(11)"
+}
+Solid {
+  translation -12.7675 -8.6052 1
+  rotation 0 0 1 0.5831
+  children [
+    Shape {
+      appearance Roughcast {
+        textureTransform TextureTransform {
+          scale 2.4 1
+        }
+      }
+      geometry Box {
+        size 0.2 2.9 2.4
+      }
+    }
+  ]
+  name "wall(12)"
+}
+Solid {
+  translation -10.7915 -11.6022 1
+  rotation 0 0 1 0.5831
+  children [
+    Shape {
+      appearance Roughcast {
+        textureTransform TextureTransform {
+          scale 2.4 1
+        }
+      }
+      geometry Box {
+        size 0.2 2.7 2.4
+      }
+    }
+  ]
+  name "wall(19)"
+}
+Solid {
+  translation -6.29879 -4.469 1
+  rotation 0 0 1 -2.482
+  children [
+    Shape {
+      appearance Roughcast {
+        textureTransform TextureTransform {
+          scale 2.4 1
+        }
+      }
+      geometry Box {
+        size 0.2 3.1004 2.4
+      }
+    }
+  ]
+  name "wall(14)"
+}
+Solid {
+  translation -4.04671 -4.57861 1
+  rotation 0 0 1 -0.8897
+  children [
+    Shape {
+      appearance Roughcast {
+        textureTransform TextureTransform {
+          scale 2.4 1
+        }
+      }
+      geometry Box {
+        size 0.2 3.6 2.4
+      }
+    }
+  ]
+  name "wall(15)"
+}
+Solid {
+  translation -3.71731 -1.98373 1
+  rotation 0 0 1 0.5912
+  children [
+    Shape {
+      appearance Roughcast {
+        textureTransform TextureTransform {
+          scale 2.4 1
+        }
+      }
+      geometry Box {
+        size 0.2 3.4447 2.4
+      }
+    }
+  ]
+  name "wall(16)"
+}
+Solid {
+  translation -2.74691 1.40862 1
+  rotation 0 0 1 -0.8125
+  children [
+    Shape {
+      appearance Roughcast {
+        textureTransform TextureTransform {
+          scale 2.4 1
+        }
+      }
+      geometry Box {
+        size 0.2 6 2.4
+      }
+    }
+  ]
+  name "wall(17)"
+}
+DEF TIAGO Tiago++ {
+  hidden position_0_0 42.28812749556857
+  hidden position_0_1 47.35457406798
+  hidden position_0_2 -1.0824985956351352
+  hidden position_0_3 -0.4678070462396704
+  hidden position_0_4 1.370195784165953
+  hidden position_0_5 0.6661495756246129
+  hidden linearVelocity_0 -0.09657594316060725 -0.10465440675361859 -0.000171471569929322
+  hidden angularVelocity_0 -0.007764999693527799 0.02167697933467673 -0.7993063770367657
+  hidden position_1_0 0.1495722645433388
+  hidden translation_2 0 0 0.7495722645433388
+  hidden position_2_0 -1.1436723608420721e-09
+  hidden linearVelocity_2 -0.07257467763369606 -0.12018760000344916 -0.0008249038466003813
+  hidden angularVelocity_2 -0.007778012479819697 0.021688696297348174 -0.7993621198258694
+  hidden position_3_0 0.1999849045273681
+  hidden translation_4 0.025098006957673703 -0.19398013454637958 -0.171
+  hidden rotation_4 0 0 1 1.7707849045273678
+  hidden position_4_0 -1.1099994258500467
+  hidden linearVelocity_4 0.10157449672112862 -0.004029636830773656 0.0006258910566087864
+  hidden angularVelocity_4 -0.007788157876133848 0.02169545137321141 -0.7995253494550174
+  hidden rotation_5 0.7518986446937418 0.4661795960544015 -0.46618130843081784 1.8521659135542807
+  hidden position_5_0 0.1999985071393597
+  hidden linearVelocity_5 0.13010637921957208 0.04963752779533909 0.0017941295579524759
+  hidden angularVelocity_5 -0.007824296465981736 0.021675111596708676 -0.7995255772396581
+  hidden translation_6 -0.08659999999999993 -0.0002980018015380313 -2.9899688361339398e-05
+  hidden rotation_6 0.6121596751636842 0.5005204068959194 0.6121599908391889 2.213469989802628
+  hidden position_6_0 1.9400114597317182
+  hidden linearVelocity_6 0.18509118551445414 0.09346725410490381 0.0024392885924803534
+  hidden angularVelocity_6 -0.007845414439546318 0.021697059933296993 -0.7995000594670354
+  hidden rotation_7 -0.9668550076850352 -0.18054116234326284 -0.18054440676496805 1.6044989794206992
+  hidden position_7_0 -1.570008102852947
+  hidden linearVelocity_7 0.16123950497457842 0.07067870130788312 0.002053438249973965
+  hidden angularVelocity_7 -0.007845232739511081 0.021697517420008784 -0.7994952269455528
+  hidden rotation_8 0.5775039010429482 0.5770458827316862 0.5775009034647355 2.0948562433636795
+  hidden position_8_0 1.3700003505214435
+  hidden linearVelocity_8 0.04020085404594566 -0.010340482925802856 0.001041162058656657
+  hidden angularVelocity_8 -0.007892743459591806 0.021760935343154243 -0.7994998093251223
+  hidden rotation_9 -0.9900037743631019 0.09973221361598597 0.09972969624975182 1.5808457934927376
+  hidden position_9_0 -1.668317566162662e-09
+  hidden linearVelocity_9 -0.004568641453219544 -0.045579596214206694 0.0005242743979980042
+  hidden angularVelocity_9 -0.007894007096747658 0.02175921840122647 -0.7994998130282506
+  hidden rotation_10 -0.5773502688685598 -0.5773502698317605 0.577350268868557 2.0943999990367965
+  hidden linearVelocity_10 -0.016088352349562476 -0.05839963860877636 0.0002896039018187081
+  hidden angularVelocity_10 -0.007893636798580878 0.021758806178671555 -0.799499669988779
+  hidden position_12_0 1.0716777187246083e-05
+  hidden position_12_1 -8.850257761817075e-06
+  hidden translation_33 -1.0716777187246083e-05 0 0
+  hidden linearVelocity_33 -0.03337447954030697 -0.07966300238650428 -0.00011803268368220179
+  hidden angularVelocity_33 -0.007893628433594691 0.021758793452481457 -0.79949966726017
+  hidden translation_34 -8.850257761817075e-06 0 0
+  hidden linearVelocity_34 -0.0403627122514898 -0.08335898732811452 -0.00014978681115789845
+  hidden angularVelocity_34 -0.007893628197116524 0.021758794716465225 -0.7994996656005976
+  hidden position_35_0 0.19998277072363357
+  hidden translation_36 0.02509800700006246 0.19398013475550724 -0.171
+  hidden rotation_36 0 0 1 1.3708172292763663
+  hidden position_36_0 -1.1099988751533132
+  hidden linearVelocity_36 -0.23902009576380706 -0.2446457725813854 -0.0025752950600786994
+  hidden angularVelocity_36 -0.007770834508912132 0.021684373225175108 -0.7992004025477855
+  hidden rotation_37 0.7518988456252614 -0.46617943401424555 0.46618114639006664 1.8521656568307445
+  hidden position_37_0 -0.20001149014510322
+  hidden linearVelocity_37 -0.2991349337469704 -0.25363870043789466 -0.002234979221797325
+  hidden angularVelocity_37 -0.00772300056018684 0.021696758952730107 -0.7992033838421778
+  hidden rotation_38 0.5348017983245772 -0.6542031803121638 -0.5347945730635726 1.983044844994224
+  hidden position_38_0 1.9400113546368172
+  hidden linearVelocity_38 -0.3507614514221414 -0.2884340734328911 -0.0026772916459232286
+  hidden angularVelocity_38 -0.007739410440720219 0.021734346764125584 -0.7992980996496748
+  hidden rotation_39 -0.9668550260406692 0.1805411131936289 0.180544357615247 1.604498960446746
+  hidden position_39_0 -1.5699918111957616
+  hidden linearVelocity_39 -0.30943100701205006 -0.298689550506695 -0.003349403863436685
+  hidden angularVelocity_39 -0.007739187898834925 0.021734096218849433 -0.7992961152068531
+  hidden rotation_40 -0.5771939639808861 -0.577660634284018 0.5771960841365938 2.0939327992580763
+  hidden position_40_0 1.3700001508756412
+  hidden linearVelocity_40 -0.16880056539968508 -0.2609937304035601 -0.0036772926147142343
+  hidden angularVelocity_40 -0.007720473745641302 0.021656749469920408 -0.7993021735118283
+  hidden rotation_41 -0.07105172460665289 -0.7053187656938762 -0.7053205591718473 2.9997319803894573
+  hidden position_41_0 -2.9333665644552943e-08
+  hidden linearVelocity_41 -0.11552411609932561 -0.24537966810936826 -0.003765641267692621
+  hidden angularVelocity_41 -0.007717061784809925 0.02165769745202821 -0.7993025507600539
+  hidden rotation_42 0.5773502748348602 0.5773502578991087 0.5773502748349082 2.0944000169357997
+  hidden linearVelocity_42 -0.10316716392580405 -0.23687648864723387 -0.003654181691685206
+  hidden angularVelocity_42 -0.007717512296734746 0.02165759415424865 -0.7993023510185124
+  hidden position_44_0 -1.165911247688565e-05
+  hidden position_44_1 1.3536111447857184e-05
+  hidden translation_65 1.165911247688565e-05 0 0
+  hidden linearVelocity_65 -0.07688034196320447 -0.22123429855821303 -0.0034841478827374035
+  hidden angularVelocity_65 -0.007717528068629413 0.021657587945071114 -0.7993023505910163
+  hidden translation_66 1.3536111447857184e-05 0 0
+  hidden linearVelocity_66 -0.08488708446036838 -0.22186583546271493 -0.0034248987762235126
+  hidden angularVelocity_66 -0.007717527692739749 0.021657588524745433 -0.7993023505306086
+  hidden position_67_0 -3.6910065941027115e-07
+  hidden linearVelocity_67 -0.14185195475096984 -0.012737822318729067 0.0027426803439528
+  hidden angularVelocity_67 -0.007778725138128313 0.021688433799199373 -0.7993622893076068
+  hidden rotation_68 0.9999999999999661 1.8454965181516354e-07 -1.845503297051314e-07 1.570800000000034
+  hidden linearVelocity_68 -0.15984081597517452 0.012817373394064059 0.003605704828519372
+  hidden angularVelocity_68 -0.007778732720252147 0.02168806127904879 -0.7993625443391568
+  hidden translation_77 2.5318584060851634e-05 6.309427392103828e-06 0.029991380450061444
+  hidden rotation_77 -0.13223253624767012 -0.0797610728019732 0.9880044168033799 -2.584526370696949e-09
+  hidden linearVelocity_77 -0.10524327994932683 -0.09543553984627805 0.00016088730030663765
+  hidden angularVelocity_77 -0.007765010134985171 0.021676976878108902 -0.7993065771271501
+  hidden rotation_81 -0.5299015171747647 0.599667299554793 -0.5996695022598235 4.116152995624766
+  hidden linearVelocity_81 0.02398342462318513 -0.002631566540690555 0.0014063707327413733
+  hidden angularVelocity_81 -0.06395352537630765 0.10894623232169812 -0.7992233973341386
+  hidden rotation_82 0.0816494402081738 -0.7047445353447205 0.7047471240206985 2.9786558088407187
+  hidden linearVelocity_82 -0.23915822046505436 -0.1882901251171492 -0.0010369371469474212
+  hidden angularVelocity_82 1.8172956199223962 -2.5488818137615596 -0.8266998373655482
+  hidden rotation_83 0 0 -1 1.0824985956351352
+  hidden position_83_0 172.66972620492712
+  hidden linearVelocity_83 -0.12006243908445256 0.06369318979651828 0.004346279116410116
+  hidden angularVelocity_83 0.004619389671900873 0.02651081458955546 0.026322397662843056
+  hidden rotation_84 0.0416853740372888 -0.7064908572547446 -0.7064934523453331 3.2249148559494945
+  hidden linearVelocity_84 -0.12061605152384487 0.06470405782430179 0.003946900371087811
+  hidden angularVelocity_84 -2.5888433686235146 -4.824255717630987 0.017074283668320145
+  hidden rotation_85 0 0 -1 0.46780704623967073
+  hidden position_85_0 180.50532279907918
+  hidden linearVelocity_85 -0.2535228772746023 -0.03213258479953101 0.0032809173961823976
+  hidden angularVelocity_85 -0.0007238401835162125 0.024435772512093668 -0.3327659425568278
+  hidden rotation_86 0.524955839306595 0.6018383112720754 0.601840521951692 4.108414394367203
+  hidden linearVelocity_86 -0.253642428494074 -0.03637868015477454 0.0029152534724877907
+  hidden angularVelocity_86 1.470891201759947 -10.048036632354886 -0.3824926921939029
+  hidden rotation_87 0 0 1 1.3701957841659527
+  hidden position_87_0 173.41229883537864
+  hidden linearVelocity_87 0.043195526696270525 -0.15870623180472965 -0.0030489873394813458
+  hidden angularVelocity_87 -0.020101950671054004 0.0168202691365111 -1.627462215950724
+  hidden rotation_88 -0.2226112008613017 -0.6893623002726534 -0.6893648324464233 2.703515033587173
+  hidden linearVelocity_88 0.06243572426473651 -0.1490685163102608 -0.003120170858919671
+  hidden angularVelocity_88 5.519587496730431 2.687923204892988 -1.7321694339521718
+  hidden rotation_89 0 0 1 0.6661495756246126
+  hidden position_89_0 180.9703188086747
+  hidden linearVelocity_89 -0.0912374353252772 -0.2565581796247732 -0.004066138041352302
+  hidden angularVelocity_89 -0.016499767111971212 0.018298084178662515 -1.3794164187171474
+  hidden rotation_90 0.7029425338261198 0.5029264041424245 0.5029282514976516 4.3669853782897
+  hidden linearVelocity_90 -0.07437834161307218 -0.26125571896208494 -0.004243911931289717
+  hidden angularVelocity_90 10.785341787816566 -2.8735374978459607 -1.5809804296240904
+  translation -0.7810078410182678 -4.222073235331745 0.08614795043768639
+  rotation -0.008869954325214115 -0.000371396816562659 -0.9999605922108499 2.5382310609806216
+  controller "async_collector"
+  supervisor TRUE
+}
+AdvertisingBoard {
+  translation -1.88454 -7.36013 0.58
+  rotation 0 0 1 2.2301
+  displayWidth 1
+  displayHeight 1
+  frameThickness 0.1
+}
+AdvertisingBoard {
+  translation -10.0214 -5.33529 0.58
+  rotation 0 0 -1 -2.15
+  name "advertising board(1)"
+  displayWidth 1
+  displayHeight 1
+  frameThickness 0.1
+}
+AdvertisingBoard {
+  translation -11.3504 -6.20569 0.58
+  rotation 0 0 -1 -2.15
+  name "advertising board(2)"
+  displayWidth 1
+  displayHeight 1
+  frameThickness 0.1
+}
+Robot {
+  name "wifi_supervisor"
+  controller "<none>"
+  supervisor TRUE
+}
+Solid {
+  translation 0.838357 1.51526 1
+  rotation 0 0 1 -2.5178
+  children [
+    Shape {
+      appearance Roughcast {
+        textureTransform TextureTransform {
+          scale 2.4 1
+        }
+      }
+      geometry Box {
+        size 0.2 5.3 2.4
+      }
+    }
+  ]
+  name "wall(18)"
+}

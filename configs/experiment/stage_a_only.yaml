@@ -1,0 +1,13 @@
+# Experiment: Test encoders in isolation
+# Usage: python scripts/train.py +experiment=stage_a_only
+defaults:
+  - override /stage_b: mtan
+  - override /data: simulation
+  - override /training: default
+
+pipeline:
+  stages: [A]
+
+training:
+  epochs: 50
+  batch_size: 256

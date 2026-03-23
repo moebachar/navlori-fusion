@@ -1,0 +1,6 @@
+# Stage A — Odometry Encoder: Linear projection
+encoder:
+  name: linear
+  in_features: 3  # delta_x, delta_y, delta_theta
+  embed_dim: 128
+  dropout: 0.1

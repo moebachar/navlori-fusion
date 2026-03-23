@@ -1,0 +1,6 @@
+# Stage B — Temporal Alignment: GRU-D with learned decay
+temporal:
+  name: gru_d
+  hidden_dim: 128
+  learn_decay: true
+  decay_init: 0.1

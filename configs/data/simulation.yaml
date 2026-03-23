@@ -1,0 +1,14 @@
+# Data source: Webots simulation
+data:
+  name: simulation
+  root: ${oc.env:NAVLORI_DATA_ROOT,../../data}
+  source: webots
+  modalities: [wifi, imu, odom]  # vision not yet in sim
+  split:
+    train_paths: [0, 3, 4]
+    val_paths: [1]
+    test_paths: [2]
+  preprocessing:
+    wifi_pca_components: 0  # 0 = disabled
+    normalize: true
+    seq_length: 50

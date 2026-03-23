@@ -1,0 +1,76 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "navlori-fusion"
+version = "0.1.0"
+description = "Attention-Based Asynchronous Fusion of WiFi, Vision, IMU, and Odometry for Indoor Robot Localization"
+requires-python = ">=3.11"
+authors = [
+    {name = "Mohamed Bachar", email = "mohamed.bachar@cesi.fr"},
+]
+
+dependencies = [
+    # Core ML
+    "torch>=2.1",
+    "torchvision>=0.16",
+    "numpy>=1.24",
+    "scipy>=1.11",
+    "pandas>=2.1",
+
+    # Configuration
+    "hydra-core>=1.3",
+    "omegaconf>=2.3",
+
+    # Experiment tracking
+    "mlflow>=2.10",
+    "tensorboard>=2.15",
+
+    # Data versioning
+    "dvc>=3.40",
+
+    # Visualization
+    "matplotlib>=3.8",
+    "seaborn>=0.13",
+    "plotly>=5.18",
+    "influxdb-client>=1.40",
+
+    # Continuous-time models
+    "torchdiffeq>=0.2",
+
+    # Notebooks
+    "ipykernel>=6.27",
+    "jupyter>=1.0",
+    "nbformat>=5.0",
+
+    # Utilities
+    "rich>=13.0",
+    "tqdm>=4.66",
+    "pyyaml>=6.0",
+    "Pillow>=10.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "ruff>=0.2",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["pipeline*"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-v --tb=short"
