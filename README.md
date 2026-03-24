@@ -41,7 +41,10 @@ navlori-fusion/
 │   │       │   ├── async_collector.py   # Event-driven multi-modal collector
 │   │       │   ├── dwa_planner.py       # DWA obstacle avoidance (from PythonRobotics)
 │   │       │   ├── paths.py             # Path loader
-│   │       │   └── paths.json           # 30 collision-free paths
+│   │       │   ├── paths.json           # 30 collision-free paths
+│   │       │   ├── fix_paths.py         # Safety zone violation fixer
+│   │       │   ├── viz_paths.py         # Path visualization generator
+│   │       │   └── viz/                 # Generated path images
 │   │       ├── wifi_supervisor/    # WiFi RSSI predictor (GPR-based)
 │   │       └── tiago_unified_collector/ # Legacy collector (reference)
 │   ├── pipeline/                   # ML pipeline
@@ -65,6 +68,7 @@ navlori-fusion/
 │   └── data_exploration.ipynb      # Data analysis + visualizations
 ├── scripts/
 │   ├── services.ps1                # Start/stop InfluxDB + Grafana
+│   ├── launch_webots.ps1           # Launch Webots in interactive session
 │   ├── train.py
 │   └── evaluate.py
 ├── data/                           # DVC-tracked data directory
@@ -232,17 +236,20 @@ Obstacle detection uses the TIAGO++ depth camera (Astra depth sensor).
 
 ### Paths
 
-30 predefined paths in `paths.json`, generated with collision-free constraints (robot radius × 1.5 safety margin). Each path has 4-10 waypoints covering the indoor environment.
+30 predefined paths in `paths.json`. Waypoints are corrected with `fix_paths.py` to enforce a safety clearance of **0.855m** (robot_radius=0.55 × 1.1 + 0.25m extra margin) from all walls. Visualize with `viz_paths.py` which outputs to `viz/`.
+
+The robot's actual collision radius is measured dynamically after `tuck_arms()` by reading the world positions of `ARM_LEFT_4` and `ARM_RIGHT_4` joints, plus a safety margin.
 
 ---
 
 ## Remote Access (from laptop)
 
-Everything runs on the desktop. From the laptop, connect via VS Code Remote SSH:
+Everything runs on the desktop. From the laptop:
 
-1. Open VS Code → Remote SSH → connect to `navlori-gpu` (100.126.253.37 via Tailscale)
+1. **VS Code Remote SSH** → connect to `navlori-gpu` (100.126.253.37 via Tailscline)
 2. Open folder: `C:\Users\Administrateur\navlori-fusion`
-3. Access services via browser:
+3. **Parsec** for Webots GUI (cameras need a real GPU session — SSH has no display context)
+4. Access services via browser:
    - Grafana: http://100.126.253.37:3000
    - InfluxDB: http://100.126.253.37:8086
    - MLflow: http://100.126.253.37:5000
