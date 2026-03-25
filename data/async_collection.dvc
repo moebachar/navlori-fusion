@@ -1,0 +1,6 @@
+outs:
+- md5: dde456adf95743c3709162752bcfbb81.dir
+  size: 347490959
+  nfiles: 1443
+  hash: md5
+  path: async_collection

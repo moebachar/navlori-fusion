@@ -5,3 +5,4 @@ async_collection/
 *.json
 !.gitkeep
 !.gitignore
+/async_collection
