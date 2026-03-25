@@ -1,0 +1,7 @@
+# Ignore all collected data (versioned via DVC)
+async_collection/
+*.csv
+*.png
+*.json
+!.gitkeep
+!.gitignore
