@@ -1,4 +1,4 @@
-"""Structured logging setup for NavLoRI Fusion.
+"""Structured logging setup for Fusion pipeline.
 
 Three levels of visibility:
   - High: MLflow (experiment comparison, post-hoc)
