@@ -45,7 +45,7 @@ class FusionDataModule:
         windows: dict[str, int] | None = None,
         normalize: bool = True,
         batch_size: int = 64,
-        num_workers: int = 0,
+        num_workers: int = 0,  # keep 0 on Windows/Jupyter — cache makes it fast enough
         camera_transform=None,
         wifi_pca: int | None = None,
     ):

@@ -93,6 +93,7 @@ def alignment_uniformity(
     y: np.ndarray,
     distance_threshold: float = 1.0,
     t: float = 2.0,
+    max_samples: int = 1000,
 ) -> dict[str, float]:
     """Compute alignment and uniformity of embeddings.
 
@@ -102,31 +103,39 @@ def alignment_uniformity(
         distance_threshold: max physical distance (meters) for a pair
                             to be considered "similar"
         t: temperature for uniformity (default 2, per paper)
+        max_samples: subsample to this many points to keep O(N²) tractable
 
     Returns:
         dict with 'alignment' (lower=better) and 'uniformity' (lower=better)
     """
-    z = _l2_normalize(z)
+    # Subsample to avoid O(N²·D) memory blowup
+    if len(z) > max_samples:
+        idx = np.random.choice(len(z), max_samples, replace=False)
+        z, y = z[idx], y[idx]
 
-    # --- Alignment: mean distance between positive pairs ---
-    # Positive pairs = samples within `distance_threshold` meters
-    pos_dists = _pairwise_distances(y)
+    z = _l2_normalize(z)
+    n = len(z)
+
+    # --- Pairwise squared distances in embedding space (memory-efficient) ---
+    # ||a-b||² = ||a||² + ||b||² - 2·aᵀb  →  never materialises (N,N,D)
+    z_sq = (z ** 2).sum(axis=1)                    # (N,)
+    dot   = z @ z.T                                 # (N, N)
+    z_dists_sq = z_sq[:, None] + z_sq[None, :] - 2 * dot  # (N, N)
+    z_dists_sq = np.maximum(z_dists_sq, 0.0)       # numerical guard
+
+    # --- Pairwise physical distances ---
+    y_sq = (y ** 2).sum(axis=1)
+    y_dot = y @ y.T
+    pos_dists = np.sqrt(np.maximum(y_sq[:, None] + y_sq[None, :] - 2 * y_dot, 0.0))
+
+    # --- Alignment ---
     pos_mask = pos_dists < distance_threshold
     np.fill_diagonal(pos_mask, False)
+    alignment = float(z_dists_sq[pos_mask].mean()) if pos_mask.any() else 0.0
 
-    if pos_mask.sum() == 0:
-        alignment = 0.0
-    else:
-        # Squared L2 distance in embedding space for positive pairs
-        z_dists_sq = _pairwise_sq_distances(z)
-        alignment = float(z_dists_sq[pos_mask].mean())
-
-    # --- Uniformity: log of average pairwise Gaussian potential ---
-    n = len(z)
-    z_dists_sq = _pairwise_sq_distances(z)
-    # Exclude diagonal
-    mask = ~np.eye(n, dtype=bool)
-    uniformity = float(np.log(np.exp(-t * z_dists_sq[mask]).mean()))
+    # --- Uniformity ---
+    off_diag = ~np.eye(n, dtype=bool)
+    uniformity = float(np.log(np.exp(-t * z_dists_sq[off_diag]).mean()))
 
     return {"alignment": alignment, "uniformity": uniformity}
 
@@ -295,8 +304,11 @@ def extract_embeddings(
     all_y = []
 
     for batch in dataloader:
-        x = batch[modality].to(device)
-        y = batch["target"]
+        # Handle both TensorDataset (tuple) and FusionDataset (dict)
+        if isinstance(batch, (list, tuple)):
+            x, y = batch[0].to(device), batch[1]
+        else:
+            x, y = batch[modality].to(device), batch["target"]
 
         z = encoder(x)
         # If encoder outputs (batch, n_tokens, embed_dim), mean-pool tokens
@@ -397,13 +409,3 @@ def _l2_normalize(z: np.ndarray) -> np.ndarray:
     return z / norms
 
 
-def _pairwise_distances(y: np.ndarray) -> np.ndarray:
-    """Euclidean pairwise distance matrix."""
-    diff = y[:, None, :] - y[None, :, :]
-    return np.sqrt((diff ** 2).sum(axis=-1))
-
-
-def _pairwise_sq_distances(z: np.ndarray) -> np.ndarray:
-    """Squared L2 pairwise distance matrix."""
-    diff = z[:, None, :] - z[None, :, :]
-    return (diff ** 2).sum(axis=-1)

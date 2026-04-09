@@ -31,3 +31,9 @@ Thumbs.db
 
 # DVC local cache
 /dvc_store/
+\n# ViT backbone feature cache\n.vit_cache/
+
+runs/**/*.pt
+
+.claude/*
+CLAUDE.md

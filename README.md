@@ -103,8 +103,8 @@ python -m ipykernel install --user --name navlori-fusion --display-name "NavLoRI
 
 ```powershell
 dvc init
-dvc remote add -d local C:\Users\Administrateur\dvc_store
-mkdir C:\Users\Administrateur\dvc_store
+dvc remote add -d local D:\dvc_store
+mkdir D:\dvc_store
 ```
 
 ### 4. Install services (InfluxDB + Grafana)

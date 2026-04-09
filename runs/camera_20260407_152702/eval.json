@@ -1,0 +1,25 @@
+{
+  "linear_probe": {
+    "mae": 3.638108253479004,
+    "rmse": 4.620318412780762,
+    "mean_euclidean": 5.752481460571289
+  },
+  "alignment_uniformity": {
+    "alignment": 0.38861116766929626,
+    "uniformity": -0.5154145359992981
+  },
+  "effective_dimensionality": {
+    "participation_ratio": 2.1018896102905273,
+    "dims_95": 3,
+    "embed_dim": 128
+  },
+  "temporal_smoothness": {
+    "correlation": 0.25476531973860184,
+    "mean_dz": 0.09307674318552017,
+    "std_dz": 0.895818293094635
+  },
+  "knn_probe": {
+    "mae": 3.246325765144541,
+    "mean_euclidean": 5.065995403625059
+  }
+}

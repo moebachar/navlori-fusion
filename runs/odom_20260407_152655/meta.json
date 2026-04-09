@@ -1,0 +1,10 @@
+{
+  "run_id": "odom_20260407_152655",
+  "modality": "odom",
+  "device": "cuda",
+  "epochs": 100,
+  "lr": 0.001,
+  "started_at": "2026-04-07T15:26:55.345146",
+  "n_train": 8524,
+  "n_val": 2318
+}

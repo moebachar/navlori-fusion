@@ -187,6 +187,28 @@ class FusionDataset(Dataset):
         if self.normalize and self.stats is None:
             self.stats = self._compute_stats()
 
+        # ------------------------------------------------------------------
+        # Precompute all non-camera windows into a single stacked tensor
+        # per modality for O(1) __getitem__ (pure tensor slice, no Python loop).
+        # ------------------------------------------------------------------
+        self._cache: dict[str, torch.Tensor] = {}
+        tabular_mods = [m for m in self.modalities if m != "camera"]
+        for mod in tabular_mods:
+            windows = [self._get_window(mod, r["path_idx"], r["time"]) for r in self._gt_rows]
+            self._cache[mod] = torch.stack(windows)  # (N, window, features)
+
+        # Pre-stack targets and timestamps
+        self._targets = torch.tensor(
+            np.array([r["target"] for r in self._gt_rows], dtype=np.float32),
+        )
+        self._timestamps = torch.tensor(
+            np.array([r["time"] for r in self._gt_rows], dtype=np.float64),
+        )
+
+        # Free raw dataframes — no longer needed
+        for mod in tabular_mods:
+            self._modality_data[mod] = []
+
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
@@ -196,22 +218,36 @@ class FusionDataset(Dataset):
 
     def __getitem__(self, idx: int) -> dict:
         row = self._gt_rows[idx]
-        t = row["time"]
-        pidx = row["path_idx"]
 
         sample = {
-            "target": torch.tensor(row["target"], dtype=torch.float32),
-            "timestamp": torch.tensor(t, dtype=torch.float64),
+            "target": self._targets[idx],
+            "timestamp": self._timestamps[idx],
             "path_id": row["path_id"],
         }
 
         for mod in self.modalities:
             if mod == "camera":
-                sample[mod] = self._get_camera(pidx, t, row["path_dir"])
+                sample[mod] = self._get_camera(
+                    row["path_idx"], row["time"], row["path_dir"]
+                )
             else:
-                sample[mod] = self._get_window(mod, pidx, t)
+                sample[mod] = self._cache[mod][idx]
 
         return sample
+
+    def get_tensors(self, modality: str) -> tuple[torch.Tensor, torch.Tensor]:
+        """Return (X, y) stacked tensors for a tabular modality.
+
+        Used by EncoderTrainer to build a TensorDataset directly, bypassing
+        __getitem__ overhead entirely.
+
+        Returns:
+            X: (N, window, features) float32 tensor
+            y: (N, 2) float32 tensor of (x, y) positions
+        """
+        if modality not in self._cache:
+            raise KeyError(f"Modality '{modality}' not in cache. Camera requires __getitem__.")
+        return self._cache[modality], self._targets
 
     @property
     def feature_dims(self) -> dict[str, int | tuple]:

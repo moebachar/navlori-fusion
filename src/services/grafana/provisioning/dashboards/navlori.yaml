@@ -1,0 +1,13 @@
+apiVersion: 1
+
+providers:
+  - name: NavLoRI
+    orgId: 1
+    folder: NavLoRI
+    type: file
+    disableDeletion: false
+    editable: true
+    updateIntervalSeconds: 30
+    options:
+      path: src/services/grafana/dashboards
+      foldersFromFilesStructure: false
