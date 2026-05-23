@@ -6,7 +6,7 @@ Verify output shapes, gradient flow, and BaseEncoder contract.
 import pytest
 import torch
 
-from src.pipeline.encoders import Anchor2Vec, IMUCNN, OdomCNN, VisionViT, BaseEncoder
+from src.pipeline.encoders import Anchor2Vec, BaseEncoder, IMUCNN, OdomCNN
 
 
 # ------------------------------------------------------------------
@@ -151,41 +151,6 @@ class TestOdomCNN:
         imu_params = sum(p.numel() for p in imu.parameters())
         odom_params = sum(p.numel() for p in odom.parameters())
         assert odom_params < imu_params
-
-
-# ------------------------------------------------------------------
-# Vision — ViT
-# ------------------------------------------------------------------
-
-class TestVisionViT:
-    @pytest.fixture(scope="class")
-    def encoder(self):
-        return VisionViT(embed_dim=EMBED_DIM, backbone="vit_b_16", freeze_backbone=True)
-
-    def test_output_shape(self, encoder):
-        x = torch.randn(2, 3, 224, 224)
-        out = encoder(x)
-        assert out.shape == (2, EMBED_DIM)
-
-    def test_backbone_frozen(self, encoder):
-        for name, param in encoder.vit.named_parameters():
-            assert not param.requires_grad, f"{name} should be frozen"
-
-    def test_head_trainable(self, encoder):
-        for param in encoder.head.parameters():
-            assert param.requires_grad
-
-    def test_is_base_encoder(self, encoder):
-        assert isinstance(encoder, BaseEncoder)
-        assert encoder.input_spec["modality"] == "camera"
-
-    def test_gradient_flows_to_head(self, encoder):
-        x = torch.randn(2, 3, 224, 224)
-        out = encoder(x)
-        loss = out.sum()
-        loss.backward()
-        head_param = list(encoder.head.parameters())[0]
-        assert head_param.grad is not None
 
 
 # ------------------------------------------------------------------

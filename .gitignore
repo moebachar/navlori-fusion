@@ -1,39 +1,71 @@
-# Python
+# ─── Secrets / local-only configs ───────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+.mcp.json
+src/simulation/controllers/*/runtime.ini
+!src/simulation/controllers/*/runtime.ini.example
+
+# ─── Python ─────────────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *.egg-info/
-dist/
 build/
+dist/
 .venv/
+.pytest_cache/
+.ruff_cache/
 
-# Data (tracked by DVC)
-data/async_collection/
-!/data/.gitkeep
+# ─── Data ───────────────────────────────────────────────────────────────────
+# Everything in data/ is local; reproducibility goes through DVC pointers
+# (.dvc files) and the conversion scripts under scripts/convert_*.py.
+data/*
+!data/.gitkeep
+!data/*.dvc
 
-# Experiment tracking
+# ─── Training / experiment artifacts ────────────────────────────────────────
+runs/
 mlruns/
 tb_logs/
+notebooks/runs/
+output/
+logs/
+*.log
+*.pt
+*.ckpt
 
-# Services (binaries + runtime)
+# ─── External / vendored code (clone separately, see docs/EXTERNAL_DEPENDENCIES.md)
+external/
+downloads/
+
+# ─── Scratch / WIP ──────────────────────────────────────────────────────────
+scratch/
+*.scratch.py
+
+# ─── Local services (binaries + runtime state) ──────────────────────────────
 src/services/influxdb/
 src/services/grafana/bin/
 src/services/grafana/data/
-*.log
+# A `services/` dir at the repo root is created by scripts/setup_services.ps1
+# for local InfluxDB/Grafana binaries — entirely local, never commit.
+/services/
 
-# IDE
+# ─── DVC ────────────────────────────────────────────────────────────────────
+/dvc_store/
+/.dvc/cache/
+/.dvc/tmp/
+
+# ─── Vision encoder backbone cache (DINOv2 / ACE weights pulled at runtime) ─
+.vit_cache/
+.ace_cache/
+
+# ─── Editor / OS ────────────────────────────────────────────────────────────
 .vscode/
 .idea/
 *.swp
-
-# OS
 Thumbs.db
 .DS_Store
 
-# DVC local cache
-/dvc_store/
-\n# ViT backbone feature cache\n.vit_cache/
-
-runs/**/*.pt
-
-.claude/*
+# ─── Local agent state ──────────────────────────────────────────────────────
+.claude/
 CLAUDE.md

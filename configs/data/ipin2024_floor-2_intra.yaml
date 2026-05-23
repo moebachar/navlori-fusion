@@ -1,0 +1,28 @@
+# IPIN 2024 Track 3 - floor -2 (within-trial split). LEAKY — DEV USE ONLY.
+# 237 chunks total (~15s each, seed=42, split: train=166 / val=36 / test=35).
+# Train and val are drawn from the SAME trials, chunked into ~15s pieces and
+# randomly assigned: chunks of one continuous walk land in different splits.
+# Numbers from this split are not generalisation evidence.
+# For honest evaluation use configs/data/ipin2024_floor-2.yaml (trial-out).
+# Modalities: wifi + imu (no odom, no camera - smartphone dataset).
+# GT is POSI waypoints linearly interpolated at 10 Hz then projected
+# to local XY via equirectangular tangent plane at the floor centroid.
+data:
+  name: ipin2024_floor-2_intra
+  root: ${oc.env:NAVLORI_DATA_ROOT,data}
+  collection_dir: ipin2024_floor-2_intra
+  source: ipin2024
+  modalities: [wifi, imu]
+
+  split:
+    train_paths: [0, 2, 3, 4, 5, 9, 10, 12, 13, 14, 15, 16, 18, 19, 21, 25, 27, 29, 30, 32, 33, 34, 36, 37, 38, 41, 42, 43, 44, 45, 46, 47, 48, 51, 52, 53, 54, 60, 61, 63, 64, 65, 66, 68, 69, 72, 73, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 89, 90, 93, 94, 95, 98, 99, 100, 101, 102, 103, 104, 105, 106, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 130, 131, 132, 133, 134, 135, 136, 138, 140, 142, 144, 145, 146, 148, 149, 152, 153, 155, 156, 157, 159, 161, 162, 164, 165, 167, 168, 169, 170, 171, 172, 174, 175, 176, 177, 180, 181, 182, 184, 185, 186, 187, 190, 191, 192, 193, 195, 196, 197, 199, 200, 201, 203, 204, 205, 206, 207, 208, 209, 211, 212, 213, 215, 216, 219, 220, 222, 223, 225, 226, 228, 229, 230, 231, 232, 235, 236]
+    val_paths:   [1, 11, 17, 20, 24, 31, 39, 40, 49, 58, 67, 74, 75, 86, 87, 88, 91, 92, 96, 97, 117, 137, 141, 147, 158, 160, 178, 194, 198, 202, 210, 214, 217, 218, 221, 227]
+    test_paths:  [6, 7, 8, 22, 23, 26, 28, 35, 50, 55, 56, 57, 59, 62, 70, 71, 107, 108, 114, 129, 139, 143, 150, 151, 154, 163, 166, 173, 179, 183, 188, 189, 224, 233, 234]
+
+  preprocessing:
+    normalize: true
+    wifi_pca: 128   # reduce 166 APs -> 128 dims
+
+  windows:
+    imu: 32    # ~1 s at 32 Hz
+    wifi: 1    # single scan

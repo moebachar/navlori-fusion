@@ -12,6 +12,7 @@ Usage::
 
 from __future__ import annotations
 
+import hashlib
 import json
 import time
 from dataclasses import dataclass, field
@@ -23,6 +24,22 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 
 from src.pipeline.evaluation.encoder_eval import evaluate_encoder, print_report
+
+
+def _split_hash(ds) -> str:
+    """8-char hex hash of (sorted path_ids, camera_stride) for a FusionDataset.
+
+    Used to namespace the vision-feature cache so a fresh train/val split
+    or a different temporal stride never picks up a stale cache from an
+    earlier run.
+    """
+    rows = getattr(ds, "_gt_rows", None)
+    if not rows:
+        return "unknown"
+    pids = sorted({r["path_id"] for r in rows})
+    stride = getattr(ds, "camera_stride", 1)
+    key = repr((pids, int(stride))).encode("utf-8")
+    return hashlib.md5(key).hexdigest()[:8]
 
 
 @dataclass
@@ -87,9 +104,22 @@ class EncoderTrainer:
         patience: int = 25,
         device: str = "auto",
         run_dir: str | Path = "runs",
+        target_mode: str = "position",
+        target_lookback_s: float = 1.0,
     ):
         self.modality = modality
         self.dm = dm
+        # target_mode="displacement" trains the encoder to predict
+        # (delta_x, delta_y) over the past `target_lookback_s` seconds
+        # instead of absolute (x, y). This is the right objective for
+        # motion sensors (IMU, Odom, DPVO motion); for place-recognition
+        # sensors (WiFi, ACE, DINOv2) keep target_mode="position".
+        if target_mode not in {"position", "displacement"}:
+            raise ValueError(
+                f"target_mode must be 'position' or 'displacement', "
+                f"got {target_mode!r}")
+        self.target_mode = target_mode
+        self.target_lookback_s = float(target_lookback_s)
 
         # Device
         if device == "auto":
@@ -139,16 +169,29 @@ class EncoderTrainer:
         pin = torch.cuda.is_available()
 
         if self.modality == "camera":
-            from src.pipeline.encoders.vision import VisionViT
-            if not isinstance(self.encoder, VisionViT):
+            # Duck-typed vision-cache path: any encoder exposing
+            # `extract_backbone_features(loader, device, cache_path)` and a
+            # `.head` that consumes the cached feature vectors can use this.
+            # Currently only DPVOMotionEncoder uses it (motion targets); the
+            # place-recognition variants (ACEVision, VisionViT) were removed.
+            if not (hasattr(self.encoder, "extract_backbone_features")
+                    and hasattr(self.encoder, "head")):
                 # Fallback: generic camera encoder, load images normally
                 return self.dm.train_dataloader(), self.dm.val_dataloader()
 
             # Pre-extract frozen backbone features.
             # Features are cached to disk so extraction only runs once ever.
-            cache_dir = self.dm.data_dir / ".vit_cache"
-            cache_tr = str(cache_dir / "train_features.pt")
-            cache_va = str(cache_dir / "val_features.pt")
+            # Namespace by encoder class so DINOv2 (768-d) and ACE (512-d)
+            # caches can't ever be mixed up. Cache filenames *also* include
+            # a short hash of the split's path_ids so that re-running with a
+            # different train/val split builds a fresh cache instead of
+            # silently re-using stale features (the kind of bug that's
+            # invisible until a polluted cache produces nonsense metrics).
+            cache_dir = self.dm.data_dir / f".{type(self.encoder).__name__.lower()}_cache"
+            train_hash = _split_hash(self.dm.train_ds)
+            val_hash = _split_hash(self.dm.val_ds)
+            cache_tr = str(cache_dir / f"train_features_{train_hash}.pt")
+            cache_va = str(cache_dir / f"val_features_{val_hash}.pt")
 
             if not hasattr(self, "_vision_cache"):
                 print("  Extracting backbone features (one-time, saved to disk)...", flush=True)
@@ -180,8 +223,17 @@ class EncoderTrainer:
             return train_loader, val_loader
 
         # Tabular: TensorDataset from pre-stacked cache
-        X_tr, y_tr = self.dm.train_ds.get_tensors(self.modality)
-        X_va, y_va = self.dm.val_ds.get_tensors(self.modality)
+        X_tr, _ = self.dm.train_ds.get_tensors(self.modality)
+        X_va, _ = self.dm.val_ds.get_tensors(self.modality)
+        # Targets depend on target_mode. For "displacement" we also drop
+        # samples flagged invalid (no in-path reference for the lookback).
+        y_tr, valid_tr = self.dm.train_ds.get_targets(
+            self.target_mode, self.target_lookback_s)
+        y_va, valid_va = self.dm.val_ds.get_targets(
+            self.target_mode, self.target_lookback_s)
+        if self.target_mode == "displacement":
+            X_tr, y_tr = X_tr[valid_tr], y_tr[valid_tr]
+            X_va, y_va = X_va[valid_va], y_va[valid_va]
         train_loader = DataLoader(
             TensorDataset(X_tr, y_tr), batch_size=bs, shuffle=True,
             num_workers=0, pin_memory=pin,
@@ -222,6 +274,8 @@ class EncoderTrainer:
             "device": self.device,
             "epochs": epochs,
             "lr": self.optimizer.defaults["lr"],
+            "target_mode": self.target_mode,
+            "target_lookback_s": self.target_lookback_s,
             "started_at": datetime.now().isoformat(),
             "n_train": len(self.dm.train_ds),
             "n_val": len(self.dm.val_ds),
@@ -320,11 +374,31 @@ class EncoderTrainer:
         else:
             eval_encoder = self.encoder
 
+        # Trustworthiness needs (N, raw_input_dim). For tabular modalities the
+        # val cache already holds (N, window, features) — flatten and pass it.
+        # Skipped for camera/vision (raw image space is too high-dim for the
+        # O(N^2) sklearn distance computation to be informative).
+        # If we filtered invalid samples in displacement mode the row order
+        # must match the filtered loader; we re-filter here using the same
+        # mask the loader used.
+        raw_val = None
+        if not getattr(self, "_vision_head_only", False):
+            try:
+                X_va, _ = self.dm.val_ds.get_tensors(self.modality)
+                if self.target_mode == "displacement":
+                    _, valid_va = self.dm.val_ds.get_targets(
+                        self.target_mode, self.target_lookback_s)
+                    X_va = X_va[valid_va]
+                raw_val = X_va.reshape(X_va.shape[0], -1).cpu().numpy()
+            except (KeyError, AttributeError):
+                raw_val = None
+
         results = evaluate_encoder(
             encoder=eval_encoder,
             train_loader=train_loader,
             val_loader=val_loader,
             modality=self.modality,
+            raw_val_inputs=raw_val,
             device=self.device,
         )
         print_report(results, modality=self.modality)

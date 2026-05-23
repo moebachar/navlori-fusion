@@ -4,7 +4,7 @@
 param([string]$Action = "start")
 
 $WebotsExe = "C:\Program Files\Webots\msys64\mingw64\bin\webots.exe"
-$WorldFile = "C:\Users\Administrateur\navlori-fusion\src\simulation\worlds\Tiago++'s world.wbt"
+$WorldFile = "X:\navlori-fusion\src\simulation\worlds\Tiago++'s world.wbt"
 $TaskName = "NavLoRI_Webots"
 
 switch ($Action) {

@@ -9,5 +9,5 @@ providers:
     editable: true
     updateIntervalSeconds: 30
     options:
-      path: src/services/grafana/dashboards
+      path: X:\navlori-fusion\src\services\grafana\dashboards
       foldersFromFilesStructure: false

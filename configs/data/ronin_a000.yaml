@@ -1,0 +1,25 @@
+# RoNIN subject a000 (trial-out split — one path per UNIQUE native sequence).
+# 9 paths total (8 train / 1 val / 0 test). The val path (path_06 = a000_7)
+# is RoNIN's seen_subjects_test_set sequence, now held out of train via the
+# converter's dedup (it used to leak into both train and val). Honest but
+# narrow: a single held-out trajectory. Prefer IMUWiFine floor 4 or
+# IPIN 2024 floor -2 trial-out for primary evaluation.
+data:
+  name: ronin_a000
+  root: ${oc.env:NAVLORI_DATA_ROOT,data}
+  collection_dir: ronin_a000
+  source: ronin
+  modalities: [wifi, imu]
+
+  split:
+    train_paths: [0, 1, 2, 3, 4, 5, 7, 8]
+    val_paths:   [6]
+    test_paths:  []
+
+  preprocessing:
+    normalize: true
+    wifi_pca: 128   # reduce 144 APs -> 128 dims
+
+  windows:
+    imu: 32    # ~1 s at 32 Hz
+    wifi: 1    # single scan

@@ -11,4 +11,7 @@ datasources:
       organization: navlori
       defaultBucket: async_data
     secureJsonData:
-      token: navlori-influx-token-2026
+      # Grafana expands $INFLUXDB_TOKEN from the process environment.
+      # Set it via the .env file at the repo root (see .env.example) before
+      # starting Grafana via scripts/services.ps1.
+      token: $INFLUXDB_TOKEN

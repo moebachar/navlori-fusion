@@ -1,0 +1,6 @@
+outs:
+- md5: 6cfd7d21b53eff619db5e126207aae10.dir
+  size: 12787412
+  nfiles: 65
+  hash: md5
+  path: ronin_a000

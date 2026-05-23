@@ -13,8 +13,13 @@ authors = [
 
 dependencies = [
     # Core ML
-    "torch>=2.1",
-    "torchvision>=0.16",
+    # NOTE: this machine has a GTX 1080 (Pascal, sm_61). PyTorch dropped
+    # Pascal binaries starting 2.7, so cap torch at <2.7 and install the
+    # CUDA 12.4 wheels explicitly:
+    #   pip install --index-url https://download.pytorch.org/whl/cu124 \
+    #       torch==2.6.0 torchvision==0.21.0
+    "torch>=2.1,<2.7",
+    "torchvision>=0.16,<0.22",
     "numpy>=1.24",
     "scipy>=1.11",
     "pandas>=2.1",
@@ -27,6 +32,9 @@ dependencies = [
     "mlflow>=2.10",
     "tensorboard>=2.15",
 
+    # Hyperparameter search
+    "optuna>=4.0",
+
     # Data versioning
     "dvc>=3.40",
 
@@ -35,6 +43,7 @@ dependencies = [
     "seaborn>=0.13",
     "plotly>=5.18",
     "influxdb-client>=1.40",
+    "imageio-ffmpeg>=0.4",   # bundled ffmpeg binary for notebook mp4 export
 
     # Continuous-time models
     "torchdiffeq>=0.2",
@@ -49,6 +58,9 @@ dependencies = [
     "tqdm>=4.66",
     "pyyaml>=6.0",
     "Pillow>=10.0",
+
+    # Vision — PnP-based (x, y) evaluation of ACE SCR predictions
+    "opencv-python>=4.8",
 ]
 
 [project.optional-dependencies]

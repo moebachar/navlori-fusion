@@ -1,0 +1,25 @@
+# IMUWiFine dataset - 4th floor only (C4 building, Nazarbayev University).
+# 80 paths total using the dataset's native train/val/test split (41 val was
+# 21 in source; DATA_20112020_041532.txt dropped for too-few POSI samples).
+# No odometry or camera in IMUWiFine - modalities are restricted to wifi + imu.
+# Test paths carry only WiFi + ground truth (no IMU); IMU windows zero-pad.
+# See data/imuwifine_floor4/ for converted paths and split.json.
+data:
+  name: imuwifine
+  root: ${oc.env:NAVLORI_DATA_ROOT,data}
+  collection_dir: imuwifine_floor4
+  source: imuwifine
+  modalities: [wifi, imu]
+
+  split:
+    train_paths: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39]
+    val_paths:   [40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59]
+    test_paths:  [60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79]
+
+  preprocessing:
+    normalize: true
+    wifi_pca: 128   # reduce 343 APs -> 128 dims (see FusionDataset)
+
+  windows:
+    imu: 32    # ~1 s at 32 Hz (downsampled from native 192 Hz)
+    wifi: 1    # single scan

@@ -1,0 +1,38 @@
+# IPIN 2024 Track 3 - floor -2.
+# 19 paths total (native split: train=11 / val=4 / test=4).
+# Modalities: wifi + imu (no odom, no camera - smartphone dataset).
+# GT is POSI waypoints linearly interpolated at 10 Hz then projected
+# to local XY via equirectangular tangent plane at the floor centroid.
+data:
+  name: ipin2024_floor-2
+  root: ${oc.env:NAVLORI_DATA_ROOT,data}
+  collection_dir: ipin2024_floor-2
+  source: ipin2024
+  modalities: [wifi, imu]
+
+  split:
+    train_paths: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    val_paths:   [11, 12, 13, 14]
+    test_paths:  [15, 16, 17, 18]
+
+  preprocessing:
+    normalize: true
+    # wifi_norm: raw  — -100 fill + fixed affine, NO PCA, NO z-score.
+    # The legacy "whiten" path (PCA + per-component z-score) destroyed the
+    # WiFi signal (autopsy Probe 4: 5m -> 21m). wifi_pca is ignored in raw mode.
+    wifi_norm: raw
+    wifi_pca: 128
+    # M2 (staleness cap) was TESTED and did NOT help once whitening was fixed:
+    #   no cap 12.55 m | 60 s 12.95 m (neutral) | 10 s 18.76 m (hurts).
+    # The model handles staleness by learning each scan's window-centroid;
+    # capping just discards useful moderately-stale scans. Left null (no cap).
+    # The capability remains in the code (FusionDataset.wifi_max_stale_s).
+    wifi_max_stale_s: null
+    # M4: world-frame IMU. Yaw-rotate horizontal accel into world frame and
+    # feed [ax_world, ay_world, gyro_xyz] (5 feats). Body-frame crippled the
+    # motion leg (skill 12% -> 52% world-only, M4 test). Encoder dim auto-reads.
+    imu_frame: world
+
+  windows:
+    imu: 32    # ~1 s at 32 Hz
+    wifi: 1    # single scan

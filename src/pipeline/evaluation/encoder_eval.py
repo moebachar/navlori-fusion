@@ -14,6 +14,14 @@ Usage::
     ts = temporal_smoothness(z_val, y_val)
     kp = knn_probe(z_train, y_train, z_val, y_val)
     tw = trustworthiness(X_val_raw, z_val)
+
+Metric convention
+-----------------
+``mae`` in this module is the **Euclidean** mean error in meters
+(``mean(||pred - y||_2)``), the same definition the trainer's ``val_mae``
+uses. A separate ``mae_component`` field holds the per-axis L1 if anyone
+asks for it. Reporting one definition consistently across stages avoids
+the silent unit-mismatch bug we hit before.
 """
 
 from __future__ import annotations
@@ -21,6 +29,36 @@ from __future__ import annotations
 import numpy as np
 import torch
 import torch.nn as nn
+
+
+# ======================================================================
+# Shared metric helpers — used by both encoder eval and fusion trainer
+# ======================================================================
+
+def euclidean_mae(pred: np.ndarray | torch.Tensor,
+                  y: np.ndarray | torch.Tensor) -> float:
+    """Mean Euclidean error in meters: ``mean(||pred - y||_2)``.
+
+    Accepts numpy or torch, ``(N, 2)`` arrays. This is the canonical
+    position-error metric across the whole pipeline.
+    """
+    if isinstance(pred, torch.Tensor):
+        return float(torch.linalg.norm(pred - y, dim=1).mean())
+    diff = pred - y
+    return float(np.sqrt((diff ** 2).sum(axis=1)).mean())
+
+
+def euclidean_rmse(pred: np.ndarray | torch.Tensor,
+                   y: np.ndarray | torch.Tensor) -> float:
+    """Root-mean-squared Euclidean error in meters.
+
+    ``sqrt(mean(||pred - y||_2^2))`` — the L2 sibling of :func:`euclidean_mae`.
+    """
+    if isinstance(pred, torch.Tensor):
+        sq = ((pred - y) ** 2).sum(dim=1)
+        return float(torch.sqrt(sq.mean()))
+    sq = ((pred - y) ** 2).sum(axis=1)
+    return float(np.sqrt(sq.mean()))
 
 
 # ======================================================================
@@ -76,12 +114,17 @@ def linear_probe(
     with torch.no_grad():
         pred = head(z_v)
 
-    diff = (pred - y_v).cpu().numpy()
-    mae = np.abs(diff).mean()
-    rmse = np.sqrt((diff ** 2).mean())
-    euclidean = np.sqrt((diff ** 2).sum(axis=1)).mean()
-
-    return {"mae": float(mae), "rmse": float(rmse), "mean_euclidean": float(euclidean)}
+    pred_np = pred.cpu().numpy()
+    y_np = y_v.cpu().numpy()
+    diff = pred_np - y_np
+    # Canonical: Euclidean MAE in meters (matches trainer.val_mae).
+    # Keep the legacy component-wise L1 under `mae_component` for any
+    # caller that explicitly wants it; it should NOT be the default.
+    return {
+        "mae": euclidean_mae(pred_np, y_np),
+        "rmse": euclidean_rmse(pred_np, y_np),
+        "mae_component": float(np.abs(diff).mean()),
+    }
 
 
 # ======================================================================
@@ -246,10 +289,11 @@ def knn_probe(
     y_pred = knn.predict(z_val)
 
     diff = y_val - y_pred
-    mae = float(np.abs(diff).mean())
-    euclidean = float(np.sqrt((diff ** 2).sum(axis=1)).mean())
-
-    return {"mae": mae, "mean_euclidean": euclidean}
+    return {
+        "mae": euclidean_mae(y_pred, y_val),
+        "rmse": euclidean_rmse(y_pred, y_val),
+        "mae_component": float(np.abs(diff).mean()),
+    }
 
 
 # ======================================================================
@@ -260,6 +304,7 @@ def trustworthiness(
     X: np.ndarray,
     z: np.ndarray,
     k: int = 10,
+    max_samples: int = 2000,
 ) -> dict[str, float]:
     """Neighborhood preservation: how well local structure is maintained.
 
@@ -267,14 +312,18 @@ def trustworthiness(
         X: (N, input_dim) raw input features
         z: (N, embed_dim) embeddings
         k: neighborhood size
+        max_samples: subsample to cap sklearn's O(N^2) pairwise cost
 
     Returns:
         dict with 'trustworthiness' score in [0, 1] (higher=better)
     """
     from sklearn.manifold import trustworthiness as sk_trust
 
+    if len(X) > max_samples:
+        idx = np.random.RandomState(0).choice(len(X), max_samples, replace=False)
+        X, z = X[idx], z[idx]
     score = float(sk_trust(X, z, n_neighbors=k))
-    return {"trustworthiness": score}
+    return {"trustworthiness": score, "n_samples": int(len(X))}
 
 
 # ======================================================================
@@ -373,11 +422,11 @@ def print_report(results: dict[str, dict], modality: str = "") -> None:
 
     if "linear_probe" in results:
         lp = results["linear_probe"]
-        print(f"  Linear Probe:     MAE={lp['mae']:.3f}m  RMSE={lp['rmse']:.3f}m  Euclid={lp['mean_euclidean']:.3f}m")
+        print(f"  Linear Probe:     MAE={lp['mae']:.3f}m  RMSE={lp['rmse']:.3f}m  (component={lp['mae_component']:.3f}m)")
 
     if "knn_probe" in results:
         kp = results["knn_probe"]
-        print(f"  KNN Probe (k=5):  MAE={kp['mae']:.3f}m  Euclid={kp['mean_euclidean']:.3f}m")
+        print(f"  KNN Probe (k=5):  MAE={kp['mae']:.3f}m  RMSE={kp['rmse']:.3f}m")
 
     if "alignment_uniformity" in results:
         au = results["alignment_uniformity"]

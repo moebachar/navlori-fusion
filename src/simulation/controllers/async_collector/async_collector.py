@@ -12,7 +12,7 @@ Modalities & nominal rates:
   - IMU (accel + gyro + orientation): ~31 Hz (every 1 step)
   - Odometry (wheel encoders):        ~15 Hz (every 2 steps)
   - WiFi RSSI (GPR predictor):        ~1 Hz  (every 31 steps)
-  - Camera RGB + Depth:               ~0.5 Hz  (every 62 steps)
+  - Camera RGB + Depth:               ~5 Hz   (every 6 steps) — dense for ACE/SCR training
   - Ground Truth:                      ~10 Hz (every 3 steps)
 
 Author: Mohamed — NavLoRI Project, CESI LINEACT
@@ -29,9 +29,17 @@ import numpy as np
 from pathlib import Path
 from controller import Supervisor
 
-_VENV_SITE = r"C:\Users\Administrateur\navlori-fusion\.venv\Lib\site-packages"
+_PROJECT_ROOT = Path(__file__).resolve().parents[4]
+_VENV_SITE = str(_PROJECT_ROOT / ".venv" / "Lib" / "site-packages")
 if _VENV_SITE not in sys.path:
     sys.path.insert(0, _VENV_SITE)
+
+try:
+    from PIL import Image
+    _HAS_PIL = True
+except ImportError:
+    _HAS_PIL = False
+    print("[WARN] Pillow not found — depth will fall back to 8-bit PNG (loses metric scale)")
 
 CONTROLLER_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(CONTROLLER_DIR, "..", "wifi_supervisor"))
@@ -62,15 +70,15 @@ SENSOR_INTERVALS = {
     "imu":          1,
     "odometry":     2,
     "wifi":         31,
-    "camera":       62,
+    "camera":       6,
     "ground_truth": 3,
 }
 JITTER_FRACTION = 0.20
 
 # Camera
 CAMERA_NAME = "head_front_camera"
-CAMERA_WIDTH = 320
-CAMERA_HEIGHT = 240
+CAMERA_WIDTH = 640
+CAMERA_HEIGHT = 480
 DEPTH_CAMERA_NAME = "head_front_camera_depth"
 
 # Arm tuck positions
@@ -89,15 +97,20 @@ ARM_TUCK_POSITIONS = {
 # WiFi
 RSSI_VISIBILITY_THRESHOLD = -85.0
 
-# InfluxDB (optional)
+# InfluxDB (optional). Token is read from the INFLUXDB_TOKEN env var so it
+# never lands in git. See .env.example for the full set of variables.
 ENABLE_VIZ = True
-INFLUXDB_URL = "http://127.0.0.1:8086"
-INFLUXDB_TOKEN = "navlori-influx-token-2026"
-INFLUXDB_ORG = "navlori"
-INFLUXDB_BUCKET = "async_data"
+INFLUXDB_URL = os.getenv("INFLUXDB_URL", "http://127.0.0.1:8086")
+INFLUXDB_TOKEN = os.getenv("INFLUXDB_TOKEN", "")
+INFLUXDB_ORG = os.getenv("INFLUXDB_ORG", "navlori")
+INFLUXDB_BUCKET = os.getenv("INFLUXDB_BUCKET", "async_data")
 
 # Output
 OUTPUT_DIR = os.path.normpath(os.path.join(CONTROLLER_DIR, "..", "..", "..", "..", "data", "async_collection"))
+
+# Set to True to write CSVs, camera images, and metadata to disk.
+# Set to False for demo/visualization runs — InfluxDB streaming stays active.
+COLLECT_MODE = False
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -180,6 +193,90 @@ def init_wheel_encoder(robot, motor_name, timestep):
         return None
 
 
+def resolve_camera_node(robot, self_node, camera, camera_name):
+    """Best-effort lookup of the Solid Node that carries `camera`.
+
+    Webots `Supervisor.getFromDevice()` silently returns None when the camera
+    lives inside a PROTO (TIAGO++ head_front_camera is one such case). We try
+    that first, then PROTO-internal DEF names, then a walk of the robot's
+    children field. Returns (Node, source_tag) or (None, "fail").
+    """
+    try:
+        n = robot.getFromDevice(camera)
+        if n is not None:
+            return n, "getFromDevice"
+    except Exception:
+        pass
+
+    # World-scope DEF we added to the .wbt cameraSlot override. Pulls the
+    # Astra Solid directly — its world pose is the camera mount (optical
+    # centre is +4 cm along the Astra's local x, applied at dataset load).
+    # Fallback candidates exist in case the .wbt DEF is ever renamed.
+    candidates = ["HEAD_ASTRA", "CAMERA", "HEAD", "HEAD_FRONT_CAMERA",
+                  camera_name, camera_name.upper()]
+    seen = set()
+    for name in candidates:
+        if name in seen:
+            continue
+        seen.add(name)
+        try:
+            n = self_node.getFromProtoDef(name)
+            if n is not None:
+                return n, f"getFromProtoDef({name!r})"
+        except Exception:
+            pass
+        try:
+            n = robot.getFromDef(name)
+            if n is not None:
+                return n, f"getFromDef({name!r})"
+        except Exception:
+            pass
+    return None, "fail"
+
+
+def compute_intrinsics(camera):
+    """Pinhole intrinsics from a Webots Camera/RangeFinder.
+
+    Webots reports horizontal FOV; assume square pixels (fx == fy) and the
+    principal point at image centre, which matches Webots' pinhole model.
+    """
+    w = camera.getWidth()
+    h = camera.getHeight()
+    fov = camera.getFov()
+    fx = 0.5 * w / math.tan(0.5 * fov)
+    return {
+        "width":     w,
+        "height":    h,
+        "fx":        fx,
+        "fy":        fx,
+        "cx":        w / 2.0,
+        "cy":        h / 2.0,
+        "fov_x_rad": fov,
+    }
+
+
+def save_depth_metric(depth_device, path, scale_mm=1000.0):
+    """Save Webots RangeFinder output as a 16-bit PNG in millimetres.
+
+    Webots' `RangeFinder.saveImage()` writes an 8-bit normalised PNG which
+    destroys metric scale. `getRangeImage()` returns float32 metres; we store
+    as uint16 mm (max 65.535 m) — matches NYU / TUM / ScanNet convention.
+    Invalid (inf / NaN) pixels are clipped to 0.
+    """
+    if not _HAS_PIL:
+        depth_device.saveImage(path, 80)
+        return False
+    w = depth_device.getWidth()
+    h = depth_device.getHeight()
+    arr = np.asarray(depth_device.getRangeImage(), dtype=np.float32).reshape(h, w)
+    arr[~np.isfinite(arr)] = 0.0
+    depth_u16 = np.clip(arr * scale_mm, 0.0, 65535.0).astype(np.uint16)
+    # Pillow >=12 picks the right mode (I;16) automatically from a uint16
+    # array; passing mode= explicitly is deprecated in Pillow 13.
+    Image.fromarray(depth_u16).save(path)
+    return True
+
+
 def load_wifi_predictor():
     search_paths = [
         os.path.join(CONTROLLER_DIR, "webots_export"),
@@ -239,17 +336,23 @@ class ModalityCSV:
         self.count = 0
 
     def open(self):
+        if not COLLECT_MODE:
+            return
         self.file = open(self.filepath, "w", newline="", encoding="utf-8")
         self.writer = csv.DictWriter(self.file, fieldnames=self.columns,
                                      extrasaction="ignore")
         self.writer.writeheader()
 
     def write(self, row):
+        if not COLLECT_MODE:
+            return
         if self.writer:
             self.writer.writerow(row)
             self.count += 1
 
     def close(self):
+        if not COLLECT_MODE:
+            return
         if self.file:
             self.file.close()
             print(f"  {os.path.basename(self.filepath)}: {self.count} events")
@@ -489,7 +592,8 @@ def run_path(robot, node, timestep, path_id, path_info,
     path_name = path_info["name"]
     path_dir = os.path.join(output_dir, f"path_{path_id:02d}")
     cam_dir = os.path.join(path_dir, "camera")
-    os.makedirs(cam_dir, exist_ok=True)
+    if COLLECT_MODE:
+        os.makedirs(cam_dir, exist_ok=True)
 
     # ── Teleport to start ──
     sx, sy = wps[0]
@@ -521,7 +625,17 @@ def run_path(robot, node, timestep, path_id, path_info,
     wifi_cols += [f"wifi_rssi_{m.replace(':', '')}" for m in ap_names]
     gt_cols = ["gt_x", "gt_y", "gt_z", "gt_heading_rad", "gt_heading_deg",
                "path_id", "waypoint_idx"]
-    cam_cols = ["frame_id", "rgb_path", "depth_path"]
+    # Camera pose: world-frame translation + row-major 3x3 rotation of the
+    # camera Solid. Webots camera local frame: +x = optical axis (forward),
+    # +y = left, +z = up. Downstream code converting to OpenCV convention
+    # (+z forward, +x right, +y down) must apply the fixed axis swap.
+    cam_cols = [
+        "frame_id", "rgb_path", "depth_path",
+        "cam_x", "cam_y", "cam_z",
+        "cam_r00", "cam_r01", "cam_r02",
+        "cam_r10", "cam_r11", "cam_r12",
+        "cam_r20", "cam_r21", "cam_r22",
+    ]
 
     csvs = {
         "imu":          ModalityCSV(os.path.join(path_dir, "imu.csv"), imu_cols),
@@ -547,6 +661,35 @@ def run_path(robot, node, timestep, path_id, path_info,
 
     camera = sensors.get("camera")
     depth = sensors.get("depth")
+
+    # Resolve the supervisor Node for the RGB camera so we can read its
+    # world-frame pose. TIAGO++'s head_front_camera is inside a PROTO, so
+    # `getFromDevice` often returns None — `resolve_camera_node` falls back
+    # to `getFromProtoDef`. If every lookup fails, we log robot-base pose in
+    # the cam_* columns and flag it in camera_info.json for post-processing.
+    cam_node = None
+    cam_source = "base_fallback"
+    if camera is not None:
+        cam_node, cam_source = resolve_camera_node(robot, node, camera, CAMERA_NAME)
+        if cam_node is None:
+            print("  [WARN] Could not resolve camera node via any strategy."
+                  " cam_* columns will hold ROBOT BASE pose as a fallback.")
+        else:
+            print(f"  [OK] Camera node resolved via {cam_source}")
+
+    # Persist intrinsics + depth format once per path.
+    if COLLECT_MODE and camera is not None:
+        cam_info = compute_intrinsics(camera)
+        cam_info["depth_format"] = "uint16_png_mm" if _HAS_PIL else "uint8_png_normalised"
+        cam_info["depth_scale_m_per_unit"] = 1.0 / 1000.0 if _HAS_PIL else None
+        cam_info["axis_convention"] = "webots (+x forward, +y left, +z up)"
+        cam_info["pose_source"] = cam_source
+        cam_info["pose_is_camera_frame"] = cam_node is not None
+        if depth is not None:
+            cam_info["depth"] = compute_intrinsics(depth)
+            cam_info["depth"]["max_range_m"] = depth.getMaxRange()
+        with open(os.path.join(path_dir, "camera_info.json"), "w") as f:
+            json.dump(cam_info, f, indent=2)
 
     while robot.step(timestep) != -1:
         sim_time = round(robot.getTime(), 4)
@@ -653,10 +796,12 @@ def run_path(robot, node, timestep, path_id, path_info,
             saved_rgb = saved_depth = False
             frame_id = f"{step_count:06d}"
             if camera is not None:
-                camera.saveImage(os.path.join(cam_dir, f"rgb_{frame_id}.png"), 80)
+                if COLLECT_MODE:
+                    camera.saveImage(os.path.join(cam_dir, f"rgb_{frame_id}.png"), 100)
                 saved_rgb = True
             if depth is not None:
-                depth.saveImage(os.path.join(cam_dir, f"depth_{frame_id}.png"), 80)
+                if COLLECT_MODE:
+                    save_depth_metric(depth, os.path.join(cam_dir, f"depth_{frame_id}.png"))
                 saved_depth = True
             if saved_rgb or saved_depth:
                 row = {
@@ -664,6 +809,15 @@ def run_path(robot, node, timestep, path_id, path_info,
                     "rgb_path": f"camera/rgb_{frame_id}.png" if saved_rgb else "",
                     "depth_path": f"camera/depth_{frame_id}.png" if saved_depth else "",
                 }
+                pose_node = cam_node if cam_node is not None else node
+                p = pose_node.getPosition()
+                R = pose_node.getOrientation()
+                row.update(
+                    cam_x=round(p[0], 5), cam_y=round(p[1], 5), cam_z=round(p[2], 5),
+                    cam_r00=round(R[0], 6), cam_r01=round(R[1], 6), cam_r02=round(R[2], 6),
+                    cam_r10=round(R[3], 6), cam_r11=round(R[4], 6), cam_r12=round(R[5], 6),
+                    cam_r20=round(R[6], 6), cam_r21=round(R[7], 6), cam_r22=round(R[8], 6),
+                )
                 csvs["camera"].write(row)
                 frame_count += 1
                 if influx and influx.ready:
@@ -762,24 +916,26 @@ def run_path(robot, node, timestep, path_id, path_info,
         c.close()
 
     # ── Metadata ──
-    meta = {
-        "path_id": path_id, "path_name": path_name,
-        "waypoints": wps, "timestep_ms": timestep,
-        "sensor_intervals": dict(SENSOR_INTERVALS),
-        "jitter_fraction": JITTER_FRACTION,
-        "samples": {name: c.count for name, c in csvs.items()},
-        "frames": frame_count,
-    }
-    with open(os.path.join(path_dir, "metadata.json"), "w") as f:
-        json.dump(meta, f, indent=2)
+    if COLLECT_MODE:
+        meta = {
+            "path_id": path_id, "path_name": path_name,
+            "waypoints": wps, "timestep_ms": timestep,
+            "sensor_intervals": dict(SENSOR_INTERVALS),
+            "jitter_fraction": JITTER_FRACTION,
+            "samples": {name: c.count for name, c in csvs.items()},
+            "frames": frame_count,
+        }
+        with open(os.path.join(path_dir, "metadata.json"), "w") as f:
+            json.dump(meta, f, indent=2)
 
     # ── Clean up floor markers ──
     remove_path_from_floor(robot, wps, path_id)
 
     # ── Trajectory plot ──
-    gt_csv = os.path.join(path_dir, "ground_truth.csv")
-    if os.path.exists(gt_csv):
-        plot_trajectory(path_dir, path_id, wps, gt_csv)
+    if COLLECT_MODE:
+        gt_csv = os.path.join(path_dir, "ground_truth.csv")
+        if os.path.exists(gt_csv):
+            plot_trajectory(path_dir, path_id, wps, gt_csv)
 
     return {name: c.count for name, c in csvs.items()}
 
@@ -878,7 +1034,8 @@ def main():
         path_ids = all_ids
     print(f"\n[Batch] {len(path_ids)} paths: {path_ids[0]}..{path_ids[-1]}")
 
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    if COLLECT_MODE:
+        os.makedirs(OUTPUT_DIR, exist_ok=True)
     scheduler = SensorScheduler(SENSOR_INTERVALS, JITTER_FRACTION)
 
     # ── Run ──
@@ -909,17 +1066,18 @@ def main():
     print(f"  Output: {OUTPUT_DIR}")
     print("=" * 60)
 
-    global_meta = {
-        "collector": "async_collector",
-        "timestep_ms": timestep,
-        "sensor_intervals": dict(SENSOR_INTERVALS),
-        "jitter_fraction": JITTER_FRACTION,
-        "paths_collected": len(path_ids),
-        "path_stats": {str(k): v for k, v in total_stats.items()},
-        "created": pytime.strftime("%Y-%m-%dT%H:%M:%S"),
-    }
-    with open(os.path.join(OUTPUT_DIR, "metadata.json"), "w") as f:
-        json.dump(global_meta, f, indent=2)
+    if COLLECT_MODE:
+        global_meta = {
+            "collector": "async_collector",
+            "timestep_ms": timestep,
+            "sensor_intervals": dict(SENSOR_INTERVALS),
+            "jitter_fraction": JITTER_FRACTION,
+            "paths_collected": len(path_ids),
+            "path_stats": {str(k): v for k, v in total_stats.items()},
+            "created": pytime.strftime("%Y-%m-%dT%H:%M:%S"),
+        }
+        with open(os.path.join(OUTPUT_DIR, "metadata.json"), "w") as f:
+            json.dump(global_meta, f, indent=2)
 
 
 if __name__ == "__main__":

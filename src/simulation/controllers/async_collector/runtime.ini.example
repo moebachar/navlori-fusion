@@ -1,0 +1,11 @@
+; Webots embedded-controller runtime config — TEMPLATE.
+;
+; Webots cannot expand env vars here, so paths must be absolute. Copy this file
+; to runtime.ini and replace the <REPO_ROOT> placeholder with the absolute
+; path to your project checkout (e.g. X:\navlori-fusion or /home/me/navlori-fusion).
+;
+; The real runtime.ini is gitignored so each developer can pin their own venv.
+
+[async_collector]
+command = <REPO_ROOT>\.venv\Scripts\python.exe -u
+PYTHONPATH = C:\Program Files\Webots\lib\controller\python;<REPO_ROOT>\.venv\Lib\site-packages

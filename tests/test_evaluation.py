@@ -62,7 +62,7 @@ class TestLinearProbe:
         result = linear_probe(z[:150], y[:150], z[150:], y[150:], epochs=50)
         assert "mae" in result
         assert "rmse" in result
-        assert "mean_euclidean" in result
+        assert "mae_component" in result
 
     def test_good_beats_random(self, good_embeddings, random_embeddings):
         z_good, y = good_embeddings
@@ -177,7 +177,7 @@ class TestKNNProbe:
         z, y = good_embeddings
         result = knn_probe(z[:150], y[:150], z[150:], y[150:])
         assert "mae" in result
-        assert "mean_euclidean" in result
+        assert "mae_component" in result
 
     def test_good_beats_random(self, good_embeddings, random_embeddings):
         z_good, y = good_embeddings

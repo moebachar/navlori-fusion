@@ -1,0 +1,30 @@
+# Stage A — Vision Encoder: DPVO motion features
+#
+# Frozen scene-agnostic patch feature extractor (Princeton-VL DPVO,
+# NeurIPS 2023), pretrained on TartanAir. Output: 120x160x128 feature
+# grid for 640x480 input (stride 4). For each pair (frame_{t-1}, frame_t)
+# we sample N patches in the previous frame, cross-correlate against the
+# current frame's feature map, soft-argmax to recover per-patch flow,
+# and pool into a 128-D motion token.
+#
+# We train only the head (per-patch projection + attentive pool + MLP)
+# for Stage A; the trunk stays frozen.
+#
+# Requires `windows: {camera: 2}` in the data config (frame pair input),
+# `camera_stride: 5` so the two frames span ~1 s (~15 cm robot motion;
+# at stride=1 the displacement is sub-pixel on DPVO's stride-4 feature
+# grid and the encoder is degenerate), and `runs/_weights/dpvo.pth`
+# (run scripts/fetch_dpvo_weights.py).
+data:
+  windows:
+    camera: 2
+  camera_stride: 5
+
+encoder:
+  name: dpvo
+  embed_dim: 128
+  weights_path: runs/_weights/dpvo.pth
+  n_patches: 64       # 8x8 grid of patches per frame
+  head_hidden: 256
+  dropout: 0.1
+  input_is_imagenet_normalised: true

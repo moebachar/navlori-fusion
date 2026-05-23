@@ -1,0 +1,247 @@
+<mxfile host="app.diagrams.net" modified="2026-04-10T00:00:00.000Z" agent="Claude Code" version="24.0.0">
+  <diagram id="vision_vit" name="VisionViT — Camera Encoder">
+    <mxGraphModel dx="1422" dy="762" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="880" pageHeight="1050" math="1" shadow="1">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ─── TITLE ─────────────────────────────────────────────────── -->
+        <mxCell id="t1" value="VisionViT — Camera Encoder" style="text;html=1;align=center;fontStyle=1;fontSize=17;fontColor=#0F172A;" vertex="1" parent="1">
+          <mxGeometry x="130" y="14" width="380" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="t2" value="Pretrained ViT-B/16 (frozen) + learned projection head · Inspired by Shao et al., EffLoc" style="text;html=1;align=center;fontStyle=2;fontSize=10;fontColor=#64748B;" vertex="1" parent="1">
+          <mxGeometry x="100" y="40" width="440" height="18" as="geometry" />
+        </mxCell>
+
+        <!-- ─── LEGEND ─────────────────────────────────────────────────── -->
+        <mxCell id="lg0" value="Legend" style="text;html=1;fontStyle=1;fontSize=10;fontColor=#0F172A;" vertex="1" parent="1">
+          <mxGeometry x="610" y="60" width="100" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="lg1" value="Input / Output" style="rounded=1;arcSize=35;fillColor=#1d4ed8;strokeColor=#1e40af;fontColor=#ffffff;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="610" y="80" width="140" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="lg2" value="ViT backbone (frozen 🔒)" style="rounded=1;arcSize=35;fillColor=#4b5563;strokeColor=#1f2937;fontColor=#e2e8f0;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="610" y="107" width="140" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="lg3" value="Attention / Self-Attention" style="rounded=1;arcSize=35;fillColor=#047857;strokeColor=#065f46;fontColor=#ffffff;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="610" y="134" width="140" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="lg4" value="MLP / Norm (trainable)" style="rounded=1;arcSize=35;fillColor=#374151;strokeColor=#1f2937;fontColor=#e2e8f0;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="610" y="161" width="140" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="lg5" value="Projection (trainable)" style="rounded=1;arcSize=35;fillColor=#6d28d9;strokeColor=#5b21b6;fontColor=#ffffff;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="610" y="188" width="140" height="22" as="geometry" />
+        </mxCell>
+
+        <!-- ─── INPUT ──────────────────────────────────────────────────── -->
+        <mxCell id="10" value="&lt;b&gt;RGB Camera Frame&lt;/b&gt;&lt;br&gt;x  ∈  ℝ&lt;sup&gt;B × 3 × 224 × 224&lt;/sup&gt;&lt;br&gt;&lt;font color=&quot;#93c5fd&quot;&gt;ImageNet-normalized  (μ=[.485,.456,.406], σ=[.229,.224,.225])&lt;/font&gt;" style="rounded=1;arcSize=18;fillColor=#1d4ed8;strokeColor=#1e40af;fontColor=#ffffff;fontSize=10;align=center;html=1;" vertex="1" parent="1">
+          <mxGeometry x="140" y="68" width="280" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="e01" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#475569;strokeWidth=1.5;" edge="1" source="10" target="11" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ─── PATCH EMBEDDING ─────────────────────────────────────────── -->
+        <mxCell id="11" value="&lt;b&gt;Patch Embedding&lt;/b&gt;&lt;br&gt;Conv2d(3→768, k=16, s=16)&lt;br&gt;224×224 → 196 patches + [CLS] token&lt;br&gt;&lt;font color=&quot;#9ca3af&quot;&gt;+ learnable positional encoding  (197, 768)&lt;/font&gt;" style="rounded=1;arcSize=15;fillColor=#4b5563;strokeColor=#1f2937;fontColor=#e2e8f0;fontSize=10;align=center;html=1;" vertex="1" parent="1">
+          <mxGeometry x="140" y="158" width="280" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#475569;strokeWidth=1.5;" edge="1" source="11" target="vit_bg" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════════════════
+             ViT BACKBONE — 12 transformer blocks (frozen)
+        ════════════════════════════════════════════════════════════════ -->
+        <mxCell id="vit_bg" value="" style="rounded=1;arcSize=6;fillColor=#F3F4F6;strokeColor=#4b5563;strokeWidth=2.5;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="118" y="252" width="324" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="vit_lbl" value="🔒  ViT-B/16 Backbone  (frozen, 86M params, ImageNet pretrained)" style="text;html=1;fontStyle=1;fontSize=10;fontColor=#4b5563;align=center;" vertex="1" parent="1">
+          <mxGeometry x="130" y="254" width="300" height="18" as="geometry" />
+        </mxCell>
+
+        <!-- Transformer block (×12) — shown as one representative block -->
+        <mxCell id="tb_bg" value="" style="rounded=1;arcSize=8;fillColor=#E5E7EB;strokeColor=#9CA3AF;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="138" y="278" width="284" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="tb_lbl" value="Transformer Block  ×  12" style="text;html=1;fontStyle=1;fontSize=10;fontColor=#374151;align=center;" vertex="1" parent="1">
+          <mxGeometry x="155" y="280" width="250" height="18" as="geometry" />
+        </mxCell>
+
+        <!-- LayerNorm 1 inside transformer -->
+        <mxCell id="tb1" value="LayerNorm  (197, 768)" style="rounded=1;arcSize=25;fillColor=#4b5563;strokeColor=#374151;fontColor=#e2e8f0;fontSize=9;fontStyle=1;align=center;html=1;" vertex="1" parent="1">
+          <mxGeometry x="158" y="302" width="244" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="etb12" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#9CA3AF;strokeWidth=1;" edge="1" source="tb1" target="tb2" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Multi-Head Self-Attention -->
+        <mxCell id="tb2" value="Multi-Head Self-Attention&lt;br&gt;12 heads · d_head=64 · d_model=768" style="rounded=1;arcSize=18;fillColor=#047857;strokeColor=#065f46;fontColor=#ffffff;fontSize=9;fontStyle=1;align=center;html=1;" vertex="1" parent="1">
+          <mxGeometry x="158" y="336" width="244" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="etb23" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#9CA3AF;strokeWidth=1;" edge="1" source="tb2" target="tb3" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="res1_lbl" value="⊕ residual" style="text;html=1;fontSize=8;fontColor=#6d28d9;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="390" y="356" width="52" height="14" as="geometry" />
+        </mxCell>
+
+        <!-- LayerNorm 2 -->
+        <mxCell id="tb3" value="LayerNorm  (197, 768)" style="rounded=1;arcSize=25;fillColor=#4b5563;strokeColor=#374151;fontColor=#e2e8f0;fontSize=9;fontStyle=1;align=center;html=1;" vertex="1" parent="1">
+          <mxGeometry x="158" y="384" width="244" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="etb34" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#9CA3AF;strokeWidth=1;" edge="1" source="tb3" target="tb4" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- MLP (FFN) -->
+        <mxCell id="tb4" value="MLP (FFN)&lt;br&gt;Linear(768→3072) → GELU → Linear(3072→768)" style="rounded=1;arcSize=18;fillColor=#4b5563;strokeColor=#374151;fontColor=#e2e8f0;fontSize=9;fontStyle=1;align=center;html=1;" vertex="1" parent="1">
+          <mxGeometry x="158" y="418" width="244" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="res2_lbl" value="⊕ residual" style="text;html=1;fontSize=8;fontColor=#6d28d9;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="390" y="432" width="52" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="etb4e" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#9CA3AF;strokeWidth=1;" edge="1" source="tb4" target="tb_end" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Output of 12 blocks -->
+        <mxCell id="tb_end" value="Output tokens  (B, 197, 768)" style="rounded=1;arcSize=25;fillColor=#4b5563;strokeColor=#374151;fontColor=#e2e8f0;fontSize=9;fontStyle=1;align=center;html=1;" vertex="1" parent="1">
+          <mxGeometry x="158" y="466" width="244" height="26" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: ViT → CLS extraction -->
+        <mxCell id="e_vit_cls" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#475569;strokeWidth=1.5;" edge="1" source="vit_bg" target="20" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ─── CLS TOKEN EXTRACTION ────────────────────────────────────── -->
+        <mxCell id="20" value="&lt;b&gt;CLS Token Extraction&lt;/b&gt;&lt;br&gt;tokens[:, 0, :]  →  (B, 768)&lt;br&gt;&lt;font color=&quot;#d1fae5&quot;&gt;classification token aggregates global context&lt;/font&gt;" style="rounded=1;arcSize=18;fillColor=#047857;strokeColor=#065f46;fontColor=#ffffff;fontSize=10;align=center;html=1;" vertex="1" parent="1">
+          <mxGeometry x="140" y="540" width="280" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="e_cls_h" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#475569;strokeWidth=1.5;" edge="1" source="20" target="head_bg" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ─── PROJECTION HEAD (trainable) ────────────────────────────── -->
+        <mxCell id="head_bg" value="" style="rounded=1;arcSize=8;fillColor=#EDE9FE;strokeColor=#7c3aed;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="118" y="624" width="324" height="196" as="geometry" />
+        </mxCell>
+        <mxCell id="head_lbl" value="Projection Head  (trainable, 115K params)" style="text;html=1;fontStyle=1;fontSize=11;fontColor=#5b21b6;align=center;" vertex="1" parent="1">
+          <mxGeometry x="140" y="626" width="280" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="h1" value="Linear  768 → 128&lt;br&gt;&lt;font color=&quot;#a78bfa&quot;&gt;(768×128 + 128 = 98,432 params)&lt;/font&gt;" style="rounded=1;arcSize=20;fillColor=#6d28d9;strokeColor=#5b21b6;fontColor=#ffffff;fontSize=10;align=center;html=1;" vertex="1" parent="1">
+          <mxGeometry x="140" y="652" width="280" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="eh12" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#64748B;strokeWidth=1.5;" edge="1" source="h1" target="h2" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="h2" value="GELU  activation" style="rounded=1;arcSize=25;fillColor=#374151;strokeColor=#1f2937;fontColor=#e2e8f0;fontSize=10;fontStyle=1;align=center;html=1;" vertex="1" parent="1">
+          <mxGeometry x="140" y="700" width="280" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="eh23" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#64748B;strokeWidth=1.5;" edge="1" source="h2" target="h3" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="h3" value="Dropout  (p=0.1)" style="rounded=1;arcSize=25;fillColor=#374151;strokeColor=#1f2937;fontColor=#e2e8f0;fontSize=10;fontStyle=1;align=center;html=1;" vertex="1" parent="1">
+          <mxGeometry x="140" y="738" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="h4" value="Linear  128 → 128&lt;br&gt;&lt;font color=&quot;#9ca3af&quot;&gt;(16,512)&lt;/font&gt;" style="rounded=1;arcSize=25;fillColor=#374151;strokeColor=#1f2937;fontColor=#e2e8f0;fontSize=10;fontStyle=1;align=center;html=1;" vertex="1" parent="1">
+          <mxGeometry x="290" y="738" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="eh45" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#64748B;strokeWidth=1.5;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="h3" target="h5" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eh45b" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#64748B;strokeWidth=1.5;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="h4" target="h5" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="h5" value="LayerNorm  (128)" style="rounded=1;arcSize=25;fillColor=#374151;strokeColor=#1f2937;fontColor=#e2e8f0;fontSize=10;fontStyle=1;align=center;html=1;" vertex="1" parent="1">
+          <mxGeometry x="140" y="782" width="280" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: head → output -->
+        <mxCell id="e_h_out" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#475569;strokeWidth=2;" edge="1" source="head_bg" target="50" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ─── OUTPUT ──────────────────────────────────────────────────── -->
+        <mxCell id="50" value="&lt;b&gt;Embedding  z&lt;/b&gt;&lt;br&gt;z  ∈  ℝ&lt;sup&gt;B × 128&lt;/sup&gt;" style="rounded=1;arcSize=20;fillColor=#1d4ed8;strokeColor=#1e40af;fontColor=#ffffff;fontSize=11;align=center;html=1;" vertex="1" parent="1">
+          <mxGeometry x="140" y="840" width="280" height="46" as="geometry" />
+        </mxCell>
+
+        <!-- ─── TRAINING STRATEGY BOX ─────────────────────────────────── -->
+        <mxCell id="ts_bg" value="" style="rounded=1;fillColor=#FFF7ED;strokeColor=#F59E0B;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="490" y="250" width="220" height="250" as="geometry" />
+        </mxCell>
+        <mxCell id="ts_h" value="Training Strategy" style="text;html=1;fontStyle=1;fontSize=10;fontColor=#92400E;align=center;" vertex="1" parent="1">
+          <mxGeometry x="490" y="254" width="220" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="ts1" value="Phase 1  (Stage A — this work):" style="text;html=1;fontSize=9;fontColor=#374151;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="498" y="276" width="210" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="ts2" value="  Backbone FROZEN  🔒" style="text;html=1;fontSize=9;fontColor=#b45309;fontFamily=Courier New;align=left;" vertex="1" parent="1">
+          <mxGeometry x="498" y="292" width="210" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="ts3" value="  Head only trainable (115K)" style="text;html=1;fontSize=9;fontColor=#374151;fontFamily=Courier New;align=left;" vertex="1" parent="1">
+          <mxGeometry x="498" y="308" width="210" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="ts4" value="  extract_backbone_features()" style="text;html=1;fontSize=9;fontColor=#047857;fontFamily=Courier New;align=left;" vertex="1" parent="1">
+          <mxGeometry x="498" y="324" width="210" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="ts5" value="  cached to .vit_cache/*.pt" style="text;html=1;fontSize=9;fontColor=#047857;fontFamily=Courier New;align=left;" vertex="1" parent="1">
+          <mxGeometry x="498" y="340" width="210" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="ts6" value="Phase 2  (Stage B+, future):" style="text;html=1;fontSize=9;fontColor=#374151;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="498" y="366" width="210" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="ts7" value="  freeze_backbone=False" style="text;html=1;fontSize=9;fontColor=#6d28d9;fontFamily=Courier New;align=left;" vertex="1" parent="1">
+          <mxGeometry x="498" y="382" width="210" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="ts8" value="  End-to-end fine-tuning" style="text;html=1;fontSize=9;fontColor=#6d28d9;fontFamily=Courier New;align=left;" vertex="1" parent="1">
+          <mxGeometry x="498" y="398" width="210" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="pc_div" value="" style="line;strokeColor=#CBD5E1;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="498" y="416" width="204" height="10" as="geometry" />
+        </mxCell>
+        <mxCell id="ts9" value="Best val MAE:    0.497 m" style="text;html=1;fontSize=9;fontColor=#047857;fontStyle=1;fontFamily=Courier New;align=left;" vertex="1" parent="1">
+          <mxGeometry x="498" y="426" width="210" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="ts10" value="Trainable:       115,200 params" style="text;html=1;fontSize=9;fontColor=#0F172A;fontStyle=1;fontFamily=Courier New;align=left;" vertex="1" parent="1">
+          <mxGeometry x="498" y="442" width="210" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="ts11" value="Backbone:     86,567,656 (frozen)" style="text;html=1;fontSize=9;fontColor=#4b5563;fontFamily=Courier New;align=left;" vertex="1" parent="1">
+          <mxGeometry x="498" y="458" width="210" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="ts12" value="Epochs:           100  |  CUDA" style="text;html=1;fontSize=9;fontColor=#6d28d9;fontFamily=Courier New;align=left;" vertex="1" parent="1">
+          <mxGeometry x="498" y="474" width="210" height="16" as="geometry" />
+        </mxCell>
+
+        <!-- ─── CACHE FLOW ANNOTATION ──────────────────────────────────── -->
+        <mxCell id="cache_bg" value="" style="rounded=1;fillColor=#F0FDF4;strokeColor=#86EFAC;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="490" y="518" width="220" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="cache_h" value="Efficient Training Pipeline" style="text;html=1;fontStyle=1;fontSize=10;fontColor=#14532d;align=center;" vertex="1" parent="1">
+          <mxGeometry x="490" y="522" width="220" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="cache1" value="1. Run backbone ONCE on all images" style="text;html=1;fontSize=9;fontColor=#374151;align=left;" vertex="1" parent="1">
+          <mxGeometry x="498" y="542" width="210" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="cache2" value="   → features.pt  (472 s first run)" style="text;html=1;fontSize=9;fontColor=#64748B;fontFamily=Courier New;align=left;" vertex="1" parent="1">
+          <mxGeometry x="498" y="558" width="210" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="cache3" value="2. Train head on cached (B, 768)" style="text;html=1;fontSize=9;fontColor=#374151;align=left;" vertex="1" parent="1">
+          <mxGeometry x="498" y="578" width="210" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="cache4" value="   → 100 epochs in 18 s  🚀" style="text;html=1;fontSize=9;fontColor=#047857;fontStyle=1;fontFamily=Courier New;align=left;" vertex="1" parent="1">
+          <mxGeometry x="498" y="594" width="210" height="16" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

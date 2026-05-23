@@ -24,7 +24,9 @@ class OdomCNN(BaseEncoder):
     Parameters
     ----------
     in_features : int
-        Number of input features per timestep (default 7).
+        Number of input features per timestep (default 5, post-2026-05-20
+        cleanup; was 7 when odom_x / odom_y were features. They were the
+        target leaking into the input — see the audit log for details).
     embed_dim : int
         Output embedding dimension (default 128).
     channels : tuple
@@ -37,7 +39,7 @@ class OdomCNN(BaseEncoder):
 
     def __init__(
         self,
-        in_features: int = 7,
+        in_features: int = 5,
         embed_dim: int = 128,
         channels: tuple[int, ...] = (16, 32, 64),
         kernel_size: int = 3,
@@ -87,3 +89,9 @@ class OdomCNN(BaseEncoder):
             "shape": (16, self.in_features),
             "dtype": "float32",
         }
+
+
+# Default kept here so callers can rebuild the same encoder without
+# importing the dataset constants. Single source of truth lives in
+# ODOM_COLS over in src/pipeline/data/dataset.py.
+ODOM_IN_FEATURES = 5

@@ -1,5 +1,6 @@
 """Stage C — Cross-modal fusion modules."""
 
-from src.fusion.base import BaseFusion
+from .base import BaseFusion
+from .transformer import ContinuousTimeEncoding, FusionTransformer
 
-__all__ = ["BaseFusion"]
+__all__ = ["BaseFusion", "ContinuousTimeEncoding", "FusionTransformer"]

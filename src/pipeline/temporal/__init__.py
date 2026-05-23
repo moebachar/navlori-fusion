@@ -1,5 +1,5 @@
 """Stage B — Temporal alignment modules."""
 
-from src.temporal.base import BaseTemporalAligner
+from .base import BaseTemporalAligner
 
 __all__ = ["BaseTemporalAligner"]

@@ -1,0 +1,100 @@
+# Stage B+C — FusionTransformer (single set-transformer)
+#
+# One token = encoder_embedding + modality_embedding + time_encoding(dt).
+# Self-attention fuses modalities (and, with K>1 instants, time);
+# a cross-attention PositionQuery reads out (x, y) at time tau.
+#
+# Every hyperparameter the notebook / scripts / Optuna use lives here —
+# load with: omegaconf.OmegaConf.load("configs/stage_c/fusion.yaml")
+
+# Which dataset to run on. The modalities, path splits, WiFi-PCA and window
+# sizes all come from configs/data/<default_dataset>.yaml — so the same
+# pipeline runs on the Webots simulation or on the real-world datasets
+# (IMUWiFine / IPIN 2024 / RoNIN) just by changing this name.
+data:
+  default_dataset: simulation   # configs/data/<name>.yaml  (overridable per run)
+  camera_window: 2          # DPVO frame pair (only datasets that have a camera)
+  camera_stride: 5          # ~1 s between the pair (visible inter-frame motion)
+  batch_size: 128
+
+# model/train/temporal defaults below are the Optuna study outcome
+# (runs/optuna_fusion/best.json — 20 trials). dropout is kept at 0.1
+# rather than the search's 0.035: Optuna searched at a 30-epoch budget,
+# the 90-epoch production run needs slightly more regularisation.
+model:
+  embed_dim: 128
+  depth: 6                  # self-attention encoder layers (Optuna)
+  n_heads: 4                # (Optuna)
+  ff_mult: 4                # (Optuna)
+  dropout: 0.1
+  use_time: true            # continuous-time encoding on every token
+  # readout {cls, query, decomposed}:
+  #   cls        — self-attention pooled CLS token
+  #   query      — tau-parameterised cross-attention PositionQuery (DEFAULT)
+  #   decomposed — pred = p_abs(absolute tokens) + g * delta(motion tokens);
+  #                separates absolute vs relative info so motion gets a
+  #                dedicated path (Proposal 1, 2026-05-20). Needs the
+  #                aux_abs_weight loss below + absolute_modalities.
+  #
+  # NOTE (2026-05-20 bake-off): on the honest IPIN trial-out split,
+  # 'decomposed' did NOT beat 'query' (24.8m vs 23.0m) and motion_frac
+  # stayed ~0.03 — because cross-trial WiFi gives no transferable anchor
+  # to integrate motion from. The decomposition can't fix an observability
+  # problem. Kept as an option for the good-but-sparse-anchor regime;
+  # default stays 'query' until WiFi transfers (session-invariant encoder).
+  readout: query
+  absolute_modalities: [wifi]   # which modalities carry an absolute fix (decomposed)
+
+train:
+  lr: 1.3e-3                # (Optuna, sim-only — re-tune on real data via Action 6)
+  weight_decay: 1.0e-4
+  huber_delta: 0.5
+  grad_clip: 1.0
+  patience: 40
+  epochs: 90
+  # modality_dropout=0.16 was the sim-only Optuna optimum. The audit
+  # showed it was too gentle: with M=4 the model only saw WiFi missing
+  # 16% of the time and learned to lean on WiFi exclusively. Raised to
+  # 0.4 so the model has to operate without each modality often.
+  modality_dropout: 0.4
+  instant_dropout: 0.45     # drop individual instant-modality tokens (async)
+  # Modality-balanced loss: explicit leave-one-out gradient on each step.
+  # See FusionTrainer for details.
+  modality_balanced_loss: true
+  modality_balanced_weight: 0.5
+  # Auxiliary anchor loss for readout=decomposed: weight on Huber(p_abs, y).
+  # Forces the absolute path to be a real position estimate so the motion
+  # path learns a residual correction.
+  aux_abs_weight: 0.5
+
+temporal:
+  n_instants: 8             # recent GT instants per sample (1 = single-instant)
+  instant_stride: 9         # GT rows between instants (~10 Hz -> 9 ≈ 0.9 s) — Optuna
+
+# Optional Stage-A pretraining: point each modality at the encoder.pt
+# (or head.pt for DPVO) emitted by EncoderTrainer / motion.py. The
+# builder will strict-load these into the fusion model before training.
+# null = train from scratch.
+stage_a:
+  pretrained:
+    imu: null
+    odom: null
+    wifi: null
+    camera: null
+
+conformal:
+  alpha: 0.1                # 90% target coverage
+
+optuna:
+  n_trials: 20
+  epochs: 30                # shortened per-trial budget (enough to rank configs)
+  search_space:             # [low, high] (or choices) per tunable hyperparameter
+    depth: [2, 6]
+    n_heads: [4, 8]
+    ff_mult: [2, 4]
+    dropout: [0.0, 0.3]
+    lr: [3.0e-4, 3.0e-3]    # log-uniform
+    modality_dropout: [0.1, 0.5]
+    instant_dropout: [0.0, 0.5]
+    n_instants: [4, 12]
+    instant_stride: [5, 15]

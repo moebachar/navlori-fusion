@@ -10,8 +10,8 @@ param(
 $FusionDir = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $ServicesDir = Join-Path $FusionDir "services"
 $InfluxdbExe = Join-Path $ServicesDir "influxdb\influxd.exe"
-$GrafanaExe = Join-Path $ServicesDir "grafana\bin\grafana-server.exe"
-$GrafanaHome = Join-Path $ServicesDir "grafana"
+$GrafanaExe = "C:\Program Files\GrafanaLabs\grafana\bin\grafana.exe"
+$GrafanaHome = "C:\Program Files\GrafanaLabs\grafana"
 
 function Start-InfluxDB {
     $existing = Get-Process -Name "influxd" -ErrorAction SilentlyContinue
@@ -32,7 +32,7 @@ function Start-InfluxDB {
 }
 
 function Start-Grafana {
-    $existing = Get-Process -Name "grafana-server" -ErrorAction SilentlyContinue
+    $existing = Get-Process -Name "grafana" -ErrorAction SilentlyContinue
     if ($existing) {
         Write-Host "[Grafana] Already running (PID $($existing.Id))"
         return
@@ -40,7 +40,7 @@ function Start-Grafana {
     Write-Host "[Grafana] Starting on http://localhost:3000 ..."
     $logPath = Join-Path $ServicesDir "grafana.log"
     $proc = Start-Process -FilePath $GrafanaExe `
-        -ArgumentList "--homepath=`"$GrafanaHome`"" `
+        -ArgumentList "server", "--homepath=`"$GrafanaHome`"" `
         -WorkingDirectory $GrafanaHome `
         -RedirectStandardOutput $logPath `
         -RedirectStandardError (Join-Path $ServicesDir "grafana_err.log") `
@@ -80,10 +80,10 @@ switch ($Action) {
     }
     "stop" {
         Stop-Service-ByName "influxd" "InfluxDB"
-        Stop-Service-ByName "grafana-server" "Grafana"
+        Stop-Service-ByName "grafana" "Grafana"
     }
     "status" {
         Get-ServiceStatus "influxd" "InfluxDB"
-        Get-ServiceStatus "grafana-server" "Grafana"
+        Get-ServiceStatus "grafana" "Grafana"
     }
 }

@@ -1,5 +1,6 @@
 """Stage E — Uncertainty quantification modules."""
 
-from src.uncertainty.base import BaseUncertainty
+from .base import BaseUncertainty
+from .conformal import ConformalPosition
 
-__all__ = ["BaseUncertainty"]
+__all__ = ["BaseUncertainty", "ConformalPosition"]

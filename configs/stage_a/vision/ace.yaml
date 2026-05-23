@@ -1,0 +1,13 @@
+# Stage A — Vision Encoder: ACE (Accelerated Coordinate Encoding)
+#
+# Frozen scene-agnostic ResNet-style trunk (Niantic ACE, CVPR 2023), pretrained
+# on ScanNet. Output: 60x80x512 feature grid for 640x480 input (stride 8).
+# We train only the projection head (linear probe) for Stage A; the SCR head
+# is added in Stage 3 of the plan.
+encoder:
+  name: ace
+  embed_dim: 128
+  weights_path: runs/_weights/ace_encoder_pretrained.pt
+  head_hidden: 256
+  dropout: 0.1
+  input_is_imagenet_normalised: true

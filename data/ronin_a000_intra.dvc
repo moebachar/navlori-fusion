@@ -1,0 +1,6 @@
+outs:
+- md5: 46903a3b7ce213b5022c94e3c2e0d80f.dir
+  size: 18591312
+  nfiles: 1295
+  hash: md5
+  path: ronin_a000_intra

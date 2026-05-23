@@ -39,11 +39,12 @@ TOP_N_APS = 15
 RSSI_VISIBILITY_THRESHOLD = -85.0   # dBm — APs weaker than this are "not visible"
 WRITE_INTERVAL = 3                  # write every N simulation steps
 
-# InfluxDB settings — update INFLUXDB_TOKEN after setup
-INFLUXDB_URL = "http://localhost:8086"
-INFLUXDB_TOKEN = "hTxBvNi8eVj1f4gkclf01cr7uSnVGOfXKPkKmnyRSMC5H2QsiFqQZe4leOyh2GcLoUOmtrLXfkiFMsBKR2EpSg=="
-INFLUXDB_ORG = "navlori"
-INFLUXDB_BUCKET = "wifi_data"
+# InfluxDB settings — token read from the INFLUXDB_TOKEN env var.
+# See .env.example for the full set of variables.
+INFLUXDB_URL = os.getenv("INFLUXDB_URL", "http://localhost:8086")
+INFLUXDB_TOKEN = os.getenv("INFLUXDB_TOKEN", "")
+INFLUXDB_ORG = os.getenv("INFLUXDB_ORG", "navlori")
+INFLUXDB_BUCKET = os.getenv("INFLUXDB_BUCKET", "wifi_data")
 
 # ═════════════════════════════════════════════════════════════════════════
 # InfluxDB Writer

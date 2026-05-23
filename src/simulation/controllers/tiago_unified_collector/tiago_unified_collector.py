@@ -83,11 +83,11 @@ RSSI_VISIBILITY_THRESHOLD = -85.0   # dBm
 # --- Visualization (InfluxDB + Grafana) ---
 ENABLE_VIZ = False              # Set True to write to InfluxDB for Grafana dashboards
 
-# --- InfluxDB Settings (only used if ENABLE_VIZ=True) ---
-INFLUXDB_URL = "http://localhost:8086"
-INFLUXDB_TOKEN = "hTxBvNi8eVj1f4gkclf01cr7uSnVGOfXKPkKmnyRSMC5H2QsiFqQZe4leOyh2GcLoUOmtrLXfkiFMsBKR2EpSg=="
-INFLUXDB_ORG = "navlori"
-INFLUXDB_BUCKET = "wifi_data"
+# --- InfluxDB Settings (only used if ENABLE_VIZ=True). Token from env. ---
+INFLUXDB_URL = os.getenv("INFLUXDB_URL", "http://localhost:8086")
+INFLUXDB_TOKEN = os.getenv("INFLUXDB_TOKEN", "")
+INFLUXDB_ORG = os.getenv("INFLUXDB_ORG", "navlori")
+INFLUXDB_BUCKET = os.getenv("INFLUXDB_BUCKET", "wifi_data")
 
 # --- Output ---
 WRITE_INTERVAL = 1             # Write every N simulation steps (1 = every step)
