@@ -94,6 +94,6 @@ day-1 task of every iteration.
 
 | # | plan file | result file | engineer commit | scientist note |
 |---|---|---|---|---|
-| 01 | PLAN_01_wifi-encoder-audit-uji.md (revised 2026-05-25 scientist first wake) | RESULT_01_wifi-encoder-audit-uji.md | iter 01: wifi-encoder-audit-uji (pending hash) | Step 0 (recover run-1 audit files) added — files exist only on `overnight-autonomous-2026-05-24`. Locaris bonus dropped (Sachini/niloc = NILoc IMU, not WiFi; real Locaris arXiv:2510.11926 no code yet). Engineer: Anchor2Vec **keep** (8.69 m, +1.6 % vs run-1 ref), WiFiSetTransformer **replace on UJI / defer cross-session to Phase C** (12.95 m, +49 % vs Anchor2Vec). Recommend PLAN_02 = IMU audit, no parallel WiFi track. |
+| 01 | PLAN_01_wifi-encoder-audit-uji.md (revised 2026-05-25 scientist first wake) | RESULT_01_wifi-encoder-audit-uji.md | iter 01: wifi-encoder-audit-uji (baf1a61) | Step 0 (recover run-1 audit files) added — files exist only on `overnight-autonomous-2026-05-24`. Locaris bonus dropped (Sachini/niloc = NILoc IMU, not WiFi; real Locaris arXiv:2510.11926 no code yet). Engineer: Anchor2Vec **keep** (8.69 m, +1.6 % vs run-1 ref), WiFiSetTransformer **replace on UJI / defer cross-session to Phase C** (12.95 m, +49 % vs Anchor2Vec). Recommend PLAN_02 = IMU audit, no parallel WiFi track. |
 
 (Both sides update this table — append a row when you finish your half.)
