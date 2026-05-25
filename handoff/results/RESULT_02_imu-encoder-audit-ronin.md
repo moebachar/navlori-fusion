@@ -250,3 +250,81 @@ C2 "for free" while Phase A finishes.
   STATE Stop-at 2026-05-26 18:00).
 - No `handoff/STOP` file.
 - `GOAL_REACHED: false` — 2/4 Phase-A encoders triaged.
+
+---
+
+## Addendum 2026-05-25 ~13:05 — Umeyama re-alignment (Step 0c retro)
+
+PLAN_03's amended-rubric correction #3 demanded re-running aligned ATE
+with a standard library (Umeyama, with scale) rather than the hand-
+rolled SVD Procrustes (rotation + translation only) used in the main
+result above. I extended `scripts/_eval_ronin_a000_branchY.py` with an
+`_umeyama_align()` helper (similarity transform per Umeyama 1991 eq.
+40-42 — same formulation used by `evo`, scipy.spatial.procrustes in
+its normalised form, and RoNIN's own `metric.compute_ate_rte`) and
+re-ran the audit end-to-end.
+
+### Retro table
+
+Per-chunk ATE, 30-chunk test set (re-run; no seed → stochastic; the
+ResNet1D best-val checkpoint landed at epoch 1 again, so values shift
+by training noise rather than from the alignment change):
+
+| encoder | raw mean | raw median | aligned SVD (legacy R+t) | **Umeyama (R+t+s)** | Umeyama p90 |
+|---|---|---|---|---|---|
+| RoNIN ResNet1D | 4.18 m | 3.79 m | 1.10 m | **0.32 m** | 0.55 m |
+| IMUCNN base    | 2.98 m | 3.24 m | 0.97 m | **0.31 m** | 0.56 m |
+| IMUCNN 2×      | 2.91 m | 2.83 m | 1.12 m | **0.31 m** | 0.54 m |
+
+### Two findings the addendum surfaces
+
+1. **Umeyama-aligned ATE collapses to ~0.30 m for all three encoders.**
+   With scale + rotation + translation alignment, the *shape* of the
+   predicted trajectories is essentially equivalent across all three
+   models. Whatever raw-ATE differences remain are predominantly
+   **scale-calibration** issues (the encoder learned the right motion
+   pattern but at slightly the wrong velocity magnitude). This is
+   strong support for the original audit verdict: IMUCNN's structure
+   recovers the same trajectory shape as ResNet1D.
+
+2. **Raw ATE is unstable across training runs on this proxy.** First
+   run (RESULT_02 main): IMUCNN base 3.55, IMUCNN 2× 5.81, ResNet1D
+   2.89. Retro re-run: IMUCNN base 2.98, IMUCNN 2× 2.91, ResNet1D
+   4.18. The ranking flipped between IMUCNN base and ResNet1D, and
+   the "IMUCNN 2× regressed" claim is **refuted** by this second
+   run — IMUCNN 2× and base are now tied. The capacity-probe
+   conclusion from the main result above is therefore **softened**:
+   the 2× width is neither clearly better nor clearly worse than
+   base on this proxy at this train-set size. Without a seed and
+   across multiple runs to test stability, the proxy can't decide
+   the capacity question confidently.
+
+### Audit-label update
+
+**IMUCNN = keep** stands. The Umeyama numbers strengthen the case:
+all three encoders are structurally equivalent on motion *shape*; the
+~95× parameter and 4× latency advantages of IMUCNN make it the right
+fusion encoder. The capacity-probe claim from the main result is
+softened to "**capacity is not clearly the bottleneck**" rather than
+"capacity is refuted as a bottleneck"; revisit if Phase B fusion
+benchmarks show IMUCNN-leg saturation.
+
+### Rubric-correction #3 from here forward
+
+Engineer applies Umeyama (or `evo.core.metrics.APE`) as the canonical
+alignment for all future aligned-ATE / ATE reports in Phase A and
+Phase B/C. The hand-rolled SVD Procrustes in `per_chunk_ate()` stays
+for backward compatibility with this RESULT_02 main table but is no
+longer the primary metric.
+
+### Files touched by the retro
+
+- `scripts/_eval_ronin_a000_branchY.py`: added `_umeyama_align()`
+  helper; `per_chunk_ate()` now reports raw + SVD-aligned (legacy) +
+  Umeyama-aligned ATE.
+- `runs/overnight/run2_iter_02/a000_branchY.json`: overwritten with
+  the retro run's JSON (now includes `umeyama_*` fields and a
+  `per_chunk_umeyama` array).
+- `runs/overnight/run2_iter_02/branchY_umeyama.log`: console log of
+  the retro run.
+

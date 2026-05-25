@@ -1,0 +1,26 @@
+# Stage A — Vision Encoder: DPVO full-pipeline hidden state
+#
+# Wraps **upstream Princeton-VL DPVO** (NeurIPS 2023) end-to-end. SLAM is
+# run path-wide once, offline, inside a CUDA docker container by
+# `scripts/extract_dpvo_features.py`, which snapshots DPVO's per-frame
+# `imap` pool (the 384-D context features that feed the GRU update
+# operator) and writes one `dpvo_features.pt` per path. At training time
+# only the small MLP head learns; the heavy 384-D representation is fully
+# DPVO-derived and frozen.
+#
+# Cf. `configs/stage_a/vision/dpvo.yaml` for the simplified flow-only
+# variant (correlation + soft-argmax) — that one mimics DPVO; this one
+# IS DPVO.
+data:
+  modalities: [vision_dpvo]
+  windows:
+    vision_dpvo: 4
+  camera_stride: 5      # consistent with how features were extracted
+
+encoder:
+  name: dpvo_full
+  in_dim: 384
+  embed_dim: 128
+  hidden: 256
+  pool: last            # {"last", "mean"} — "last" matches online-runner
+  dropout: 0.1

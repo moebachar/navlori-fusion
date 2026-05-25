@@ -231,10 +231,44 @@ def train_model(model, Xtr, Ytr, Xva, Yva, epochs, batch, lr, name, dev):
     return best_va, elapsed
 
 
+def _umeyama_align(src: np.ndarray, dst: np.ndarray) -> np.ndarray:
+    """Umeyama (1991) similarity alignment src -> dst with optimal scale.
+
+    Returns the aligned src trajectory (same shape). Unlike a hand-rolled
+    SVD Procrustes (rotation + translation only), Umeyama additionally
+    estimates the optimal scale factor — which is the canonical method
+    used by evo, scipy.spatial.procrustes (in normalised form), and
+    RoNIN's own metric. Reference: S. Umeyama, "Least-squares estimation
+    of transformation parameters between two point patterns,"
+    IEEE TPAMI 1991, eq. (40-42).
+    """
+    src = np.asarray(src, dtype=np.float64)
+    dst = np.asarray(dst, dtype=np.float64)
+    n, d = src.shape
+    mu_s = src.mean(0)
+    mu_d = dst.mean(0)
+    src_c = src - mu_s
+    dst_c = dst - mu_d
+    var_s = (src_c ** 2).sum() / n
+    H = src_c.T @ dst_c / n
+    U, S, Vt = np.linalg.svd(H)
+    D = np.eye(d)
+    if np.linalg.det(U) * np.linalg.det(Vt) < 0:
+        D[-1, -1] = -1.0
+    R = Vt.T @ D @ U.T
+    s = (S * np.diag(D)).sum() / max(var_s, 1e-12)
+    t = mu_d - s * R @ mu_s
+    aligned = (s * (R @ src.T)).T + t
+    return aligned.astype(np.float32)
+
+
 def per_chunk_ate(model, chunks_test, window, stride, dev):
-    """Integrate predicted velocities → trajectory → ATE per chunk."""
+    """Integrate predicted velocities → trajectory → ATE per chunk.
+
+    Reports raw, SVD-Procrustes-aligned (legacy), and Umeyama-aligned ATE.
+    """
     model.eval()
-    ates_raw, ates_aligned, names, lens = [], [], [], []
+    ates_raw, ates_aligned, ates_umeyama, names, lens = [], [], [], [], []
     with torch.no_grad():
         for c in chunks_test:
             feat = c["feat"]
@@ -274,12 +308,17 @@ def per_chunk_ate(model, chunks_test, window, stride, dev):
                 Rm = Vt.T @ U.T
             aligned = pc @ Rm.T + gt_at_ends.mean(0)
             ate_al = float(np.sqrt(((aligned - gt_at_ends) ** 2).sum(1).mean()))
+            # Umeyama (with scale) — the canonical alignment per amended rubric.
+            aligned_u = _umeyama_align(traj, gt_at_ends)
+            ate_um = float(np.sqrt(((aligned_u - gt_at_ends) ** 2).sum(1).mean()))
             ates_raw.append(ate_raw)
             ates_aligned.append(ate_al)
+            ates_umeyama.append(ate_um)
             names.append(c["name"])
             lens.append(int(len(ends)))
     arr_raw = np.array(ates_raw)
     arr_al = np.array(ates_aligned)
+    arr_um = np.array(ates_umeyama)
     return {
         "raw_mean": float(arr_raw.mean()),
         "raw_median": float(np.median(arr_raw)),
@@ -290,9 +329,14 @@ def per_chunk_ate(model, chunks_test, window, stride, dev):
         "aligned_mean": float(arr_al.mean()),
         "aligned_median": float(np.median(arr_al)),
         "aligned_p90": float(np.percentile(arr_al, 90)),
+        "umeyama_mean": float(arr_um.mean()),
+        "umeyama_median": float(np.median(arr_um)),
+        "umeyama_p90": float(np.percentile(arr_um, 90)),
+        "umeyama_max": float(arr_um.max()),
         "n_chunks": int(len(arr_raw)),
         "n_windows_per_chunk_mean": float(np.mean(lens)),
         "per_chunk_raw": [float(x) for x in arr_raw],
+        "per_chunk_umeyama": [float(x) for x in arr_um],
     }
 
 
