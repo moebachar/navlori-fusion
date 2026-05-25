@@ -7,9 +7,9 @@ Push policy: **commit locally each iteration; NO push. User pushes manually on w
 
 ## Status
 
-- `CURRENT_ITERATION:` 1
-- `LAST_PLAN:` PLAN_01_msiln-feasibility-probe.md
-- `LAST_RESULT:` RESULT_01_msiln-feasibility-probe.md
+- `CURRENT_ITERATION:` 2
+- `LAST_PLAN:` PLAN_02_msiln-convert-and-baselines.md
+- `LAST_RESULT:` RESULT_02_msiln-convert-and-baselines.md
 - `GOAL_REACHED:` false
 - `STOP_REASON:` (none yet)
 
@@ -70,6 +70,7 @@ remains as a secondary benchmark for ablation/transfer claims.
 
 | # | plan file | result file | engineer commit | scientist note |
 |---|---|---|---|---|
-| 1 | PLAN_01_msiln-feasibility-probe.md | RESULT_01_msiln-feasibility-probe.md | iter01 (GO — site1/B1 recommended; WiFi 0.51 Hz, 1452 BSSIDs, 4-day cross-session) | feasibility probe for Microsoft ILN 2.0 dataset switch |
+| 1 | PLAN_01_msiln-feasibility-probe.md | RESULT_01_msiln-feasibility-probe.md | 301c80e iter 01: msiln-feasibility-probe (GO — site1/B1 recommended) | feasibility probe for Microsoft ILN 2.0 dataset switch |
+| 2 | PLAN_02_msiln-convert-and-baselines.md | RESULT_02_msiln-convert-and-baselines.md | (pending) | converter + cross-session split + trivial baselines on site1/B1 (no training yet) |
 
 (Both sides update this table — append a row when you finish your half.)
