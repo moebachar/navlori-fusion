@@ -252,14 +252,45 @@ def main():
     ap.add_argument("--dataset", default="msiln_site1_b1")
     ap.add_argument("--epochs", type=int, default=90)
     ap.add_argument("--skip-smoke", action="store_true")
+    ap.add_argument("--embed-dim", type=int, default=None,
+                    help="Override cfg.model.embed_dim (default: from config)")
+    ap.add_argument("--batch-size", type=int, default=None,
+                    help="Override cfg.data.batch_size (drop on OOM)")
+    ap.add_argument("--wifi-pca", type=int, default=None,
+                    help="Override cfg.dataset.preprocessing.wifi_pca")
+    ap.add_argument("--modalities", default=None,
+                    help="Comma-separated subset to enable (e.g. 'wifi' for wifi-only)")
+    ap.add_argument("--run-label", default="",
+                    help="Suffix tag appended to summary JSON name; identifies the probe.")
     args = ap.parse_args()
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    _print(f"=== PLAN_03 train+eval on {args.dataset}  (device={device}) ===")
+    _print(f"=== train+eval on {args.dataset}  (device={device}, label={args.run_label or 'default'}) ===")
     cfg = load_config(args.dataset)
+
+    # ── apply CLI overrides BEFORE building anything ─────────────────────────
+    if args.embed_dim is not None:
+        _print(f"  override model.embed_dim {cfg.model.embed_dim} -> {args.embed_dim}")
+        cfg.model.embed_dim = int(args.embed_dim)
+    if args.batch_size is not None:
+        _print(f"  override data.batch_size {cfg.data.batch_size} -> {args.batch_size}")
+        cfg.data.batch_size = int(args.batch_size)
+    if args.wifi_pca is not None:
+        pre = cfg.dataset.get("preprocessing", {}) or {}
+        _print(f"  override dataset.preprocessing.wifi_pca "
+               f"{pre.get('wifi_pca', None)} -> {args.wifi_pca}")
+        if "preprocessing" not in cfg.dataset:
+            cfg.dataset.preprocessing = {}
+        cfg.dataset.preprocessing.wifi_pca = int(args.wifi_pca)
+    if args.modalities is not None:
+        new_mods = [m.strip() for m in args.modalities.split(",") if m.strip()]
+        _print(f"  override dataset.modalities {list(cfg.dataset.modalities)} -> {new_mods}")
+        cfg.dataset.modalities = new_mods
+
     _print(f"  config: depth={cfg.model.depth}  heads={cfg.model.n_heads}  "
-           f"readout={cfg.model.readout}  K={cfg.temporal.n_instants}  "
-           f"stride={cfg.temporal.instant_stride}")
+           f"embed_dim={cfg.model.embed_dim}  readout={cfg.model.readout}  "
+           f"K={cfg.temporal.n_instants}  stride={cfg.temporal.instant_stride}  "
+           f"batch={cfg.data.batch_size}")
 
     dm = build_datamodule(cfg)
     _print(dm.summary())
@@ -353,7 +384,12 @@ def main():
     _print(f"  smoothness median across 5 paths = {smooth_med:.2f}")
 
     # --- save summary
-    out = Path(trainer.run_path) / "plan_03_summary.json"
+    summary["run_label"] = args.run_label
+    summary["embed_dim"] = int(cfg.model.embed_dim)
+    summary["batch_size"] = int(cfg.data.batch_size)
+    summary["modalities_active"] = list(cfg.dataset.modalities)
+    out_name = f"summary_{args.run_label or 'default'}.json"
+    out = Path(trainer.run_path) / out_name
     out.write_text(json.dumps(summary, indent=2))
     _print(f"\nWrote {out}")
     _print(f"Run dir: {trainer.run_path}")

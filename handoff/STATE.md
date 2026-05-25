@@ -7,9 +7,9 @@ Push policy: **commit locally each iteration; NO push. User pushes manually on w
 
 ## Status
 
-- `CURRENT_ITERATION:` 3
-- `LAST_PLAN:` PLAN_03_msiln-fusion-baseline-run.md
-- `LAST_RESULT:` RESULT_03_msiln-fusion-baseline-run.md
+- `CURRENT_ITERATION:` 4
+- `LAST_PLAN:` PLAN_04_wifi-encoder-capacity-probe.md
+- `LAST_RESULT:` RESULT_04_wifi-encoder-capacity-probe.md
 - `GOAL_REACHED:` false
 - `STOP_REASON:` (none yet)
 
@@ -72,6 +72,7 @@ remains as a secondary benchmark for ablation/transfer claims.
 |---|---|---|---|---|
 | 1 | PLAN_01_msiln-feasibility-probe.md | RESULT_01_msiln-feasibility-probe.md | 301c80e iter 01: msiln-feasibility-probe (GO — site1/B1 recommended) | feasibility probe for Microsoft ILN 2.0 dataset switch |
 | 2 | PLAN_02_msiln-convert-and-baselines.md | RESULT_02_msiln-convert-and-baselines.md | 3cb454b iter 02: msiln-convert-and-baselines (wifi-kNN floor 17.7m val / 9.5m test; fusion target <=6m test) | converter + cross-session split + trivial baselines on site1/B1 (no training yet) |
-| 3 | PLAN_03_msiln-fusion-baseline-run.md | RESULT_03_msiln-fusion-baseline-run.md | (pending) | first FusionTransformer training on msiln_b1; smoke + 90-epoch + eval + per-traj + latency |
+| 3 | PLAN_03_msiln-fusion-baseline-run.md | RESULT_03_msiln-fusion-baseline-run.md | bae6e06 iter 03: msiln-fusion-baseline-run (val 15.7m / test 8.99m; wifi-only ~ full-fusion -> encoder is bottleneck; PLAN_04 = encoder_swap) | first FusionTransformer training on msiln_b1; smoke + 90-epoch + eval + per-traj + latency |
+| 4 | PLAN_04_wifi-encoder-capacity-probe.md | RESULT_04_wifi-encoder-capacity-probe.md | (pending) | embed_dim 128->256 probe (1419 BSSIDs vs IPIN's ~125); gates whether PLAN_05 = polish or full per-AP set-transformer rebuild |
 
 (Both sides update this table — append a row when you finish your half.)
