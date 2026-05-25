@@ -11,9 +11,9 @@ the autopsy.
 
 ## Status
 
-- `CURRENT_ITERATION:` 1  (RESULT_01 committed; awaiting PLAN_02)
-- `LAST_PLAN:` PLAN_01_wifi-encoder-audit-uji.md (revised 2026-05-25 by scientist after first-wake audit found missing files + misidentified Locaris baseline)
-- `LAST_RESULT:` RESULT_01_wifi-encoder-audit-uji.md (2026-05-25 ~11:52 local)
+- `CURRENT_ITERATION:` 2  (RESULT_02 committed; awaiting PLAN_03)
+- `LAST_PLAN:` PLAN_02_imu-encoder-audit-ronin.md (2026-05-25 ~12:12 local)
+- `LAST_RESULT:` RESULT_02_imu-encoder-audit-ronin.md (2026-05-25 ~12:35 local)
 - `GOAL_REACHED:` false
 - `STOP_REASON:` (none yet)
 
@@ -95,5 +95,6 @@ day-1 task of every iteration.
 | # | plan file | result file | engineer commit | scientist note |
 |---|---|---|---|---|
 | 01 | PLAN_01_wifi-encoder-audit-uji.md (revised 2026-05-25 scientist first wake) | RESULT_01_wifi-encoder-audit-uji.md | iter 01: wifi-encoder-audit-uji (baf1a61) | Step 0 (recover run-1 audit files) added — files exist only on `overnight-autonomous-2026-05-24`. Locaris bonus dropped (Sachini/niloc = NILoc IMU, not WiFi; real Locaris arXiv:2510.11926 no code yet). Engineer: Anchor2Vec **keep** (8.69 m, +1.6 % vs run-1 ref), WiFiSetTransformer **replace on UJI / defer cross-session to Phase C** (12.95 m, +49 % vs Anchor2Vec). Recommend PLAN_02 = IMU audit, no parallel WiFi track. |
+| 02 | PLAN_02_imu-encoder-audit-ronin.md | RESULT_02_imu-encoder-audit-ronin.md | iter 02: imu-encoder-audit-ronin (pending hash) | Branch X (canonical unseen-subjects) preferred; Branch Y (a000 intra-session proxy) fallback if full RoNIN data missing locally (only `data/ronin_a000` confirmed present). Three orthogonal probes for bottleneck: architecture (RoNIN ResNet1D) + capacity (IMUCNN 2× width) + preprocessing (run-1 disaster fix). Engineer: **Branch Y used (full RoNIN data not on machine)**. IMUCNN = **keep** (aligned ATE 1.04 m vs ResNet1D 0.97 m, +7 %; raw 3.55 m vs 2.89 m, +23 % borderline; 95× smaller, 4× faster). Capacity probe **refuted** modify hypothesis (2× width raw ATE 5.81 m, +63 %). C2 NOT discharged — Branch Y proxy ≠ canonical unseen-subjects; queued for Phase C. Recommend PLAN_03 = Camera audit. |
 
 (Both sides update this table — append a row when you finish your half.)
