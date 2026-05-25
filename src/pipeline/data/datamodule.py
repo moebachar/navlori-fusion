@@ -47,7 +47,11 @@ class FusionDataModule:
         batch_size: int = 64,
         num_workers: int = 0,  # keep 0 on Windows/Jupyter — cache makes it fast enough
         camera_transform=None,
+        camera_stride: int = 1,
         wifi_pca: int | None = None,
+        wifi_norm: str = "whiten",
+        wifi_max_stale_s: float | None = None,
+        imu_frame: str = "body",
     ):
         self.data_dir = Path(data_dir)
         self.train_paths = train_paths
@@ -59,7 +63,11 @@ class FusionDataModule:
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.camera_transform = camera_transform
+        self.camera_stride = camera_stride
         self.wifi_pca = wifi_pca
+        self.wifi_norm = wifi_norm
+        self.wifi_max_stale_s = wifi_max_stale_s
+        self.imu_frame = imu_frame
 
         self.train_ds: FusionDataset | None = None
         self.val_ds: FusionDataset | None = None
@@ -107,7 +115,11 @@ class FusionDataModule:
             normalize=self.normalize,
             stats=None,  # will compute internally
             camera_transform=self.camera_transform,
+            camera_stride=self.camera_stride,
             wifi_pca=self.wifi_pca,
+            wifi_norm=self.wifi_norm,
+            wifi_max_stale_s=self.wifi_max_stale_s,
+            imu_frame=self.imu_frame,
         )
 
         # Share training stats and PCA model with val/test (no leakage)
@@ -122,21 +134,35 @@ class FusionDataModule:
             normalize=self.normalize,
             stats=shared_stats,
             camera_transform=self.camera_transform,
+            camera_stride=self.camera_stride,
             wifi_pca=self.wifi_pca,
+            wifi_norm=self.wifi_norm,
+            wifi_max_stale_s=self.wifi_max_stale_s,
+            imu_frame=self.imu_frame,
             wifi_pca_model=shared_pca,
         )
 
-        self.test_ds = FusionDataset(
-            data_dir=self.data_dir,
-            path_ids=self.test_paths,
-            modalities=self.modalities,
-            windows=self.windows,
-            normalize=self.normalize,
-            stats=shared_stats,
-            camera_transform=self.camera_transform,
-            wifi_pca=self.wifi_pca,
-            wifi_pca_model=shared_pca,
-        )
+        # Some honest splits have no test paths at all (e.g. ronin_a000,
+        # 9 train / 1 val / 0 test). Skip rather than crash; consumers
+        # already null-check ``self.test_ds`` (FusionTrainer:130).
+        if self.test_paths:
+            self.test_ds = FusionDataset(
+                data_dir=self.data_dir,
+                path_ids=self.test_paths,
+                modalities=self.modalities,
+                windows=self.windows,
+                normalize=self.normalize,
+                stats=shared_stats,
+                camera_transform=self.camera_transform,
+                camera_stride=self.camera_stride,
+                wifi_pca=self.wifi_pca,
+                wifi_norm=self.wifi_norm,
+                wifi_max_stale_s=self.wifi_max_stale_s,
+                imu_frame=self.imu_frame,
+                wifi_pca_model=shared_pca,
+            )
+        else:
+            self.test_ds = None
 
     def train_dataloader(self) -> DataLoader:
         assert self.train_ds is not None, "Call setup() first"
@@ -179,10 +205,13 @@ class FusionDataModule:
             lines.append(f"  Modalities: {self.modalities}")
             lines.append(f"  Feature dims: {self.train_ds.feature_dims}")
             lines.append(f"  Windows: { {m: self.train_ds.windows[m] for m in self.modalities} }")
-            if self.wifi_pca:
-                pca = self.train_ds._wifi_pca_model
+            pca = self.train_ds._wifi_pca_model
+            if pca is not None:
                 ev = pca.explained_variance_ratio_.sum() * 100
-                lines.append(f"  WiFi PCA: 117 → {self.wifi_pca} dims ({ev:.1f}% variance)")
+                n_aps = self.train_ds.num_wifi_aps
+                lines.append(f"  WiFi PCA: {n_aps} -> {self.wifi_pca} dims ({ev:.1f}% variance)")
+            elif getattr(self, "wifi_norm", "whiten") == "raw":
+                lines.append(f"  WiFi: raw (-100 fill + fixed affine, no PCA, no z-score)")
             if self.train_ds.stats:
                 for mod, s in self.train_ds.stats.items():
                     lines.append(f"  {mod} mean range: [{s['mean'].min():.3f}, {s['mean'].max():.3f}]")

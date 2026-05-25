@@ -4,7 +4,7 @@ data:
   root: ${oc.env:NAVLORI_DATA_ROOT,data}
   collection_dir: async_collection
   source: webots
-  modalities: [wifi, imu, odom]  # add "camera" when ready
+  modalities: [wifi, imu, odom, camera]
 
   # Path 0 is empty (failed run) — excluded from all splits
   # 11 train / 3 val / 4 test  (65% / 17% / 18%)
