@@ -3,6 +3,11 @@ async_collection/
 *.csv
 *.png
 *.json
+*.zip
+*.tar.gz
+*.hdf5
+ronin_frdr/
+hospital_sample*/
 !.gitkeep
 !.gitignore
 /async_collection

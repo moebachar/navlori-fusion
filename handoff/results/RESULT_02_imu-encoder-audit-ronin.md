@@ -392,3 +392,58 @@ in):
    if within 20 % → C2 discharged → update this audit label to
    `keep` without qualification.
 
+---
+
+## Addendum 2026-05-25 ~23:30 — PLAN_07 closed C2 measurement (NOT discharged)
+
+User unblocked the Phase-C manual task by placing the FRDR archive
+in `data/` (~14.9 GB) on 2026-05-25 evening. PLAN_07 executed the
+canonical C2 measurement using:
+
+- Vendored RoNIN `ronin_resnet.py` pretrained checkpoint
+  (`data/ronin_frdr/pretrained_resnet/ronin_resnet/
+  checkpoint_gsn_latest.pt`).
+- Our `IMUCNN` trained from scratch for 20 epochs on the canonical
+  list_train.txt ∩ on-disk (69 of 73 sequences).
+- Both evaluated on canonical `list_test_unseen.txt` (all 32
+  sequences present in the FRDR extract).
+- Metrics: RoNIN's own `compute_ate_rte`, Umeyama (Sim(3) with
+  scale), raw mean Euclidean.
+
+**Result:**
+
+| metric | IMUCNN | ResNet1D | gap (raw-weighted) | 20 % gate |
+|---|---|---|---|---|
+| Raw ATE (RoNIN's `compute_ate_rte`) | 9.961 m | **5.140 m** | **+93.8 %** | ❌ FAIL |
+| Umeyama-aligned ATE | 7.876 m | 5.140 m | +53.2 % | ❌ FAIL |
+| Raw mean Euclidean (run-1 convention) | 14.087 m | n/a | (vs run-1 ref 14.41 m: −2.2 %) | n/a |
+
+**C2 NOT discharged.** ResNet1D reproduces the paper's 5.14 m
+exactly (within 0 %); IMUCNN's canonical raw ATE is +94 % off ResNet1D
+— well outside the 20 % audit gate.
+
+**Audit label remains `keep (in-domain only)`** with one update:
+the Phase B contingency (swap IMUCNN → ResNet1D unmodified if fusion
+shows IMU-leg saturation) is **now active**, with explicit triggers
+defined in RESULT_07:
+- `only:imu` MAE ≥ 1.4× `only:wifi` MAE, AND
+- `drop:imu` does NOT improve full-fusion MAE by ≥ 5 %.
+
+If both trigger in PLAN_09 onward, the IMU branch swaps to RoNIN
+ResNet1D loaded from the canonical-pretrained checkpoint
+(`data/ronin_frdr/pretrained_resnet/ronin_resnet/checkpoint_gsn_latest.pt`).
+Demand #3 is preserved: vendored RoNIN source untouched; checkpoint
+loaded as a release artifact via `torch.load(weights_only=True)`.
+
+**Paper-claim framing for C2**: "Our IMUCNN encoder is competitive
+with RoNIN ResNet1D **in-domain** (a000 intra-session, Umeyama ATE
+0.31 m / 0.32 m respectively); on cross-subject canonical unseen,
+the gap widens to +94 % (raw ATE 9.96 m / 5.14 m). IMUCNN is
+fit-for-purpose as a **fusion encoder** (95× smaller, 4× faster than
+ResNet1D) where WiFi provides the absolute anchor; the cross-subject
+gap is reserved as a Phase-C / future-work item."
+
+Verdict: this addendum supersedes the earlier "C2 deferred to
+manual / Phase C" framing. C2 has been measured cleanly; the gap
+exceeds the gate; the label and contingency are set.
+

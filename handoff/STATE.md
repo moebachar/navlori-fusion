@@ -11,9 +11,9 @@ the autopsy.
 
 ## Status
 
-- `CURRENT_ITERATION:` 6  (RESULT_06 committed; Phase B foundation in place; awaiting PLAN_07)
-- `LAST_PLAN:` PLAN_06_phase-b-foundation.md (2026-05-25 ~18:30 local — scope flipped from "Camera ext-SOTA" to "Phase B foundation" given time pressure + 2nd wake-up stall)
-- `LAST_RESULT:` RESULT_06_phase-b-foundation.md (2026-05-25 ~18:45 local — WiFi+IMU K=1 baseline val 0.469 m / test 0.517 m reproduced)
+- `CURRENT_ITERATION:` 7  (RESULT_07 committed; C2 NOT discharged on canonical; awaiting RESULT_08 — PLAN_08 already issued)
+- `LAST_PLAN:` PLAN_07_c2-closure-ronin-canonical-v2.md + PLAN_08_camera-ext-sota-tartanair-hospital.md (both written 2026-05-25 evening after user-side unblock of MANUAL Phase-C tasks; FRDR ZIP + TartanAir hospital tar.gz both present in `data/`)
+- `LAST_RESULT:` RESULT_07_c2-closure-ronin-canonical-v2.md (2026-05-25 ~23:30 local — ResNet1D 5.140 m vs IMUCNN 9.961 m canonical raw ATE; gap +93.8 % → C2 NOT discharged; label stays `keep (in-domain only)`, Phase B contingency live)
 - `GOAL_REACHED:` false
 - `STOP_REASON:` (none yet)
 
@@ -141,37 +141,40 @@ day-1 task of every iteration.
   IMUCNN relabelled `keep (in-domain only)`. RESULT_03 retros done
   in same iteration.
 
-**Phase B — Fusion redesign (PLAN_06 → ~PLAN_10)**
-- 06: Phase B foundation — restore run-1 fusion stack, reproduce
-  2-modality (WiFi + IMU) baseline on Webots (~0.43 m val MAE
-  target). Subset eval. Latency.
-- 07: Add Camera (DPVOMotion-P-A) as 3rd modality, same architecture
-  (single-instant FusionTransformer), retrain, evaluate.
-- 08: Add Odom 1.5-modality path (OdomCNN-P-B + raw odom_x/y for
-  smoothness per RESULT_04 finding), retrain, evaluate.
-- 09: Architecture bake-off on 10 % Webots subset — set-transformer /
+**Phase B — Fusion redesign (PLAN_06 ✓ + PLAN_09 → PLAN_12)**
+- 06: Phase B foundation ✓ — WiFi+IMU K=1 baseline reproduced
+  (val 0.469 m, test 0.517 m, IMU net-positive, latency 0.044 ms).
+
+**Phase A close-out (formerly MANUAL Phase C; now active after
+user-side unblock 2026-05-25 evening — both datasets in `data/`)**
+- 07: C2 closure v2 — canonical RoNIN unseen-subjects from FRDR
+  ZIP (`data/FRDR_dataset_538_download_606_202605251142.zip`,
+  ~14.9 GB); ResNet1D + IMUCNN with RoNIN's own
+  `compute_ate_rte` metric AND Umeyama-aligned column.
+- 08: Camera external-SOTA validation on TartanAir hospital sample
+  (`data/hospital_sample_P000.tar.gz`); pipeline = DPVO if
+  `lietorch`/`altcorr` build succeeds, else TartanVO MIT
+  pure-PyTorch, else DROID-SLAM. Metric = `evo` ATE RMSE with
+  Sim(3) alignment (DPVO's reported convention).
+
+**Phase B (resumes after 07/08)**
+- 09: Add Camera (DPVOMotion-P-A) as 3rd modality, same
+  FusionTransformer, retrain, evaluate.
+- 10: Add Odom 1.5-modality path (OdomCNN-P-B + raw odom_x/y) as
+  4th, retrain, evaluate.
+- 11: Architecture bake-off on 10 % Webots subset — set-transformer /
   TCN / LSTM-attn / late+gate. Commit to winner.
-- 10: Phase B winner full-training + per-modality ablations
+- 12: Phase B winner full-training + per-modality ablations
   (`only:X`, `drop:X` for all 4 modalities).
 
-**Phase C — Validation, real-world plausibility, MANUAL items
-(PLAN_11+)**
+**Phase C — Real-world validation + ablations (PLAN_13+)**
 - C-1: Cross-session real-world subset on Microsoft ILN 2.0 (C4
-  claim). Per-modality subset eval. Conformal coverage.
-- C-2: Per-path distribution + per-trajectory smoothness ratio
+  claim). Per-modality subset eval.
+- C-2: Conformal coverage at α=0.1 on val + test for the Phase B
+  winner.
+- C-3: Per-path distribution + per-trajectory smoothness ratio
   reported for every Phase C evaluation (criterion (d) gate
   enforcement).
-- C-3: Conformal coverage at α=0.1 on val + test for the Phase B
-  winner.
-- **MANUAL TASK 1 (deferred from PLAN_05):** Canonical RoNIN
-  unseen-subjects fetch via Globus, ResNet1D + IMUCNN eval,
-  Umeyama alignment, discharge C2.
-- **MANUAL TASK 2 (deferred from RESULT_03 review):** Camera
-  external-SOTA validation on a public VO benchmark (TartanAir /
-  EuRoC / KITTI; method = DPVO unmodified if `lietorch` install
-  unblocked on Linux/WSL2, else TartanVO / DROID-SLAM). Both manual
-  tasks are bundled — they're both external-resource-blocked + needed
-  for paper-strength per-leg validation, not for the C3 fusion claim.
 
 ## Iteration log
 
@@ -183,5 +186,7 @@ day-1 task of every iteration.
 | 04 | PLAN_04_odom-encoder-audit-webots.md | RESULT_04_odom-encoder-audit-webots.md | iter 04: odom-encoder-audit-webots (823b4f9) | Internal audit (no public SOTA). "Day-1" baseline = trivial cumulative-integration of odometry → position MAE (Step 1). Floor gate: OdomCNN must beat trivial integration by ≥ 10 % raw test MAE or label = `replace`. Two preprocessing variants (P-A raw norm / P-B Δ-features). One probe (width OR window). Phase A closes after this RESULT; Phase A summary table required. Engineer: trivial floor val 12.17 m / test 8.27 m / smoothness r=0.999. **OdomCNN P-B = keep** (val 4.62 / test 4.24, +49 % over floor; gap −8.3 %). P-A fails gate (+20.9 %); window32 neutral. Honest weakness: OdomCNN smoothness r ≈ 0 vs trivial 0.999 → Phase B should consider feeding *both* OdomCNN embedding (absolute-MAE) and raw integrated `(odom_x, odom_y)` (smoothness). **Phase A closed (4/4 keep)**; recommend PLAN_05 = C2 closure per locked plan. |
 | 05 | PLAN_05_c2-closure-ronin-canonical.md (folds in 3 RESULT_03 review notes: Step 0a difficulty-matched probe, Step 0b smoothness debt re-label, Step 0c PLAN_06 queue) | RESULT_05_c2-closure-ronin-canonical.md | iter 05: c2-closure-ronin-canonical (c9ea806) | Focused experiment = C2 closure on canonical RoNIN unseen-subjects with Umeyama. Step 1 = FRDR archive fetch (gated path; fallback = Branch Y reaffirmation + C2 deferred to Phase C). PLAN_06 newly inserted as Camera external-SOTA validation on a public VO benchmark (TartanAir/EuRoC/KITTI; method = DPVO unblocked or TartanVO/DROID-SLAM). Engineer: **Step 1 BLOCKED — FRDR is Globus-OAuth-gated; no canonical data on disk**. Steps 0a/0b/0c done as RESULT_03 addenda (difficulty-normalised gap +17.5 % at the edge; relabelled `keep with smoothness debt`; PLAN_06 queue confirmed). RESULT_02 IMU verdict updated to **`keep (in-domain only)`** with C2 deferred to manual / Phase C. Phase B can begin at PLAN_06 (Camera external SOTA) or PLAN_07 (bake-off). |
 | 06 | PLAN_06_phase-b-foundation.md (**scope flipped from "Camera ext-SOTA" to "Phase B foundation"** — time-value call after 2nd wake-up stall; Camera ext-SOTA + canonical-C2 both bundled as MANUAL Phase C tasks) | RESULT_06_phase-b-foundation.md | iter 06: phase-b-foundation (9133e54) | Restore run-1 fusion stack (`src/pipeline/fusion/*`, `training/fusion_trainer.py`, `configs/stage_c/`, `_smoke_fusion.py`) + reproduce 2-modality (WiFi+IMU) baseline on Webots. Target: val MAE within ±15 % of run-1's 0.43 m. No Camera, no Odom, no architecture change yet — those queue as PLAN_07/08/09. Engineer: fusion stack restored cleanly (33 files + `encoders/__init__.py` extended for `DPVOMotionEncoder`). **WiFi+IMU K=1 baseline: val 0.469 m (+9.1 % vs run-1 ref, well inside ±15 %), test 0.517 m, latency 0.044 ms/sample, IMU adds net-positive 6.6 %/1.3 % val/test over WiFi-only.** Recommend PLAN_07 = add Camera (DPVOMotion P-A) as 3rd modality at K=1, same FusionTransformer config. |
+| 07 | PLAN_07_c2-closure-ronin-canonical-v2.md (user-side unblock: FRDR ZIP now in `data/`; Phase A close-out, NOT Phase B continuation as originally planned) | (pending) | (pending) | Focused experiment = canonical RoNIN unseen-subjects C2 closure (32-sequence test). Step 0 = extract 14.9 GB FRDR ZIP + verify HDF5 layout (`synced/{gyro_uncalib, acce, time}` + `pose/{tango_pos, tango_ori}`) + per-list coverage. Step 1 = ResNet1D SOTA repro (prefer pretrained if in FRDR archive; else train). Step 2 = IMUCNN with **RoNIN's own `metric.compute_ate_rte`** + Umeyama side-by-side. Step 3 = audit decision, raw-weighted. References: run-1 14.41 m IMUCNN / 5.93 m ResNet1D; paper 5.14 m. |
+| 08 | PLAN_08_camera-ext-sota-tartanair-hospital.md (user-side unblock: TartanAir hospital sample now in `data/`; Phase A close-out continued) | (pending) | (pending) | Focused experiment = Camera per-leg validation on TartanAir hospital sample. Step 0 = extract `hospital_sample_P000.tar.gz` (image-only TartanAir v1: NO IMU); verify NED 7-float `pose_left.txt`. Step 1 = pipeline selection: DPVO retry on Windows → TartanVO MIT pure-PyTorch fallback → DROID-SLAM last resort. Step 2 = chosen SOTA on the sequence via `evo` Sim(3)-aligned ATE. Step 3 = our DPVOMotionEncoder (Mode α: Webots-trained head out-of-domain). Step 4 = upgrade-or-keep label at 30 % paper-strength bar. |
 
 (Both sides update this table — append a row when you finish your half.)
