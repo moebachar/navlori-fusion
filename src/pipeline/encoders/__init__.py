@@ -5,6 +5,7 @@ from .imu import IMUCNN
 from .odom import OdomCNN
 from .vision import VisionViT
 from .wifi import Anchor2Vec
+from .wifi_set import WiFiSetTransformer
 
 __all__ = [
     "BaseEncoder",
@@ -12,4 +13,5 @@ __all__ = [
     "IMUCNN",
     "OdomCNN",
     "VisionViT",
+    "WiFiSetTransformer",
 ]
