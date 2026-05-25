@@ -7,9 +7,9 @@ Push policy: **commit locally each iteration; NO push. User pushes manually on w
 
 ## Status
 
-- `CURRENT_ITERATION:` 2
-- `LAST_PLAN:` PLAN_02_msiln-convert-and-baselines.md
-- `LAST_RESULT:` RESULT_02_msiln-convert-and-baselines.md
+- `CURRENT_ITERATION:` 3
+- `LAST_PLAN:` PLAN_03_msiln-fusion-baseline-run.md
+- `LAST_RESULT:` RESULT_03_msiln-fusion-baseline-run.md
 - `GOAL_REACHED:` false
 - `STOP_REASON:` (none yet)
 
@@ -71,6 +71,7 @@ remains as a secondary benchmark for ablation/transfer claims.
 | # | plan file | result file | engineer commit | scientist note |
 |---|---|---|---|---|
 | 1 | PLAN_01_msiln-feasibility-probe.md | RESULT_01_msiln-feasibility-probe.md | 301c80e iter 01: msiln-feasibility-probe (GO — site1/B1 recommended) | feasibility probe for Microsoft ILN 2.0 dataset switch |
-| 2 | PLAN_02_msiln-convert-and-baselines.md | RESULT_02_msiln-convert-and-baselines.md | (pending) | converter + cross-session split + trivial baselines on site1/B1 (no training yet) |
+| 2 | PLAN_02_msiln-convert-and-baselines.md | RESULT_02_msiln-convert-and-baselines.md | 3cb454b iter 02: msiln-convert-and-baselines (wifi-kNN floor 17.7m val / 9.5m test; fusion target <=6m test) | converter + cross-session split + trivial baselines on site1/B1 (no training yet) |
+| 3 | PLAN_03_msiln-fusion-baseline-run.md | RESULT_03_msiln-fusion-baseline-run.md | (pending) | first FusionTransformer training on msiln_b1; smoke + 90-epoch + eval + per-traj + latency |
 
 (Both sides update this table — append a row when you finish your half.)
