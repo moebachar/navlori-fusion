@@ -1,9 +1,8 @@
 # Run 2 — Coordination State
 
-Started: (to be filled when user launches loops)
-Stop at: (to be filled — user decides budget)
-Branch: TBD (suggest fresh branch off `main`, e.g.
-        `overnight-autonomous-run2-2026-05-25`)
+Started: Started: 2026-05-25 <12:30> local
+Stop at: 2026-05-26 18:00 local
+Branch: overnight-autonomous-run2-2026-05-25
 Push policy: **commit locally each iteration; NO push. User pushes
               manually on wake.**
 
