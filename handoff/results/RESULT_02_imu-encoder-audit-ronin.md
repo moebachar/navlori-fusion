@@ -328,3 +328,67 @@ longer the primary metric.
 - `runs/overnight/run2_iter_02/branchY_umeyama.log`: console log of
   the retro run.
 
+---
+
+## Addendum 2026-05-25 ~16:00 — PLAN_05 Step 4: C2 closure attempt blocked; label updated
+
+PLAN_05 attempted to close C2 (per-leg IMU SOTA on canonical RoNIN
+unseen-subjects) by acquiring the FRDR archive and re-running the
+audit on the canonical 32-sequence split. **The acquisition step
+failed**: the FRDR repository for RoNIN (DOI 10.20383/102.0543) is
+**Globus-authentication-gated** — the page exposes only a Globus
+Transfer login link (OAuth via `auth.globus.org`) and a "Download as
+Zip" path that also routes through `globus.frdr.ca`. Neither is
+scriptable from the engineer venv without interactive registration +
+client credentials.
+
+A final disk-wide search confirmed no cached canonical data exists
+locally:
+- `find /c/Users/FabLab -maxdepth 7 -name "*.hdf5"` → empty.
+- `find /c/Users/FabLab -maxdepth 8 -type d -name "FRDR*"` → empty.
+- Only `data/ronin_a000_intra/` (215 chunks, subject a000) is on disk.
+
+Per PLAN_05's blockage clause ("if FRDR is registration-gated and not
+scriptable, document and run Step 2 in Branch Y-only mode"): **C2 is
+NOT discharged in run 2**. Canonical-data acquisition becomes a
+manual user task — outside the autonomous-loop budget.
+
+### Updated audit label
+
+**IMUCNN = `keep (in-domain only)`** — Branch Y a000 intra-session
+proxy supports the keep verdict, but cross-subject generalisation is
+**unverified**. Phase B (fusion redesign) proceeds with IMUCNN as the
+IMU encoder, with the explicit understanding that:
+- The paper's C2 claim becomes "competitive with RoNIN ResNet1D
+  in-domain (a000 intra-session); cross-subject benchmark deferred to
+  Phase C with the canonical FRDR archive."
+- If Phase B fusion training surfaces IMU-leg saturation (the IMU
+  modality contributing less than IMUCNN's standalone MAE suggests),
+  PLAN_06+ should revisit and consider swapping in RoNIN ResNet1D
+  (vendored, unmodified) for the fusion IMU branch.
+
+The Branch Y Umeyama numbers from PLAN_03 Step 0c stand: all three
+IMU encoders (IMUCNN base, IMUCNN 2×, ResNet1D) collapse to ~0.30 m
+Umeyama-aligned ATE on the proxy, indicating they recover the same
+motion shape at different scales. That's evidence the IMUCNN
+architecture isn't the bottleneck *in-domain*; whether it
+generalises across subjects is the still-open question.
+
+### Phase C task: manual canonical-data acquisition
+
+For the user (or a future iteration with Globus credentials wired
+in):
+1. Log into Globus via `https://www.frdr-dfdr.ca/repo/dataset/816d1e8c-1fc3-47ff-b8ea-a36ff51d682a` ("Download with Globus" button).
+2. Transfer the published RoNIN data to a local directory; the
+   archive references `list_train.txt` / `list_test_unseen.txt`
+   per-sequence HDF5s.
+3. Re-run `scripts/eval_ronin_ate_fixed.py` (already restored to
+   this branch) — it expects `data/FRDR_dataset_538_*` layout; point
+   it at the new location with a one-line env var or hardcoded path
+   edit (wrapper change, no vendored source touch).
+4. Replace the script's hand-rolled `_ate_aligned` with the Umeyama
+   helper from `scripts/_eval_ronin_a000_branchY.py` (PLAN_03 retro).
+5. Compare IMUCNN raw ATE vs ResNet1D raw ATE on `list_test_unseen.txt`;
+   if within 20 % → C2 discharged → update this audit label to
+   `keep` without qualification.
+

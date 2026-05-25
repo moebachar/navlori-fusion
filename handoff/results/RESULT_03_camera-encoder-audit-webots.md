@@ -283,3 +283,106 @@ visibly degrades fusion MAE, revisit then.
   STATE Stop-at 2026-05-26 18:00).
 - No `handoff/STOP` file.
 - `GOAL_REACHED: false` — 3/4 Phase-A encoders triaged.
+
+---
+
+## Addendum 2026-05-25 ~15:55 — third-party-review responses (PLAN_05 Step 0)
+
+PLAN_05's Step 0 retros respond to a 2026-05-25 ~15:20 third-party
+review of this RESULT. Three issues were flagged; addressed below.
+
+### Step 0a — Difficulty-matched probe
+
+The original "test 1.56 m < val 1.85 m → no overfit" reasoning was
+naive: val paths {2, 13, 14} and test paths {15, 16, 17} are not
+difficulty-matched. The probe computes per-path difficulty features
+from `ground_truth.csv` and normalises MAE by path length.
+
+| path | split | length (m) | mean speed (m/s) | `mean |ω|` (rad/s) | n_pairs | MAE (m) | MAE / length |
+|---|---|---|---|---|---|---|---|
+| 2 | val | 25.83 | 0.313 | 0.147 | 424 | 2.327 | 0.0901 |
+| 13 | val | 19.81 | 0.318 | 0.143 | 320 | 0.700 | 0.0354 |
+| 14 | val | 25.14 | 0.328 | 0.104 | 395 | 2.272 | 0.0904 |
+| 15 | test | 26.41 | 0.315 | 0.089 | 432 | 1.072 | 0.0406 |
+| 16 | test | 18.14 | 0.320 | 0.070 | 293 | 1.849 | 0.1019 |
+| 17 | test | 17.89 | 0.309 | 0.239 | 297 | 1.985 | 0.1110 |
+
+- val aggregate: MAE = 1.766 m (per-path mean), length = 23.59 m, **MAE/m = 0.0719**.
+- test aggregate: MAE = 1.636 m (per-path mean), length = 20.82 m, **MAE/m = 0.0845**.
+- **Raw test-val gap** (per-path-mean basis) = **−7.4 %** (test wins
+  on raw MAE, but only because test paths are shorter).
+- **Difficulty-normalised gap** (per-meter basis) = **+17.5 %** (val
+  wins per-m by 17.5 %; **test is actually 17.5 % harder per meter**).
+
+(Note: the per-path-mean basis above differs slightly from the
+RESULT_03 main-table aggregate, which weights by frame count and gives
+val 1.85 / test 1.56. The main-table aggregate and the per-path-mean
+aggregate both lead to the same difficulty-normalised conclusion.)
+
+**Verdict**: the keep label survives the multi-condition gate
+(difficulty-normalised gap 17.5 % is **just inside** the 20 % window),
+but the margin is much tighter than the raw test-beats-val finding
+suggested. The verdict is held **at the edge of the gate**, not
+comfortably inside. Future audit iterations should report per-path
+difficulty features in the multi-condition table by default.
+
+Probe script: `scripts/_difficulty_probe_paths.py`. JSON output:
+`runs/overnight/run2_iter_05/camera_difficulty_probe.json`.
+
+### Step 0b — Smoothness-debt reframe
+
+The original audit verdict `keep` was paper-soft on the
+per-trajectory smoothness weakness (median Pearson r ≈ 0.07 between
+‖Δpred‖ and ‖Δgt‖ across test paths). Reframing the verdict label:
+
+> **DPVOMotionEncoder = keep with smoothness debt**, P-A
+> preprocessing as the canonical config. The "debt" is explicit: the
+> encoder predicts absolute position competitively (1.56 m raw test
+> MAE) but does not produce a usable per-frame motion signal — the
+> motion magnitude between consecutive head outputs is uncorrelated
+> with GT motion magnitude.
+
+Phase B follow-up candidates (must be revisited when fusion
+architecture is chosen):
+
+- **(B-1) Auxiliary velocity loss on the camera head** during
+  fusion training. Adds a GT-velocity supervision target alongside
+  the position regression; trades head expressiveness for explicit
+  motion signal.
+- **(B-2) EMA smoothing on per-instant camera tokens** before they
+  reach the fusion transformer. Cheap, easy to ablate, no head
+  retraining needed.
+- **(B-3) Let the fusion transformer absorb the noise** via
+  temporal cross-attention (the current RESULT_03 default
+  recommendation). Most "clean" approach but most dependent on the
+  Phase B architecture choice.
+
+**Hard rule**: Phase B's bake-off iteration must report **per-modality
+per-trajectory smoothness** in any 4-modality test run so the debt
+is visible, not silent.
+
+### Step 0c — PLAN_06 (Camera external SOTA) queued
+
+The Camera audit ran with `lietorch`/`altcorr` unavailable (Branch
+Q), so DPVO-as-SLAM was never reproduced end-to-end on a public
+benchmark. The Webots-only audit by itself does **not** discharge
+per-leg validation for Camera (the Phase A summary table in
+RESULT_04 already marks Camera C3-pending).
+
+PLAN_06 is queued (will be issued by the scientist after this
+iteration) to:
+1. Pick **one** public visual-odometry benchmark (TartanAir →
+   EuRoC → KITTI, in preference order).
+2. Pick **one** method to reproduce (DPVO unmodified → TartanVO →
+   DROID-SLAM, in preference order).
+3. Run the project's `DPVOMotionEncoder` trunk on the SAME public
+   sequence (motion-only, no SLAM tracker) and compare against
+   the SOTA pipeline's reported ATE.
+4. Update RESULT_03's per-leg label using public-benchmark evidence.
+
+PLAN_06 is queued **after** PLAN_05 (C2 closure) because RoNIN data
+is more accessible locally than TartanAir/EuRoC.
+
+---
+
+End of PLAN_05 Step 0 addendum.

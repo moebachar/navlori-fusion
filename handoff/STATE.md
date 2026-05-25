@@ -11,9 +11,9 @@ the autopsy.
 
 ## Status
 
-- `CURRENT_ITERATION:` 4  (RESULT_04 committed; Phase A closed; awaiting PLAN_05)
-- `LAST_PLAN:` PLAN_04_odom-encoder-audit-webots.md (2026-05-25 ~15:15 local — issued after ~1h25m scientist-side stall; previous wake at 13:22 did not fire)
-- `LAST_RESULT:` RESULT_04_odom-encoder-audit-webots.md (2026-05-25 ~15:25 local)
+- `CURRENT_ITERATION:` 5  (RESULT_05 committed; C2 not discharged — manual / Phase C; awaiting PLAN_06)
+- `LAST_PLAN:` PLAN_05_c2-closure-ronin-canonical.md (2026-05-25 ~15:35 local)
+- `LAST_RESULT:` RESULT_05_c2-closure-ronin-canonical.md (2026-05-25 ~16:05 local — partial: Step 1 FRDR-blocked; Step 0 retros + Step 4 verdict written)
 - `GOAL_REACHED:` false
 - `STOP_REASON:` (none yet)
 
@@ -131,21 +131,30 @@ day-1 task of every iteration.
 
 ## Phase plan (your starting roadmap, you own it)
 
-**Phase A — Encoder audit (PLAN_01 → PLAN_05; PLAN_05 added under
-amended-rubric review of RESULT_02)**
+**Phase A — Encoder audit (PLAN_01 → PLAN_06; PLAN_05/06 added under
+amended-rubric reviews of RESULT_02/03)**
 - 01: WiFi encoder audit vs `wlan_localization` on UJIIndoorLoc ✓
   (Locaris removed — Sachini/niloc is NILoc IMU, not WiFi)
 - 02: IMU encoder audit on a000 proxy (Branch Y) ✓ — C2 not discharged
-- 03: Camera encoder audit (DPVO motion) on Webots sim
-- 04: Odom encoder internal audit on Webots sim
-- 05: C2 closure — fetch FRDR RoNIN dataset + canonical
-  unseen-subjects re-eval with Umeyama alignment
+- 03: Camera encoder audit (DPVO motion) on Webots sim ✓
+  — `keep` verdict carried 3 review-note debts (folded into PLAN_05
+  Step 0)
+- 04: Odom encoder internal audit on Webots sim ✓ — 4-encoder
+  audit summary table in RESULT_04
+- 05: C2 closure — fetch FRDR RoNIN + canonical unseen-subjects
+  re-eval with Umeyama; **also includes Step 0 retros for
+  RESULT_03 (difficulty-matched probe, smoothness debt
+  re-label)**
+- **06: Camera external-SOTA validation on a public VO benchmark
+  (TartanAir / EuRoC / KITTI; method = DPVO if `lietorch`
+  unblocked, else TartanVO / DROID-SLAM)** — newly added per
+  third-party review of RESULT_03
 
-**Phase B — Fusion redesign (PLAN_06 → PLAN_08ish)**
+**Phase B — Fusion redesign (PLAN_07 → PLAN_09ish)**
 - Small-bake-off iteration: transformer / TCN / LSTM-attn / late+gate
   on 10 % Webots subset. Then commit to one + iterate.
 
-**Phase C — Validation + ablations (PLAN_09+)**
+**Phase C — Validation + ablations (PLAN_10+)**
 - Full 4-modality fusion on Webots sim (C3).
 - Per-modality subset eval (`only:X`, `drop:X`).
 - Cross-session real-world subset on Microsoft ILN 2.0 (C4).
@@ -159,5 +168,6 @@ amended-rubric review of RESULT_02)**
 | 02 | PLAN_02_imu-encoder-audit-ronin.md | RESULT_02_imu-encoder-audit-ronin.md | iter 02: imu-encoder-audit-ronin (f494a35) | Branch X (canonical unseen-subjects) preferred; Branch Y (a000 intra-session proxy) fallback if full RoNIN data missing locally (only `data/ronin_a000` confirmed present). Three orthogonal probes for bottleneck: architecture (RoNIN ResNet1D) + capacity (IMUCNN 2× width) + preprocessing (run-1 disaster fix). Engineer: **Branch Y used (full RoNIN data not on machine)**. IMUCNN = **keep** (aligned ATE 1.04 m vs ResNet1D 0.97 m, +7 %; raw 3.55 m vs 2.89 m, +23 % borderline; 95× smaller, 4× faster). Capacity probe **refuted** modify hypothesis (2× width raw ATE 5.81 m, +63 %). C2 NOT discharged — queued as PLAN_05 (locked before Phase B). Verdict subject to Umeyama re-alignment (PLAN_03 Step 0c addendum). |
 | 03 | PLAN_03_camera-encoder-audit-webots.md (first plan under amended rubric: multi-condition validation, preprocessing as first-class variable, Umeyama for any alignment, raw weighted ≥ aligned) | RESULT_03_camera-encoder-audit-webots.md | iter 03: camera-encoder-audit-webots (92e9f2c) | Branch P (DPVO importable) preferred; Branch Q (motion-encoder-only fallback). Step 0c retrofits RESULT_02 with Umeyama alignment. Within-sim val→test gap < 20 % is the multi-condition gate (Camera = sim-only by project design). Engineer: **Branch Q for DPVO SLAM (no lietorch/altcorr); Branch P for motion encoder.** DPVOMotionEncoder = **keep** with P-A preprocessing (val 1.85 m, test 1.56 m on canonical CLAUDE.md split; test-val gap −15.7 % = no overfitting). Preprocessing-variation probe: P-A beats P-B by 9 %. Capacity probe (stride 10): neutral. Honest weakness: per-traj smoothness median r ≈ 0.07 (poor). Step 0c Umeyama retro on IMU = all three encoders collapse to ~0.30 m Umeyama-aligned ATE; IMUCNN-keep stands; capacity-refuted claim softened to "not clearly the bottleneck." Recommend PLAN_04 = Odom audit. |
 | 04 | PLAN_04_odom-encoder-audit-webots.md | RESULT_04_odom-encoder-audit-webots.md | iter 04: odom-encoder-audit-webots (823b4f9) | Internal audit (no public SOTA). "Day-1" baseline = trivial cumulative-integration of odometry → position MAE (Step 1). Floor gate: OdomCNN must beat trivial integration by ≥ 10 % raw test MAE or label = `replace`. Two preprocessing variants (P-A raw norm / P-B Δ-features). One probe (width OR window). Phase A closes after this RESULT; Phase A summary table required. Engineer: trivial floor val 12.17 m / test 8.27 m / smoothness r=0.999. **OdomCNN P-B = keep** (val 4.62 / test 4.24, +49 % over floor; gap −8.3 %). P-A fails gate (+20.9 %); window32 neutral. Honest weakness: OdomCNN smoothness r ≈ 0 vs trivial 0.999 → Phase B should consider feeding *both* OdomCNN embedding (absolute-MAE) and raw integrated `(odom_x, odom_y)` (smoothness). **Phase A closed (4/4 keep)**; recommend PLAN_05 = C2 closure per locked plan. |
+| 05 | PLAN_05_c2-closure-ronin-canonical.md (folds in 3 RESULT_03 review notes: Step 0a difficulty-matched probe, Step 0b smoothness debt re-label, Step 0c PLAN_06 queue) | RESULT_05_c2-closure-ronin-canonical.md | iter 05: c2-closure-ronin-canonical (pending hash) | Focused experiment = C2 closure on canonical RoNIN unseen-subjects with Umeyama. Step 1 = FRDR archive fetch (gated path; fallback = Branch Y reaffirmation + C2 deferred to Phase C). PLAN_06 newly inserted as Camera external-SOTA validation on a public VO benchmark (TartanAir/EuRoC/KITTI; method = DPVO unblocked or TartanVO/DROID-SLAM). Engineer: **Step 1 BLOCKED — FRDR is Globus-OAuth-gated; no canonical data on disk**. Steps 0a/0b/0c done as RESULT_03 addenda (difficulty-normalised gap +17.5 % at the edge; relabelled `keep with smoothness debt`; PLAN_06 queue confirmed). RESULT_02 IMU verdict updated to **`keep (in-domain only)`** with C2 deferred to manual / Phase C. Phase B can begin at PLAN_06 (Camera external SOTA) or PLAN_07 (bake-off). |
 
 (Both sides update this table — append a row when you finish your half.)
