@@ -124,6 +124,78 @@ next wake based on whether the counterpart's next artifact is likely ready.
   iteration.
 - No `--no-verify`, no `--force`, no `reset --hard`, no `clean -fd`.
 
+## Run 2+ cycle rules (added 2026-05-25 after run 1 retrospective)
+
+These rules exist because run 1 failed by skipping them. They are NOT
+suggestions — they are gates.
+
+### Pre-flight before any training iteration
+
+1. **Small-subset pre-test.** Run on 10 % of training data for 5 epochs
+   **before** promoting to full data. Acceptance:
+   - Loss drops monotonically (no NaN, no divergence).
+   - Subset val MAE moves at least 10 % from epoch 1 → epoch 5.
+
+   If the small-subset pre-test fails, KILL the run, write a diagnostic
+   result, and DO NOT promote to full data. Total cost of a failed
+   pre-test ≤ 5 min; total cost of a failed full run ≥ 30 min and a
+   wasted iteration.
+
+2. **Memory budget check.** Before any new architecture goes to training,
+   forward + backward on a synthetic batch at the **target shape**
+   (real batch size, real K, real sequence length). Report peak GPU MB.
+   Refuse to launch full training if peak > 6 GB on the 8 GB Quadro P4000.
+   Engineer fixes the architecture OR plan is revised before iteration
+   continues.
+
+### Pre-flight before any architectural change
+
+1. **Name the SOTA baseline this competes with** (arXiv ID + repo URL).
+2. **State the failure mode the change addresses** with quantitative
+   evidence from a prior RESULT, not a hunch.
+3. **List the modalities affected** and how per-modality contribution
+   will be measured after the change (subset eval `only:X`, `drop:X`).
+
+### Day-1 rule for every new benchmark
+
+**Clone the named SOTA repo and reproduce its published number
+unmodified before any method comparison.** No "we'll get to the
+baseline next iteration." If the SOTA repo can't be reproduced on this
+machine, the iteration's result documents the obstacle and the
+baseline becomes part of the next plan.
+
+### Result content (every RESULT must include)
+
+1. **Per-modality subset eval** (`only:wifi`, `only:imu`, …, `drop:X`)
+   for every fusion run. Lets us see at-a-glance whether each modality
+   contributes.
+2. **Per-path distribution** (median, p25, p75, p90, max), not just
+   the aggregate mean. Run 1's autopsy showed 2.3× per-path variance —
+   single means hide this.
+3. **SOTA-repo number on the same data and same metric**, NOT a
+   trivial baseline (centroid / kNN / dead-reckoning are floors, not
+   competitors).
+
+### Blockage rules (no silent stalls)
+
+1. **Engineer partial-result rule.** If blocked > 15 min on any single
+   step (OOM, crash, scope-too-large, vendored-repo broken, anything),
+   write a partial `RESULT_NN_<slug>.md` IMMEDIATELY with the blockage,
+   stop the iteration, schedule a wake. No silent stalls.
+
+2. **Scientist override rule.** If engineer is silent > 60 min after a
+   plan was issued and there is no in-flight RESULT (no log activity,
+   no commits, no working-tree changes), scientist writes a
+   `SCIENTIST_NOTE_iterNN.md` documenting the observed state and the
+   next plan supersedes the blocked one. Iteration log marks the
+   blocked iter as `blocked-<reason>`.
+
+3. **Laptop-sleep recovery.** Both loops MUST verify their counterpart
+   has activity within the last 90 min of a scheduled wake. If silence
+   exceeds 90 min, assume the /loop session was killed by a sleep
+   cycle. Scientist writes a recovery note; the user resurrects the
+   engineer manually.
+
 ## Final-stop routine (when stop triggers)
 
 The engineer, on stop:

@@ -1,166 +1,192 @@
-# Scientist Brief — NavLoRI-Fusion
+# Scientist Brief — NavLoRI-Fusion (run 2, 2026-05-25)
 
-You are the **research strategist** for an indoor-localization PhD project. A separate Claude
-session (the **engineer**) implements your plans, runs experiments, and reports back. This
-document is your starting context. Read it once end-to-end before doing anything else.
-
----
-
-## 1. Who and what
-
-- **Author:** Mohamed Bachar, PhD at CESI LINEACT.
-- **Project:** `navlori-fusion` — indoor (x,y) localization by fusing WiFi RSSI + IMU
-  (+ vision/odometry placeholders) with a single set-transformer (`FusionTransformer`)
-  + a split-conformal uncertainty head.
-- **Repo:** `https://github.com/moebachar/navlori-fusion` (HTTPS), branch
-  `audit-baseline-2026-05-20`. Public-release restructure landed in commit `53a06ac`.
-- **Read first** (in order):
-  1. `README.md` — current top-line claims + scoreboard.
-  2. `docs/SOTA_BASELINES.md` — Phase A (per-leg) and Phase B (fusion vs single-modality
-     SOTA on IPIN). All numbers from live runs.
-  3. `docs/MILESTONES.md` — M1–M4 execution log (what was tried, what passed, what
-     reverted and why).
-  4. `docs/PIPELINE_AUTOPSY.md` — 6 forensic probes. The whitening probe is the
-     headline finding.
-  5. `docs/PIPELINE.md` + `handoff/fusion-pipeline.md` — architecture in detail.
-  6. `CLAUDE.md` — operational constraints the engineer must respect (Windows-only,
-     project venv, no direct pushes, etc.). You don't run code; the engineer does.
+You are the **research strategist** for an indoor-localization PhD project.
+This brief is the contract for **run 2** of the overnight scientist+engineer
+loop. Run 1 is archived under `handoff/archive/run1/` — read its `README.md`
+if you want the history, but do not let its conclusions anchor you.
 
 ---
 
-## 2. The headline result (and the problem)
+## 1. Project in 30 seconds
 
-Phase B controlled comparison on **IPIN 2024 floor −2 val** (single floor, both
-modalities, same per-sample mean Euclidean):
+- **Author:** Mohamed Bachar, PhD, CESI LINEACT.
+- **System:** robot indoor localization via fusion of **4 modalities** —
+  WiFi RSSI (1 Hz, absolute), IMU (~31 Hz, motion), Odometry (~15 Hz, motion),
+  Camera (~5 Hz, visual). All four exist together only in the Webots
+  simulation (TIAGO++ robot). Real-world datasets are typically 2-modality
+  (smartphone WiFi+IMU).
+- **Encoders** (committed under `src/pipeline/encoders/`):
+  WiFi → `Anchor2Vec`; WiFi alt → `WiFiSetTransformer` (built in run 1);
+  IMU → `IMUCNN`; Odom → `OdomCNN`; Camera → `DPVOMotionEncoder` (DPVO trunk
+  + head).
+- **Fusion** (committed under `src/pipeline/fusion/`): single set-transformer
+  with self-attention for cross-modal + cross-time fusion, cross-attention
+  `PositionQuery(τ)` readout. Implementation was rushed in run 1 — open
+  for redesign (transformer, TCN, LSTM-attention, late+gating are all on
+  the table; transformer is letterature-preferred but not mandatory).
+- **Repo:** `https://github.com/moebachar/navlori-fusion`. Branch for this
+  run will be a fresh one off `main` — see STATE.md.
 
-| method | modality | val MAE |
+---
+
+## 2. The publishable contribution this run targets
+
+> **A 4-modality fusion architecture for indoor localization that gracefully
+> handles missing/async modalities and matches per-leg published SOTA on
+> each modality's canonical benchmark.**
+
+This contribution has 4 supporting claims, each of which must be backed
+by experiments before paper submission:
+
+| claim | how to prove it | dataset |
 |---|---|---|
-| **Our fusion** (M4 decomposed, M1 raw WiFi + M4 world IMU) | WiFi+IMU | **10.05 m** |
-| `wlan_localization` (open-source baseline) | WiFi-only | 23.12 m |
-| RoNIN ResNet1D (open-source baseline) | IMU-only | 42.87 m |
+| C1 — Our WiFi encoder is competitive with WiFi SOTA | reproduce CNNLoc + Locaris numbers; show our encoder within ~20 % | UJIIndoorLoc |
+| C2 — Our IMU encoder is competitive with IMU SOTA | reproduce RoNIN ResNet18 ATE; show our encoder within ~20 % | RoNIN unseen-subjects |
+| C3 — The 4-modality fusion architecture works end-to-end | full pipeline trained + evaluated on the only 4-modality dataset | Webots sim |
+| C4 — The architecture degrades gracefully to 2 modalities on real data | run the architecture as WiFi+IMU subset with modality_dropout | Microsoft ILN 2.0 site1/B1 (cross-session) |
 
-**The defensible claim:** fusion beats each open-source single-modality SOTA on the
-same data, with the same metric, using their unmodified code.
+C1 and C2 are validation-grade ("our piece is not worse than the SOTA");
+C3 is the novelty headline ("look what fusing all 4 gets you"); C4 is
+the real-world plausibility check.
 
-**The problem:** 10 m is still bad for a publishable paper. State-of-the-art indoor
-WiFi+IMU in the literature claims 1–3 m. The autopsy quantified an IPIN-specific
-ceiling of ~6–7 m driven by WiFi sparsity (29 % of val samples have WiFi >15 s stale),
-so even a perfect encoder cannot reach 1–3 m on this dataset. But we have not yet
-proved we are at that ceiling — and we have not validated the pipeline on a dataset
-where 1–3 m is physically reachable.
-
----
-
-## 3. What we tried — milestones
-
-(Full detail in `docs/MILESTONES.md`.)
-
-- **M1 — WiFi raw encoding (PASS).** Removed Box-Cox + PCA + per-component z-score
-  whitening; replaced with `(rssi + 100) / 100` affine fill. Scan-level kNN error
-  on IPIN dropped from 20.9 m (whitened) → 5.4 m (raw). This is the dominant
-  improvement in the whole pipeline.
-- **M2 — Hard staleness cap (NEGATIVE, REVERTED).** Hypothesis: drop val samples
-  whose WiFi is >15 s old. Result: fusion val_mae unchanged. The model already
-  ignored stale tokens via time-encoding + modality dropout. Cap removed.
-- **M3 — Decomposed cross-attention readout (PASS, marginal).** Readout splits the
-  position query into a low-frequency WiFi anchor + a high-frequency IMU
-  micro-motion query. Saved 0.6 m on IPIN. Kept as default.
-- **M4 — World-frame IMU encoding (PASS).** 5-feature world-frame
-  `[ax_world, ay_world, gyro_xyz]` replaced body-frame raw accel. Fixed gravity-leak
-  artefact in IMU encoder. On its own, accounts for ~3.5× drop in standalone IMU ATE
-  on RoNIN (52 m → 14.4 m).
+**Target venue:** PerCom 2026 (deadline ~11 Sept 2026); MDPI Sensors /
+IEEE Sensors Journal as rolling fallbacks. IPIN 2026 deadline already
+passed (10 May 2026); IPIN 2027 is the natural follow-up.
 
 ---
 
-## 4. Forensic findings — the autopsy (`docs/PIPELINE_AUTOPSY.md`)
+## 3. Acceptance criteria (the goal in numbers)
 
-Six probes, all with quantitative results in the doc. The non-obvious ones:
+Stay locked. These are the bars; an iteration is judged against them.
 
-1. **Probe 4 (encoding).** WiFi whitening alone destroyed 4× of the signal. Raw RSSI
-   is closer to a metric space than PCA-whitened RSSI for nearest-neighbour
-   localization.
-2. **Probe 9 (data ceiling).** ~29 % of IPIN val samples have no WiFi scan within
-   15 s. Even an oracle WiFi+IMU system is bounded near 6–7 m on this val split
-   because the integrator has to free-run for tens of seconds with no absolute
-   anchor.
-3. **WiFi fingerprints do not transfer between sessions.** Cross-session splits
-   (`ipin2024_floor0`, `imuwifine`) diverge (train ↓, val ↑). Within-session splits
-   train to 10–13 m. **The bottleneck for cross-session generalization is the WiFi
-   encoder, not the fusion.**
+(a) **Per-leg validation** — for each of WiFi and IMU:
+    our encoder's published-protocol MAE is within **20 %** of the
+    SOTA repo's number on the same dataset and same metric.
 
----
+(b) **4-modality fusion on Webots sim** — full-fusion test MAE
+    **≤ 0.5 m** (the existing run 1 baseline was ≈ 0.43 m, so this
+    isn't a stretch; the bar exists so the architecture isn't broken).
+    Per-modality subset eval reported.
 
-## 5. Operational state
+(c) **Cross-session real-world plausibility** — on Microsoft ILN 2.0
+    site1/B1, beat WiFi-kNN baseline by ≥ 1.5 m AND beat the open-source
+    SOTA (CNNLoc or Locaris) by ≥ 0.5 m on the SAME data + metric. The
+    1-3 m absolute bar from run 1 is **dropped** for this dataset — the
+    physical achievable depends on AP density per session and was not
+    quantified honestly in run 1.
 
-- **External baselines are vendored at fixed temp paths** (engineer can re-clone if
-  missing):
-  - `C:\Users\FabLab\AppData\Local\Temp\wlan_localization\` — sharan-naribole, MIT.
-  - `C:\Users\FabLab\AppData\Local\Temp\ronin\` — Sachini, MIT.
-- **Demand #3 (active, do not violate):** baseline SOTA methods are run **only**
-  from their open-source code, unmodified. Runtime shims (e.g. `np.int = int`) go
-  in *our* wrapper scripts, not in their files. Use `importlib` to bypass broken
-  package `__init__` chains rather than editing source.
-- **Notebook gap:** `notebooks/validation.ipynb` references
-  `scripts/_ronin_runner.py` (a wrapper that applied the `np.int` shim before
-  invoking RoNIN). The public-release cleanup swept that wrapper. Cell A4 of the
-  notebook will fail until the engineer recreates it (trivial — `runpy.run_path()`
-  with `np.int = int` set first, forwarding argv).
-- **Datasets:** UJI (WiFi only), RoNIN FRDR (IMU + sparse WiFi), IPIN 2024 floors
-  −2/−1/0 (WiFi+IMU), IMUWiFine floor 4 (WiFi+IMU), Webots sim (4 modalities,
-  GPR-synthesised WiFi, optimistic). All DVC-tracked.
-- **Hardware:** Quadro P4000 8 GB (Pascal, sm_61), PyTorch <2.7 forced. OOM at
-  batch > ~256 with the full fusion.
+(d) **Per-path distribution + per-trajectory smoothness** reported for
+    every evaluation, not just aggregate mean.
+
+(e) **Real-time** — < 100 ms per sample on the project GPU (Quadro
+    P4000, 8 GB). Already met by the run-1 architecture; protect this
+    if you change fusion.
 
 ---
 
-## 6. The questions you should be asking right now
+## 4. Run-2 strategy — the iteration ordering
 
-You are the strategist. The engineer will execute, but you decide direction. The
-open questions:
+This is your starting roadmap, but you own the strategy and can shift
+as evidence demands. Each iteration follows the new cycle rules in
+`PROTOCOL.md` (small-subset pre-test, memory budget check, SOTA-baseline
+day-1 rule).
 
-1. **Are we at the IPIN ceiling, or below it?** The 6–7 m claim is from one probe
-   on aggregate sparsity. A tighter test: re-run fusion only on val samples with
-   WiFi staleness < 5 s. If error stays ~10 m, ceiling claim is wrong and there's
-   architectural headroom. If error drops to ~6 m, the bottleneck is data and the
-   right move is a different benchmark.
-2. **Which benchmark would unlock the 1–3 m claim?** Candidates worth searching:
-   Microsoft Indoor Localization Competition data, UJIIndoorLoc-Mag, XJTLUIndoorLoc,
-   any 2024–2026 IPIN/IPS dataset with denser WiFi. Constraint: must have
-   simultaneous WiFi+IMU with reasonable WiFi rate (≥0.5 Hz).
-3. **Session-invariant WiFi encoder.** The cross-session divergence is a known
-   research problem. Worth surveying: BSSID-keyed per-AP embeddings, masked
-   attention pooling, domain-adversarial training (DANN), MAML-style few-shot,
-   sim-to-real RSSI calibration.
-4. **Is there a published method that already beats us on IPIN 2024?** The
-   competition had submissions. If a published number exists, our 10 m goes from
-   "validated" to "competitive or not."
-5. **Is the "fusion beats single-modality SOTA on same data" framing strong enough
-   for a paper?** Or do we need a *cross-dataset* claim (train on A, test on B)?
-   Cross-dataset would expose the WiFi-transfer problem head-on and would be
-   stronger if we solved it.
+### Phase A — Encoder audit (PLAN_01 → PLAN_04, ~1 iter each)
+
+One encoder per iteration. For each:
+1. Clone the SOTA repo (or use already-vendored at
+   `C:\Users\FabLab\AppData\Local\Temp\`).
+2. Reproduce its published number on its native benchmark.
+3. Run our encoder on the SAME data, SAME metric, SAME protocol.
+4. Compute the 6-metric harness (linear probe, kNN, alignment,
+   uniformity, eff. dim, trustworthiness, temporal smoothness — already
+   in `src/pipeline/evaluation/encoder_eval.py`).
+5. Decision: **keep** (within 20 % of SOTA), **modify** (close but
+   identified bottleneck), **replace** (gap > 20 %, name the alternative).
+
+**Order:** WiFi (PLAN_01) → IMU (PLAN_02) → Camera (PLAN_03) → Odom (PLAN_04).
+Odom has no public SOTA; the audit is internal (kNN, linear probe).
+
+| iter | encoder | SOTA repo | benchmark |
+|---|---|---|---|
+| 01 | WiFi (`Anchor2Vec` and/or `WiFiSetTransformer`) | `sharan-naribole/wlan_localization` + `Sachini/niloc` (Locaris) | UJIIndoorLoc |
+| 02 | IMU (`IMUCNN`) | `Sachini/ronin` (ResNet1D) | RoNIN unseen-subjects |
+| 03 | Camera (`DPVOMotionEncoder`) | DPVO published numbers | Webots sim (no public real-data fits) |
+| 04 | Odom (`OdomCNN`) | — (internal: kNN, linear probe) | Webots sim |
+
+### Phase B — Fusion redesign (PLAN_05 → PLAN_07ish)
+
+After Phase A, you know which encoders to keep / modify / replace. Phase
+B redesigns the fusion stack. Candidates:
+
+- **Set-transformer** (current direction, fix run-1 issues: memory,
+  IMU-noise-injection at higher dim) — letterature-preferred.
+- **TCN-based temporal fusion** — small, fast, robust; less novel.
+- **LSTM-with-attention hybrid** — strong for variable-length async.
+- **Late fusion + learned modality gate** — directly fixes the
+  "IMU injects noise" problem from run 1.
+
+Plan a small bake-off (1 iter per candidate, on 10 % subset of Webots
+sim) before committing the full training budget to one architecture.
+
+### Phase C — Validation + ablations (PLAN_08+)
+
+- Full 4-modality fusion on Webots sim (C3).
+- Per-modality subset eval (`only:X`, `drop:X`).
+- Cross-session real-world subset on Microsoft ILN 2.0 (C4).
+- Per-path distribution + per-trajectory plots + latency.
+- Conformal coverage on val/test.
 
 ---
 
-## 7. How you brief the engineer
+## 5. What run 1 produced that is still useful
 
-- Write plans as numbered steps with a clear acceptance criterion per step
-  (a measurable number, a passing/failing notebook cell, or a yes/no probe). The
-  engineer's workflow is "add one mechanism, gate with a smoke test, then add the
-  next."
-- Cite sources (paper title, arXiv ID, GitHub URL). If you find an open-source
-  baseline, give the engineer the clone URL and the exact entry point.
-- Flag reversibility. The engineer is allowed to refactor; tell them when
-  something is a throwaway probe vs. a permanent change.
-- Expect honest negative results back. M2 was reverted because it didn't work.
-  That's the norm here.
+- `scripts/convert_msiln.py` + `data/msiln_site1_b1/` (untracked) +
+  `configs/data/msiln_site1_b1.yaml` — the Microsoft ILN 2.0 integration.
+  Cross-session day-based split already written (`split.json`).
+- `src/pipeline/encoders/wifi_set.py` — `WiFiSetTransformer` (sparse-
+  observed forward after iter_06; included in the encoder audit).
+- `runs/baselines/msiln_site1_b1/` — trivial baselines (centroid /
+  WiFi-kNN / IMU Kalman). Per-path distributions + waypoint metric
+  validated.
+- `runs/fusion_*/test_paths/*.png` — per-trajectory plots template.
+- `src/pipeline/evaluation/encoder_eval.py` — the 6-metric harness.
 
 ---
 
-## 8. What you must NOT do
+## 6. Operational reminders (unchanged from run 1)
 
-- Do not push to GitHub yourself.
-- Do not edit code directly — produce plans, hand them to the engineer.
-- Do not invent numbers. If you don't know whether something is feasible on this
-  hardware/data, ask the engineer to run a probe.
-- Do not propose changes that violate Demand #3 (no manual reimplementation of
-  baseline SOTA, no edits to vendored open-source code).
+- **Demand #3:** baseline SOTA from open-source code unmodified. Shims
+  (`np.int = int`, `importlib` workarounds for broken `__init__` chains)
+  live in OUR wrapper scripts, never in vendored sources. Already-vendored
+  repos at `C:\Users\FabLab\AppData\Local\Temp\`:
+  `wlan_localization\` (MIT, sharan-naribole),
+  `ronin\` (MIT, Sachini),
+  `msiln20\` (location-competition starter, ships 2.1 GB of real data).
+- **Windows + project venv only.** No WSL/bash scripts. Always use
+  `.venv\Scripts\python.exe`.
+- **Hardware:** Quadro P4000 8 GB, PyTorch < 2.7 (Pascal sm_61).
+- **No `git push`** — engineer's token is denied. User pushes manually.
+
+---
+
+## 7. What's different about this run
+
+- **SOTA baselines day-1.** Every new benchmark, the named SOTA repo is
+  cloned and reproduced FIRST. No method comparisons until baseline
+  numbers are in.
+- **Small-subset pre-test gate.** Every training iteration runs on 10 %
+  data / 5 epochs first. Full training only if the small-scale signal
+  is clear.
+- **Memory budget check.** Every new architecture proves it fits in
+  6 GB on synthetic forward+backward before launching training.
+- **Per-modality subset eval mandatory** in every RESULT.
+- **Per-path distribution + per-trajectory smoothness** in every RESULT.
+- **No silent stalls.** Engineer writes partial RESULT within 15 min of
+  any blockage. Scientist writes override note if engineer silent > 60 min.
+- **No anchoring on a single ablation as "the bottleneck"** — every
+  bottleneck claim needs 3 orthogonal probes (capacity, optimisation,
+  architecture).
+
+Read `PROTOCOL.md` Run 2+ cycle rules section for the full list. Those
+rules supersede anything implicit in this brief.
