@@ -13,6 +13,7 @@ from .dpvo_motion import DPVOMotionEncoder
 from .imu import IMUCNN
 from .odom import OdomCNN
 from .wifi import Anchor2Vec
+from .wifi_set import WiFiSetTransformer
 
 __all__ = [
     "BaseEncoder",
@@ -21,4 +22,5 @@ __all__ = [
     "DPVOMotionEncoder",
     "IMUCNN",
     "OdomCNN",
+    "WiFiSetTransformer",
 ]

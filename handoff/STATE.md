@@ -7,11 +7,11 @@ Push policy: **commit locally each iteration; NO push. User pushes manually on w
 
 ## Status
 
-- `CURRENT_ITERATION:` 4
-- `LAST_PLAN:` PLAN_04_wifi-encoder-capacity-probe.md
-- `LAST_RESULT:` RESULT_04_wifi-encoder-capacity-probe.md
+- `CURRENT_ITERATION:` 6
+- `LAST_PLAN:` PLAN_06_wifi-set-encoder-sparse-observed.md
+- `LAST_RESULT:` RESULT_06_wifi-set-encoder-sparse-observed.md
 - `GOAL_REACHED:` false
-- `STOP_REASON:` (none yet)
+- `STOP_REASON:` engineer resumed at 08:36 local after laptop sleep cycle; iter_06 executed PLAN_06 (sparse-observed rewrite); bar=NO-PASS strict but smoothness collapsed 12.9→3.4 (4× tighter). Set-transformer 15× slower per fwd-bwd than Anchor2Vec → had to drop K=8→1 to fit budget. PLAN_07 recommendation: `redesign_or_pivot`, engineer leans toward option 1 (re-run K=8 with SDPA/FlashAttention or lighter encoder).
 
 ## Goal
 
@@ -73,6 +73,8 @@ remains as a secondary benchmark for ablation/transfer claims.
 | 1 | PLAN_01_msiln-feasibility-probe.md | RESULT_01_msiln-feasibility-probe.md | 301c80e iter 01: msiln-feasibility-probe (GO — site1/B1 recommended) | feasibility probe for Microsoft ILN 2.0 dataset switch |
 | 2 | PLAN_02_msiln-convert-and-baselines.md | RESULT_02_msiln-convert-and-baselines.md | 3cb454b iter 02: msiln-convert-and-baselines (wifi-kNN floor 17.7m val / 9.5m test; fusion target <=6m test) | converter + cross-session split + trivial baselines on site1/B1 (no training yet) |
 | 3 | PLAN_03_msiln-fusion-baseline-run.md | RESULT_03_msiln-fusion-baseline-run.md | bae6e06 iter 03: msiln-fusion-baseline-run (val 15.7m / test 8.99m; wifi-only ~ full-fusion -> encoder is bottleneck; PLAN_04 = encoder_swap) | first FusionTransformer training on msiln_b1; smoke + 90-epoch + eval + per-traj + latency |
-| 4 | PLAN_04_wifi-encoder-capacity-probe.md | RESULT_04_wifi-encoder-capacity-probe.md | (pending) | embed_dim 128->256 probe (1419 BSSIDs vs IPIN's ~125); gates whether PLAN_05 = polish or full per-AP set-transformer rebuild |
+| 4 | PLAN_04_wifi-encoder-capacity-probe.md | RESULT_04_wifi-encoder-capacity-probe.md | ffd5253 iter 04: wifi-encoder-capacity-probe (NO-PASS; structurally bound; PLAN_05 = swap_committed) | embed_dim 128->256 probe (1419 BSSIDs vs IPIN's ~125); gates whether PLAN_05 = polish or full per-AP set-transformer rebuild |
+| 5 | PLAN_05_wifi-set-transformer-encoder.md | (blocked — no formal RESULT_05) | (none — engineer offline) | encoder built but training OOM'd at all 3 batch sizes (dense-masked 1419 tokens × O(N²) attn). See handoff/SCIENTIST_NOTE_iter05.md. Superseded by PLAN_06. |
+| 6 | PLAN_06_wifi-set-encoder-sparse-observed.md | RESULT_06_wifi-set-encoder-sparse-observed.md | (pending) | rewrite WiFiSetTransformer.forward() to use sparse-observed (~127 tokens, not 1419); fits 8 GB at bs=128; same bar rubric as PLAN_05 |
 
 (Both sides update this table — append a row when you finish your half.)

@@ -23,7 +23,13 @@ from omegaconf import OmegaConf
 from torch.utils.data import DataLoader
 
 from src.pipeline.data.datamodule import FusionDataModule
-from src.pipeline.encoders import Anchor2Vec, DPVOMotionEncoder, IMUCNN, OdomCNN
+from src.pipeline.encoders import (
+    Anchor2Vec,
+    DPVOMotionEncoder,
+    IMUCNN,
+    OdomCNN,
+    WiFiSetTransformer,
+)
 from src.pipeline.fusion.transformer import FusionTransformer
 from src.pipeline.training.fusion_trainer import FusionTrainer
 
@@ -154,8 +160,19 @@ def build_encoders(
     if "odom" in mods:
         enc["odom"] = OdomCNN(in_features=5, embed_dim=embed)
     if "wifi" in mods:
-        enc["wifi"] = Anchor2Vec(
-            n_aps=int(dm.train_ds.feature_dims["wifi"]), embed_dim=embed)
+        wifi_kind = str(
+            cfg.dataset.get("wifi_encoder_type", "anchor2vec")
+        ).lower()
+        n_aps = int(dm.train_ds.feature_dims["wifi"])
+        if wifi_kind == "set_transformer":
+            enc["wifi"] = WiFiSetTransformer(n_aps=n_aps, embed_dim=embed)
+        elif wifi_kind == "anchor2vec":
+            enc["wifi"] = Anchor2Vec(n_aps=n_aps, embed_dim=embed)
+        else:
+            raise ValueError(
+                f"Unknown wifi_encoder_type={wifi_kind!r}; "
+                "expected 'anchor2vec' or 'set_transformer'."
+            )
     vision = None
     if "camera" in mods:
         vision = DPVOMotionEncoder(

@@ -260,6 +260,13 @@ def main():
                     help="Override cfg.dataset.preprocessing.wifi_pca")
     ap.add_argument("--modalities", default=None,
                     help="Comma-separated subset to enable (e.g. 'wifi' for wifi-only)")
+    ap.add_argument("--wifi-encoder", default=None,
+                    choices=["anchor2vec", "set_transformer"],
+                    help="Override cfg.dataset.wifi_encoder_type")
+    ap.add_argument("--patience", type=int, default=None,
+                    help="Override cfg.train.patience")
+    ap.add_argument("--n-instants", type=int, default=None,
+                    help="Override cfg.temporal.n_instants (K)")
     ap.add_argument("--run-label", default="",
                     help="Suffix tag appended to summary JSON name; identifies the probe.")
     args = ap.parse_args()
@@ -286,6 +293,16 @@ def main():
         new_mods = [m.strip() for m in args.modalities.split(",") if m.strip()]
         _print(f"  override dataset.modalities {list(cfg.dataset.modalities)} -> {new_mods}")
         cfg.dataset.modalities = new_mods
+    if args.wifi_encoder is not None:
+        _print(f"  override dataset.wifi_encoder_type "
+               f"{cfg.dataset.get('wifi_encoder_type', 'anchor2vec')} -> {args.wifi_encoder}")
+        cfg.dataset.wifi_encoder_type = args.wifi_encoder
+    if args.patience is not None:
+        _print(f"  override train.patience {cfg.train.patience} -> {args.patience}")
+        cfg.train.patience = int(args.patience)
+    if args.n_instants is not None:
+        _print(f"  override temporal.n_instants {cfg.temporal.n_instants} -> {args.n_instants}")
+        cfg.temporal.n_instants = int(args.n_instants)
 
     _print(f"  config: depth={cfg.model.depth}  heads={cfg.model.n_heads}  "
            f"embed_dim={cfg.model.embed_dim}  readout={cfg.model.readout}  "
