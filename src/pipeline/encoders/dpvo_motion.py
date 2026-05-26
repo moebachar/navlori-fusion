@@ -51,7 +51,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from external.dpvo import BasicEncoder4
+from src.pipeline.baselines import BasicEncoder4
 
 from .base import BaseEncoder
 

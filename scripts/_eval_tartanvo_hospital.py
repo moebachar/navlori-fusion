@@ -35,40 +35,20 @@ from pathlib import Path
 
 import numpy as np
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
-# --- Demand #3 runtime shim: numpy.linalg.linalg.svd (deprecated submodule) ---
-import numpy as _np
-import numpy.linalg as _nplinalg
-if not hasattr(_nplinalg, "linalg"):
-    _nplinalg.linalg = _nplinalg  # type: ignore[attr-defined]
+from src.pipeline.baselines import apply_tartanvo_shims, TARTANVO_ROOT  # noqa: E402
 
-# --- Demand #3 runtime shim: scipy.spatial.transform.Rotation.as_dcm ---
-from scipy.spatial.transform import Rotation as _R
-if not hasattr(_R, "as_dcm"):
-    _R.as_dcm = _R.as_matrix  # type: ignore[attr-defined]
-if not hasattr(_R, "from_dcm"):
-    _R.from_dcm = _R.from_matrix  # type: ignore[attr-defined]
+# All 3 TartanVO runtime shims (scipy as_dcm, numpy linalg.linalg, cupy
+# compile_with_cache) live in src.pipeline.baselines._shims; Demand #3
+# preserved (no vendored-source edits).
+apply_tartanvo_shims()
 
-# --- Demand #3 runtime shim: cupy.cuda.compile_with_cache removed in cupy 12+ ---
-import cupy as _cupy  # noqa: E402
-if not hasattr(_cupy.cuda, "compile_with_cache"):
-    class _CompatModule:
-        """Mimic the old cupy.cuda.compile_with_cache(source).get_function API
-        using cupy.RawModule under the hood. Just enough to make the
-        vendored TartanVO PWC correlation kernels work without source edits."""
-        def __init__(self, source):
-            self._mod = _cupy.RawModule(code=source)
-
-        def get_function(self, name):
-            return self._mod.get_function(name)
-
-    _cupy.cuda.compile_with_cache = _CompatModule  # type: ignore[attr-defined]
-
-
-TARTANVO_DIR = Path(r"C:\Users\FabLab\AppData\Local\Temp\tartanvo")
+TARTANVO_DIR = TARTANVO_ROOT
 WEIGHTS = "tartanvo_1914.pkl"
 
-ROOT = Path(__file__).resolve().parents[1]
 SEQ_ROOT = ROOT / "data" / "tartanair_hospital" / "P000"
 OUT_DIR = ROOT / "runs" / "overnight" / "run2_iter_08"
 

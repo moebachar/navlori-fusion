@@ -15,55 +15,27 @@ Run: ``.venv/Scripts/python.exe scripts/_eval_wlanloc_msiln.py``
 """
 from __future__ import annotations
 
-import importlib.util
 import json
 import sys
 import time
-import types
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 DATA = ROOT / "data" / "msiln_site1_b1"
 OUT_DIR = ROOT / "runs" / "overnight" / "run2_iter_15"
-WLANLOC_SRC = Path(r"C:\Users\FabLab\AppData\Local\Temp\wlan_localization\src")
+
+from src.pipeline.baselines import load_position_regressor, load_preprocessor  # noqa: E402
 
 # Train = paths 0-93 (Nov 24 surveyor), val = 94-127 (Nov 25),
 # test = 128-132 (Dec 5+6).
 TRAIN_PATHS = list(range(0, 94))
 VAL_PATHS = list(range(94, 128))
 TEST_PATHS = list(range(128, 133))
-
-
-def _stub_logger():
-    base = types.ModuleType("wlan_localization")
-    utils = types.ModuleType("wlan_localization.utils")
-    logmod = types.ModuleType("wlan_localization.utils.logger")
-    import logging
-    logmod.get_logger = lambda name: logging.getLogger(name)
-    sys.modules.setdefault("wlan_localization", base)
-    sys.modules.setdefault("wlan_localization.utils", utils)
-    sys.modules.setdefault("wlan_localization.utils.logger", logmod)
-
-
-def _load_pure(rel_path: str, mod_name: str):
-    spec = importlib.util.spec_from_file_location(
-        mod_name, WLANLOC_SRC / "wlan_localization" / rel_path)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
-def _load_position_regressor():
-    _stub_logger()
-    return _load_pure("models/position_regressor.py", "wlan_pos_reg").PositionRegressor
-
-
-def _load_preprocessor():
-    _stub_logger()
-    return _load_pure("data/preprocessor.py", "wlan_preproc").DataPreprocessor
 
 
 def load_split_rssi(path_ids: list[int]):
@@ -115,8 +87,8 @@ def load_split_rssi(path_ids: list[int]):
 
 def main():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    PositionRegressor = _load_position_regressor()
-    DataPreprocessor = _load_preprocessor()
+    PositionRegressor = load_position_regressor()
+    DataPreprocessor = load_preprocessor()
     print("Loading MSILN site1/B1...", flush=True)
     Xtr_raw, Ytr = load_split_rssi(TRAIN_PATHS)
     Xva_raw, Yva = load_split_rssi(VAL_PATHS)

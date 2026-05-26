@@ -44,15 +44,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-RONIN_SRC = Path(r"C:\Users\FabLab\AppData\Local\Temp\ronin\source")
-if str(RONIN_SRC) not in sys.path:
-    sys.path.insert(0, str(RONIN_SRC))
-
-# Demand #3 runtime shim — applied here, never edited into vendored source.
-np.int = int  # type: ignore[attr-defined]
-
-from model_resnet1d import BasicBlock1D, FCOutputModule, ResNet1D  # noqa: E402  vendored RoNIN
-
+from src.pipeline.baselines import BasicBlock1D, FCOutputModule, ResNet1D  # noqa: E402
 from src.pipeline.encoders import IMUCNN  # noqa: E402
 from src.pipeline.evaluation.encoder_eval import (  # noqa: E402
     alignment_uniformity,

@@ -88,10 +88,18 @@ navlori-fusion/
 cd C:\Users\Administrateur
 git clone git@github.com:moebachar/navlori-fusion.git
 cd navlori-fusion
+git submodule update --init --recursive
 python -m venv .venv
 .venv\Scripts\activate
 pip install -e ".[dev]"
 ```
+
+The `git submodule update --init --recursive` step pulls the four
+SOTA baseline repositories (wlan_localization, ronin, tartanvo,
+dpvo) under `external_methods/`. See
+[docs/EXTERNAL_DEPENDENCIES.md](docs/EXTERNAL_DEPENDENCIES.md) for
+the per-submodule setup notes (TartanVO weights, RoNIN pretrained
+ResNet1D, DPVO Windows-build limitation).
 
 ### 2. Register Jupyter kernel
 

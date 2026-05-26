@@ -9,10 +9,7 @@ violated demand #3).
 """
 from __future__ import annotations
 
-import importlib.util
-import logging
 import sys
-import types
 from pathlib import Path
 
 import numpy as np
@@ -21,23 +18,11 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-WLAN_SRC = Path(r"C:\Users\FabLab\AppData\Local\Temp\wlan_localization\src")
 
+from src.pipeline.baselines import load_position_regressor, load_preprocessor  # noqa: E402
 
-def _load(rel: str, name: str):
-    sys.modules.setdefault("wlan_localization", types.ModuleType("wlan_localization"))
-    sys.modules.setdefault("wlan_localization.utils", types.ModuleType("wlan_localization.utils"))
-    logmod = types.ModuleType("wlan_localization.utils.logger")
-    logmod.get_logger = lambda n: logging.getLogger(n)
-    sys.modules["wlan_localization.utils.logger"] = logmod
-    spec = importlib.util.spec_from_file_location(
-        name, WLAN_SRC / "wlan_localization" / rel)
-    m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
-    return m
-
-
-PositionRegressor = _load("models/position_regressor.py", "_pr").PositionRegressor
-DataPreprocessor = _load("data/preprocessor.py", "_dp").DataPreprocessor
+PositionRegressor = load_position_regressor()
+DataPreprocessor = load_preprocessor()
 
 
 def load_ipin_wifi():

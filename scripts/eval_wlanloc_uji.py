@@ -16,49 +16,19 @@ Two evaluation modes:
 """
 from __future__ import annotations
 
-import importlib.util
 import sys
 import time
-import types
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 UJI = ROOT / "data" / "uji_indoorloc"
-WLANLOC_SRC = Path(r"C:\Users\FabLab\AppData\Local\Temp\wlan_localization\src")
 
-
-def _stub_logger():
-    base = types.ModuleType("wlan_localization")
-    utils = types.ModuleType("wlan_localization.utils")
-    logmod = types.ModuleType("wlan_localization.utils.logger")
-    import logging
-    logmod.get_logger = lambda name: logging.getLogger(name)
-    sys.modules.setdefault("wlan_localization", base)
-    sys.modules.setdefault("wlan_localization.utils", utils)
-    sys.modules.setdefault("wlan_localization.utils.logger", logmod)
-
-
-def _load_pure(rel_path: str, mod_name: str):
-    """Load one of their source files directly, bypassing the package init
-    chain that drags in imblearn (incompatible with our sklearn)."""
-    spec = importlib.util.spec_from_file_location(
-        mod_name, WLANLOC_SRC / "wlan_localization" / rel_path)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
-def _load_position_regressor():
-    _stub_logger()
-    return _load_pure("models/position_regressor.py", "wlan_pos_reg").PositionRegressor
-
-
-def _load_preprocessor():
-    _stub_logger()
-    return _load_pure("data/preprocessor.py", "wlan_preproc").DataPreprocessor
+from src.pipeline.baselines import load_position_regressor, load_preprocessor  # noqa: E402
 
 
 def load_uji(csv):
@@ -69,8 +39,8 @@ def load_uji(csv):
 
 
 def main():
-    PositionRegressor = _load_position_regressor()
-    DataPreprocessor = _load_preprocessor()
+    PositionRegressor = load_position_regressor()
+    DataPreprocessor = load_preprocessor()
     Xtr_raw, Ytr = load_uji(UJI / "trainingData.csv")
     Xva_raw, Yva = load_uji(UJI / "validationData.csv")
     print(f"UJI: train {len(Xtr_raw)} val {len(Xva_raw)} APs {Xtr_raw.shape[1]}")

@@ -29,19 +29,11 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-# Runtime compat shim so RoNIN's data_glob_speed (which uses np.int) imports
-# cleanly without editing their source. Demand #3: their code stays pristine.
-np.int = int  # type: ignore[attr-defined]
-
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-RONIN_SRC = Path(r"C:\Users\FabLab\AppData\Local\Temp\ronin\source")
-if str(RONIN_SRC) not in sys.path:
-    sys.path.insert(0, str(RONIN_SRC))
 
-from data_glob_speed import GlobSpeedSequence, StridedSequenceDataset  # noqa: E402
-
+from src.pipeline.baselines import GlobSpeedSequence, StridedSequenceDataset  # noqa: E402
 from src.pipeline.encoders import IMUCNN  # noqa: E402
 
 

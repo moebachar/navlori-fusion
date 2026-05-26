@@ -1,0 +1,15 @@
+[submodule "external_methods/wlan_localization"]
+	path = external_methods/wlan_localization
+	url = https://github.com/sharan-naribole/wlan_localization
+	branch = master
+[submodule "external_methods/ronin"]
+	path = external_methods/ronin
+	url = https://github.com/Sachini/ronin
+	branch = master
+[submodule "external_methods/tartanvo"]
+	path = external_methods/tartanvo
+	url = https://github.com/castacks/tartanvo
+	branch = python3
+[submodule "external_methods/dpvo"]
+	path = external_methods/dpvo
+	url = https://github.com/princeton-vl/DPVO

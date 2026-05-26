@@ -25,13 +25,8 @@ import torch.nn as nn
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-# import RoNIN architecture from their cloned repo
-RONIN_SRC = Path(r"C:\Users\FabLab\AppData\Local\Temp\ronin\source")
-if str(RONIN_SRC) not in sys.path:
-    sys.path.insert(0, str(RONIN_SRC))
 
-from model_resnet1d import BasicBlock1D, FCOutputModule, ResNet1D  # noqa: E402
-
+from src.pipeline.baselines import BasicBlock1D, FCOutputModule, ResNet1D  # noqa: E402
 from src.pipeline.fusion.builder import load_config  # noqa: E402
 
 WIN = 50            # 2 s at IPIN ~25 Hz

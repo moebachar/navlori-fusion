@@ -23,22 +23,17 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-# Runtime shim for RoNIN's data_glob_speed (uses np.int).
-np.int = int  # type: ignore[attr-defined]
-
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-RONIN_SRC = Path(r"C:\Users\FabLab\AppData\Local\Temp\ronin\source")
-if str(RONIN_SRC) not in sys.path:
-    sys.path.insert(0, str(RONIN_SRC))
 
-from data_glob_speed import GlobSpeedSequence, StridedSequenceDataset  # noqa: E402
-from metric import compute_ate_rte  # noqa: E402  RoNIN's own metric
-
+from src.pipeline.baselines import (  # noqa: E402
+    GlobSpeedSequence, StridedSequenceDataset, compute_ate_rte,
+    RONIN_LISTS,
+)
 from src.pipeline.encoders import IMUCNN  # noqa: E402
 
-LISTS = Path(r"C:\Users\FabLab\AppData\Local\Temp\ronin\lists")
+LISTS = RONIN_LISTS
 TRAIN_DIR = ROOT / "data" / "ronin_frdr" / "train"
 TEST_DIR = ROOT / "data" / "ronin_frdr" / "unseen"
 OUT_DIR = ROOT / "runs" / "overnight" / "run2_iter_07"
