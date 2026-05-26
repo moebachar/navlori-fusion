@@ -446,6 +446,39 @@ class DPVOMotionEncoder(BaseEncoder):
         tokens = self._frozen_tokens(x)        # (B, N, 132)
         return self.head(tokens)               # (B, embed_dim)
 
+    @torch.no_grad()
+    def demo_forward(self, raw_input):
+        """Per-encoder introspection (notebook §0). Runs the frozen
+        trunk on the input image pair, returns the per-patch motion
+        tokens (B, n_patches, 132) as ``intermediate``.
+
+        ``raw_input`` should be ``(2, 3, H, W)`` or ``(B, 2, 3, H, W)``
+        ImageNet-normalised float RGB frame pair.
+        """
+        import numpy as np
+        x = raw_input
+        if isinstance(x, np.ndarray):
+            x = torch.from_numpy(x).float()
+        if x.ndim == 4:  # (2, 3, H, W) -> (1, 2, 3, H, W)
+            x = x.unsqueeze(0)
+        x = x.to(next(self.parameters()).device)
+        self.eval()
+        tokens = self._frozen_tokens(x)
+        encoded = self.head(tokens)
+        return {
+            "raw": x.detach().cpu().numpy(),
+            "preprocessed": x.detach().cpu().numpy(),
+            "intermediate": tokens.detach().cpu().numpy(),  # (B, n_patches, 132)
+            "encoded": encoded.detach().cpu().numpy(),
+            "description": (
+                f"DPVOMotionEncoder: frozen DPVO BasicEncoder4 trunk on "
+                f"frame pair (t-1, t) -> {self.n_patches} patches × "
+                f"{self._patch_token_dim} channels (trunk feat + dx, dy, "
+                f"‖flow‖, corr_peak) -> {self.embed_dim}-d token via "
+                f"trainable head."
+            ),
+        }
+
     @property
     def input_spec(self) -> dict:
         return {

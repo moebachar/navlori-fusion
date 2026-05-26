@@ -97,6 +97,35 @@ class IMUCNN(BaseEncoder):
 
         return x
 
+    @torch.no_grad()
+    def demo_forward(self, raw_input):
+        """Per-encoder introspection (notebook §0). Returns the conv
+        stack's final activations (pre-pooling) as the
+        ``intermediate``."""
+        import numpy as np
+        x = raw_input
+        if isinstance(x, np.ndarray):
+            x = torch.from_numpy(x).float()
+        if x.ndim == 2:
+            x = x.unsqueeze(0)
+        x = x.to(next(self.parameters()).device)
+        self.eval()
+        # Transpose for conv1d
+        x_t = x.transpose(1, 2)
+        conv_out = self.conv_stack(x_t)         # (B, C, T)
+        encoded = self.head(conv_out.mean(dim=2))
+        return {
+            "raw": x.detach().cpu().numpy(),
+            "preprocessed": x.detach().cpu().numpy(),
+            "intermediate": conv_out.detach().cpu().numpy(),  # (B, channels[-1], window)
+            "encoded": encoded.detach().cpu().numpy(),
+            "description": (
+                f"IMUCNN: 1D-CNN ({self.in_features}->{conv_out.shape[1]} ch) over "
+                f"window={x.shape[1]} ({self.in_features}-channel input) -> global avg "
+                f"pool -> {self.embed_dim}-d token."
+            ),
+        }
+
     @property
     def input_spec(self) -> dict:
         return {

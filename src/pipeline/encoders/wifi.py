@@ -92,6 +92,46 @@ class Anchor2Vec(BaseEncoder):
 
         return token
 
+    @torch.no_grad()
+    def demo_forward(self, raw_input):
+        """Per-encoder introspection for the notebook §0 preprocessing demo.
+
+        Returns a dict with keys ``raw`` / ``preprocessed`` /
+        ``intermediate`` (anchor attention weights) / ``encoded`` /
+        ``description``. ``raw_input`` may be a numpy array or torch
+        tensor of shape (n_aps,) or (1, n_aps) or (B, 1, n_aps).
+        """
+        import numpy as np
+        x = raw_input
+        if isinstance(x, np.ndarray):
+            x = torch.from_numpy(x).float()
+        if x.ndim == 1:
+            x = x.view(1, 1, -1)
+        elif x.ndim == 2:
+            x = x.unsqueeze(1)
+        x = x.to(next(self.parameters()).device)
+        self.eval()
+        # Step 1: anchor similarity (softmax weights = intermediate)
+        if x.ndim == 3:
+            x_sq = x.squeeze(1)
+        else:
+            x_sq = x
+        sim = F.linear(x_sq, self.anchors)
+        weights = F.softmax(sim / (self.temperature.abs() + 1e-6), dim=-1)
+        # Step 2-3: token + head refinement (re-running forward path)
+        encoded = self.forward(x)
+        return {
+            "raw": x_sq.detach().cpu().numpy(),
+            "preprocessed": x_sq.detach().cpu().numpy(),
+            "intermediate": weights.detach().cpu().numpy(),
+            "encoded": encoded.detach().cpu().numpy(),
+            "description": (
+                f"Anchor2Vec: {x_sq.shape[1]} APs -> {self.n_anchors} learned anchors "
+                f"(softmax-attention weights are the intermediate) -> "
+                f"{self.embed_dim}-d token via weighted sum of anchor embeddings + MLP head."
+            ),
+        }
+
     @property
     def input_spec(self) -> dict:
         return {

@@ -1,30 +1,55 @@
-"""PLAN_16 architecture bake-off — 3 alternative aggregator backbones
-that drop in to the FusionTransformer's `self.encoder` slot.
+"""Run-2 architecture bake-off — 4 aggregator candidates over the
+(K instants × M modalities) FusionTransformer token sequence.
 
-Each candidate subclasses ``FusionTransformer`` and only replaces the
-nn.TransformerEncoder layer stack (and the source-key-padding-mask
-plumbing). Everything else — encoders, CLS, PositionQuery readout,
-position head, modality/time embeddings — is inherited unchanged so
-the comparison is apples-to-apples on the aggregator alone.
+Each candidate swaps only the ``FusionTransformer.encoder`` block
+(via ``_swap_encoder``); the encoders, CLS, PositionQuery readout,
+position head, and modality/time embeddings are inherited unchanged
+so the comparison is apples-to-apples on the aggregator alone.
+``MoTTransformer`` is the one exception — a standalone module
+without the CLS / PositionQuery machinery (PLAN_21 spec).
 
-Candidates:
-  - ``LSTMAttnFusion``   — bidirectional LSTM over the (1 + K·M)-token
-                            sequence; mask-aware via packed sequence is
-                            avoided (mask just zeroes padded outputs).
-  - ``TCNFusion``         — 3-layer 1D dilated conv stack (kernel 3,
-                            dilations [1, 2, 4]) on the token sequence
-                            treated as channels-first 1D.
-  - ``CNN1DFusion``       — 3-layer plain 1D conv stack (kernel 3, no
-                            dilation); the minimum-baseline candidate.
+## Run-2 verdict per candidate
 
-A fourth candidate (Transformer-from-scratch) is documented in the
-PLAN_16 narrative but skipped this iteration per the plan's "cut to 3
-if overrun" provision (4 candidates × 30 epochs × ~5 min each blows
-the 75-min compute budget).
+| name              | params  | Webots val | Webots test | smoothness r | latency b=1 (ms) | source        | verdict                                       |
+|-------------------|--------:|-----------:|------------:|-------------:|-----------------:|---------------|-----------------------------------------------|
+| incumbent         | 1.55 M  | 0.394      | 0.417       | 0.039        | 6.41             | RESULT_06+    | run-1 baseline; over-parameterised for the data scale  |
+| **cnn1d**         | 0.51 M  | **0.282**  | **0.339**   | 0.009        | **4.73**         | RESULT_17/18  | **PHASE B WINNER** — cooperative fusion       |
+| lstm_attn         | 0.57 M  | 0.301      | 0.340       | **0.051**    | 4.67             | RESULT_17/18  | runner-up; per-modality dead-reckoning regime |
+| tcn               | ~0.51 M | (subset)   | (subset)    | ≤ 0.085      | n/a              | RESULT_16     | bake-off candidate; no distinct full-data run |
+| mot_transformer   | 0.74 M  | 0.594      | 0.608       | 0.019        | 5.82             | RESULT_21     | **γ5 — WORST of 4**; ALiBi suppresses motion  |
+
+## Design rationale (paper methods section)
+
+- **CNN1D** (RESULT_16/17): 3-layer plain 1D conv (kernel 3, no
+  dilation) over the K·M+1 token sequence. The "minimum-baseline"
+  candidate — and the run-2 winner. Cooperative fusion regime:
+  WiFi anchors, motion modalities add marginal corrections.
+- **LSTM-attn** (RESULT_16/17): bidirectional LSTM hidden=128
+  over the same sequence. Surprising structural finding —
+  per-modality dead-reckoning regime confirmed on 3 datasets
+  (RESULT_18/19/22): `only:imu` ≈ `only:camera` ≈ full to within
+  ~1-8 %. Best smoothness r in run-2 (0.051 Webots, 0.089 IPIN).
+- **TCN** (RESULT_16): 3-layer dilated 1D conv with dilations
+  [1,2,4]; receptive field 15 tokens (covers K·M=16+CLS). No
+  distinct finding beyond CNN1D; cut from full-data retrain per
+  RESULT_17's "two strongest candidates" rule.
+- **MoTTransformer** (RESULT_21 — see ``mot_transformer.py``):
+  scientist-designed transformer-from-scratch with ALiBi temporal
+  bias + no CLS + no PositionQuery. Honest negative result
+  (regresses by +79 % vs CNN1D); kept for the methods-section
+  "we benchmarked 4 architectures" claim.
 
 The bake-off keeps the incumbent's PositionQuery cross-attention
 readout (NOT the cls/decomposed readouts) so the differentiator is
 strictly the aggregator.
+
+## Smoothness debt — falsified architectural hypothesis
+
+Across all 4 architectures × 5+ datasets, the per-trajectory
+smoothness median r stays ≤ 0.10 — well below the locked 0.20
+gate. The architectural-lever-for-smoothness hypothesis is
+**falsified**; the open lever is the loss function (auxiliary
+velocity B-1 / EMA token smoothing B-2 from RESULT_05).
 """
 from __future__ import annotations
 

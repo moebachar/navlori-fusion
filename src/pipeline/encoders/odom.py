@@ -80,6 +80,34 @@ class OdomCNN(BaseEncoder):
 
         return x
 
+    @torch.no_grad()
+    def demo_forward(self, raw_input):
+        """Per-encoder introspection (notebook §0). Returns conv stack
+        activations as the ``intermediate``."""
+        import numpy as np
+        x = raw_input
+        if isinstance(x, np.ndarray):
+            x = torch.from_numpy(x).float()
+        if x.ndim == 2:
+            x = x.unsqueeze(0)
+        x = x.to(next(self.parameters()).device)
+        self.eval()
+        x_t = x.transpose(1, 2)
+        conv_out = self.conv_stack(x_t)
+        encoded = self.head(conv_out.mean(dim=2))
+        return {
+            "raw": x.detach().cpu().numpy(),
+            "preprocessed": x.detach().cpu().numpy(),
+            "intermediate": conv_out.detach().cpu().numpy(),
+            "encoded": encoded.detach().cpu().numpy(),
+            "description": (
+                f"OdomCNN: 1D-CNN over window={x.shape[1]} "
+                f"({self.in_features}-channel input) -> "
+                f"{conv_out.shape[1]} channels -> {self.embed_dim}-d token. "
+                f"P-B Δ-features (RESULT_04 winner) recommended at the dataset stage."
+            ),
+        }
+
     @property
     def input_spec(self) -> dict:
         return {

@@ -766,3 +766,171 @@ class FusionTrainer:
         (self.run_path / f"staleness_{modality}.json").write_text(
             json.dumps(results, indent=2))
         return results
+
+    # ------------------------------------------------------------------
+    # Public API — consolidated in PLAN_28 for the run-2 walkthrough notebook.
+    # The methods below complement evaluate_all_subsets / evaluate_staleness
+    # so the notebook + paper scripts use a single entry-point per analysis.
+    # ------------------------------------------------------------------
+
+    def compute_per_trajectory_smoothness(self, split: str = "test") -> dict:
+        """Per-trajectory Pearson r between ‖Δpredᵢ‖ and ‖Δgtᵢ‖.
+
+        Returns a dict ``{path_id: r, ..., 'median_r': ..., 'min_r': ...,
+        'max_r': ..., 'per_path': {pid: r}}``. Criterion (d) target gate
+        is ``median_r > 0.20`` (locked in RESULT_05); falsified across
+        all 4 architectures in run-2 (see ``handoff/SUMMARY.md``).
+        """
+        import numpy as np
+        pred_t, gt_t = self.predict(split)
+        pred = pred_t.numpy(); gt = gt_t.numpy()
+        # path_ids come from the dataset's GT rows
+        ds = getattr(self.dm, f"{split}_ds")
+        pids = np.array([r["path_id"] for r in ds._gt_rows])[:len(pred)]
+        per_path = {}
+        for p in np.unique(pids):
+            m = pids == p
+            if m.sum() < 5:
+                continue
+            pp, gg = pred[m], gt[m]
+            dp = np.linalg.norm(np.diff(pp, axis=0), axis=1)
+            dg = np.linalg.norm(np.diff(gg, axis=0), axis=1)
+            if dp.std() < 1e-9 or dg.std() < 1e-9:
+                per_path[int(p)] = 0.0
+            else:
+                per_path[int(p)] = float(np.corrcoef(dp, dg)[0, 1])
+        rs = list(per_path.values())
+        return {
+            "per_path": per_path,
+            "median_r": float(np.median(rs)) if rs else 0.0,
+            "min_r": float(min(rs)) if rs else 0.0,
+            "max_r": float(max(rs)) if rs else 0.0,
+        }
+
+    def latency_probe(self, batch_sizes=(1, 32), n_trials: int = 100,
+                       n_warmup: int = 20) -> dict:
+        """Per-batch-size wall-clock latency on the current device.
+
+        Returns ``{batch_size: {'ms_per_sample': float, 'ms_per_batch':
+        float, 'n_trials': int}}``. Criterion (e) gate: ms_per_sample <
+        100 ms on a Quadro P4000. Run-2 CNN1D winner: b=1 = 4.73 ms,
+        b=32 = 0.15 ms (RESULT_18, 21× / 660× under gate).
+        """
+        import time
+        self.model.eval()
+        n_val = self.n.get("val", 0)
+        out = {}
+        with torch.no_grad():
+            for batch in batch_sizes:
+                bs = batch if batch <= n_val else max(1, n_val // 2)
+                idx = torch.arange(bs, device=self.device)
+                for _ in range(n_warmup):
+                    inputs, avail, dt, ya, yi = self._batch("val", idx, drop=False)
+                    y, q = self._resolve_query(idx, dt, ya, yi, randomize=False)
+                    _ = self.model(inputs, avail, dt, query_dt=q)
+                if self.device == "cuda":
+                    torch.cuda.synchronize()
+                t0 = time.time()
+                for _ in range(n_trials):
+                    inputs, avail, dt, ya, yi = self._batch("val", idx, drop=False)
+                    y, q = self._resolve_query(idx, dt, ya, yi, randomize=False)
+                    _ = self.model(inputs, avail, dt, query_dt=q)
+                if self.device == "cuda":
+                    torch.cuda.synchronize()
+                total = time.time() - t0
+                out[bs] = {
+                    "batch_size": int(bs),
+                    "n_trials": int(n_trials),
+                    "ms_per_batch": float(total / n_trials * 1000.0),
+                    "ms_per_sample": float(total / n_trials / bs * 1000.0),
+                }
+        return out
+
+
+def load_trained(checkpoint_dir, arch: str = "cnn1d", dataset: str = "simulation",
+                  modalities=None, K: int = 4, batch_size: int = 128) -> FusionTrainer:
+    """Load a trained model + return a ready-to-evaluate ``FusionTrainer``.
+
+    Module-level helper (not a classmethod) so the call is a clean
+    one-liner from the notebook:
+
+    >>> from src.pipeline.training import load_trained
+    >>> tr = load_trained("runs/overnight/run2_iter_17/cnn1d/fusion_*", arch="cnn1d")
+    >>> tr.evaluate_all_subsets("test")
+
+    Parameters
+    ----------
+    checkpoint_dir : str | Path
+        Directory containing ``model.pt`` (the FusionTrainer's save
+        layout). Glob patterns supported (chooses the latest match).
+    arch : str
+        Architecture name from ``src.pipeline.fusion.list_archs()``.
+    dataset : str
+        Hydra dataset config name to use for rebuilding the datamodule
+        + encoders (``"simulation"`` for Webots, ``"ipin2024_floor0"``,
+        ``"imuwifine"``, etc.).
+    modalities, K, batch_size
+        Override datamodule defaults.
+    """
+    from pathlib import Path
+
+    from src.pipeline.fusion import CANDIDATES
+    from src.pipeline.fusion.builder import (
+        build_datamodule, build_encoders, extract_vision_tokens, load_config,
+    )
+
+    chk = Path(checkpoint_dir)
+    if "*" in str(chk):
+        matches = sorted(Path(".").glob(str(chk)))
+        if not matches:
+            raise FileNotFoundError(f"No checkpoint dirs match {chk}")
+        chk = matches[-1]
+    # If a directory contains a fusion_* subdir, descend into the most recent.
+    if chk.is_dir() and not (chk / "model.pt").is_file():
+        subs = sorted(chk.glob("fusion_*"))
+        if subs:
+            chk = subs[-1]
+    model_p = chk / "model.pt"
+    if not model_p.is_file():
+        raise FileNotFoundError(f"No model.pt at {chk}")
+
+    cfg = load_config(dataset)
+    if modalities is not None:
+        cfg.dataset.modalities = list(modalities)
+    cfg.temporal.n_instants = int(K)
+    cfg.data.batch_size = int(batch_size)
+
+    dm = build_datamodule(cfg)
+    encs, vision = build_encoders(cfg, dm)
+    extra = extract_vision_tokens(dm, vision, device="cuda") if vision is not None else {}
+
+    incumbent_kwargs = dict(
+        embed_dim=int(cfg.model.embed_dim),
+        depth=int(cfg.model.depth),
+        n_heads=int(cfg.model.n_heads),
+        ff_mult=int(cfg.model.ff_mult),
+        dropout=float(cfg.model.dropout),
+        use_time=bool(cfg.model.use_time),
+        readout=str(cfg.model.readout),
+        absolute_modalities=list(cfg.model.get("absolute_modalities", None) or ["wifi"]),
+    )
+    torch.manual_seed(42)
+    if arch not in CANDIDATES:
+        raise KeyError(f"Unknown arch {arch!r}. Available: {list(CANDIDATES)}")
+    model = CANDIDATES[arch](incumbent_kwargs, encs)
+    state = torch.load(model_p, weights_only=True, map_location="cpu")
+    if isinstance(state, dict) and "state_dict" in state:
+        model.load_state_dict(state["state_dict"], strict=True)
+    else:
+        model.load_state_dict(state, strict=True)
+
+    trainer = FusionTrainer(
+        model=model, dm=dm, modalities=list(model.modalities),
+        extra_inputs=extra,
+        lr=float(cfg.train.lr),
+        n_instants=int(cfg.temporal.n_instants),
+        instant_stride=int(cfg.temporal.instant_stride),
+        batch_size=int(cfg.data.batch_size),
+        run_dir=str(chk.parent / "loaded_eval"),
+    )
+    return trainer
