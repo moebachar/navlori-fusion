@@ -31,6 +31,7 @@ from __future__ import annotations
 import torch
 import torch.nn as nn
 
+from .mot_transformer import MoTTransformer
 from .transformer import FusionTransformer
 
 
@@ -167,9 +168,28 @@ def build_incumbent(incumbent_kwargs: dict, encoders: dict) -> FusionTransformer
     return FusionTransformer(encoders=encoders, **incumbent_kwargs)
 
 
+def build_mot_transformer(incumbent_kwargs: dict, encoders: dict) -> MoTTransformer:
+    """PLAN_21 transformer-from-scratch candidate. Designed AFTER RESULT_17/18.
+
+    3-layer, 2-head, ALiBi temporal bias, FFN dim=2D, single-query cross-attn
+    readout, MLP head D->64->2. ~0.48 M params (parity vs CNN1D 0.51 M /
+    LSTM-attn 0.57 M).
+    """
+    return MoTTransformer(
+        encoders=encoders,
+        embed_dim=incumbent_kwargs["embed_dim"],
+        n_layers=3,
+        n_heads=2,
+        ff_mult=2,
+        dropout=float(incumbent_kwargs.get("dropout", 0.1)),
+        n_instants=4,
+    )
+
+
 CANDIDATES = {
     "incumbent": build_incumbent,
     "lstm_attn": build_lstm_attn,
     "tcn": build_tcn,
     "cnn1d": build_cnn1d,
+    "mot_transformer": build_mot_transformer,
 }

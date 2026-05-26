@@ -183,10 +183,15 @@ def main():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     print(f"=== arch={args.arch}  PLAN_18 ablations ===", flush=True)
 
-    iter17_dirs = sorted((ROOT / "runs" / "overnight" / "run2_iter_17" / args.arch).glob("fusion_*"))
-    if not iter17_dirs:
-        raise SystemExit(f"No iter_17/{args.arch} fusion run dir found")
-    run_path = iter17_dirs[-1]
+    # Look in iter_17 (CNN1D/LSTM-attn) or iter_21 (MoTTransformer) per arch.
+    candidate_dirs = []
+    for iter_n in ("run2_iter_17", "run2_iter_21"):
+        candidate_dirs.extend(
+            sorted((ROOT / "runs" / "overnight" / iter_n / args.arch).glob("fusion_*"))
+        )
+    if not candidate_dirs:
+        raise SystemExit(f"No checkpoint dir found for {args.arch}")
+    run_path = candidate_dirs[-1]
     print(f"loading {args.arch} checkpoint from {run_path}", flush=True)
 
     cfg = load_config("simulation")
