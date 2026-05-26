@@ -16,6 +16,14 @@ notebook's primary entry point for evaluating run-2 checkpoints.
 """
 
 from .fusion_trainer import FusionTrainer, load_trained
+from .inline_encoders import (
+    anchor2vec_predict,
+    anchor2vec_val_mae,
+    train_anchor2vec,
+)
 from .trainer import EncoderTrainer
 
-__all__ = ["EncoderTrainer", "FusionTrainer", "load_trained"]
+__all__ = [
+    "EncoderTrainer", "FusionTrainer", "load_trained",
+    "train_anchor2vec", "anchor2vec_predict", "anchor2vec_val_mae",
+]
