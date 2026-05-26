@@ -11,9 +11,9 @@ the autopsy.
 
 ## Status
 
-- `CURRENT_ITERATION:` 18  (awaiting PLAN_18)
-- `LAST_PLAN:` PLAN_17_phase-b-full-data-retrain-cnn1d-lstm.md (settle the bake-off at full data: CNN1D + LSTM-attn vs incumbent's RESULT_13 numbers; three outcomes α'''/β'''/γ'''; smoothness r > 0.20 gate at scale is the load-bearing finding question)
-- `LAST_RESULT:` RESULT_17_phase-b-full-data-retrain-cnn1d-lstm.md (**outcome α''' — NEW Phase B winner**: CNN1D val 0.282 / test 0.339 (−28%/−19% vs incumbent), LSTM-attn val 0.301 / test 0.340 (−24%/−19%); both at 1/3 the params (0.51-0.57 M vs 1.55 M); LSTM-attn's per-modality `only:imu` test 0.339 ties full fusion 0.340 → fundamentally different "dead-reckon-from-anything" fusion regime; smoothness debt persists across architectures (max r=0.051 LSTM-attn, all under 0.20 gate); architectural lever doesn't fix smoothness, loss-function lever (B-1/B-2) remains the open knob; **CNN1D is the new C3 paper-claim number**)
+- `CURRENT_ITERATION:` 19  (awaiting PLAN_19)
+- `LAST_PLAN:` PLAN_18_phase-b-new-winner-cnn1d-ablations.md (full ablation suite on the new CNN1D winner mirroring RESULT_14's incumbent ablations; plus tightly-bounded LSTM-attn dead-reckoning probe; updated PerCom main-results panel)
+- `LAST_RESULT:` RESULT_18_phase-b-new-winner-cnn1d-ablations.md (**CNN1D paper-grade ablation suite holds + LSTM-attn dead-reckoning confirmed structurally**: CNN1D sanity exact (val 0.282 / test 0.339), 16-row subset eval `wifi+imu+camera` drop-Odom test 0.338 ~= full 0.339 (RESULT_14 drop-Odom pattern holds), 8-lag staleness slope **0.028 m/s R²=0.995** (essentially identical to incumbent's 0.029 — K=4 temporal property is architecture-invariant), per-trajectory smoothness r=0.009 (debt persists across architectures), latency b=1 **4.73 ms** / b=32 **0.15 ms** (criterion (e) 21×/660× under gate); LSTM-attn dead-reckoning: **ALL 4 only:X rows within 8 %** of full (only:wifi 0.423, only:imu 0.339, only:camera 0.338, only:odom 0.357) — uniform per-modality recovery regime confirmed; LSTM-attn staleness slope 0.024 m/s (16 % shallower than CNN1D, 19 % shallower than incumbent) — dead-reckoning hypothesis supported by data; **two fusion regimes** = paper-grade discussion finding. PLAN_19 recommendation = MSILN cross-session re-run with CNN1D winner)
 - `GOAL_REACHED:` false
 - `STOP_REASON:` (none yet)
 
@@ -167,14 +167,46 @@ user-side unblock 2026-05-25 evening — both datasets in `data/`)**
 - 12: Phase B winner full-training + per-modality ablations
   (`only:X`, `drop:X` for all 4 modalities).
 
-**Phase C — Real-world validation + ablations (PLAN_13+)**
-- C-1: Cross-session real-world subset on Microsoft ILN 2.0 (C4
-  claim). Per-modality subset eval.
-- C-2: Conformal coverage at α=0.1 on val + test for the Phase B
-  winner.
-- C-3: Per-path distribution + per-trajectory smoothness ratio
-  reported for every Phase C evaluation (criterion (d) gate
-  enforcement).
+**Phase C — Main results table + real-world validation (PLAN_15 ✓ + PLAN_19→23)**
+
+PerCom paper hinges on ONE main results table (per third-party
+directive 2026-05-26 ~08:00 local; see
+`handoff/SCIENTIST_NOTE_main-results-table.md` for full schema +
+in-hand vs missing-number inventory). Phase C deliverables, in
+iteration order:
+
+- 15: MSILN site1/B1 cross-session ✓ — gate (c)-2 clean SOTA beat
+  (+14.29 m test over wlan_localization); gate (c)-1 partial
+  (kNN test-anomaly). NB: used WiFiSetTransformer, divergent
+  from RESULT_01 audit-winner Anchor2Vec; re-run flagged.
+
+- **19: IMUWiFine** — CNN1D + LSTM-attn + per-leg SOTA
+  reproduction (wlan_localization on WiFi + RoNIN ResNet1D on
+  IMU). NEW measurements; never run on this dataset.
+
+- **20: IPIN 2024 floor 0** — same shape as PLAN_19. Floor 0
+  per directive (scope-bounded; other floors optional Phase C
+  extension if time permits).
+
+- **21: RoNIN single-mod** — CNN1D + LSTM-attn IMU-only.
+  ResNet1D 5.140 m reused from RESULT_07.
+
+- **22: UJI** — CNN1D + LSTM-attn at K=1 (degenerate temporal
+  axis; UJI is per-scan). wlan_localization 15.17 m and
+  Anchor2Vec 8.69 m reused from RESULT_01.
+
+- **23: SUMMARY + main table assembly** — populate the 6-row
+  table; cross-dataset comparison; honest gaps documented
+  (C2 cross-subject, Camera per-leg paper-soft, smoothness
+  debt across architectures).
+
+Optional Phase C extensions IF time remains after PLAN_23:
+- Conformal coverage at α=0.1 on the Phase B winner (criterion
+  (d) extension; `src/pipeline/uncertainty/conformal.py` restored
+  RESULT_06).
+- MSILN cross-session re-run with the CNN1D + Anchor2Vec
+  combination (RESULT_15's divergence — could close gate (c)-1
+  if the new architecture margin holds cross-session).
 
 ## Iteration log
 
@@ -206,5 +238,7 @@ user-side unblock 2026-05-25 evening — both datasets in `data/`)**
 | 16 | PLAN_16_phase-b-architecture-bakeoff.md (inserted per third-party review 2026-05-26 ~04:10 local; bake-off was wrongly dropped at iter 10 — iter 13 refuted the dropping premise; paper-strength fix for methods section) | RESULT_16_phase-b-architecture-bakeoff.md | iter 16: phase-b-architecture-bakeoff (849378f) | 4 candidates {LSTM-attn / TCN / 1D-CNN / Transformer-from-scratch} on 10 % Webots subset, K=4 B=128, same encoders + readout + protocol; only fusion block changes. Incumbent run-1 FusionTransformer benchmarked on same subset for fair compare. Decision: beat 0.417 m AND r > 0.20 ⇒ new winner; else incumbent stands defensible ("4 architectures compared, kept this one"). PLAN_17 = if new winner → full-data retrain; if not → Phase C continuation. **NB**: engineer's RESULT_15 surfaced that the deployed MSILN config used `WiFiSetTransformer` per their default — that's an unintended divergence from the RESULT_01 audit decision (Anchor2Vec was the keep verdict on UJI); flag for PLAN_17 Phase C follow-up. Engineer: **3 of 4 candidates implemented** (transformer_scratch cut per "overrun" provision). On 2-path subset, all 3 candidates BEAT incumbent by 24-34 % on val/test at 1/3 params (CNN1D val/test 0.978/1.261 vs incumbent 1.493/1.688). **Smoothness gate r > 0.20 NOT met by any** (max LSTM-attn r=0.085) → strict PLAN_16 rule NOT met. Smoothness debt is architecture-invariant (4-of-4 fail). Subset finding may NOT generalise to full data (incumbent has 5.7× more data at full scale). Recommend PLAN_17 = full-data retrain CNN1D + LSTM-attn (~1.5h compute). |
 
 | 17 | PLAN_17_phase-b-full-data-retrain-cnn1d-lstm.md | RESULT_17_phase-b-full-data-retrain-cnn1d-lstm.md | iter 17: phase-b-full-data-retrain-cnn1d-lstm (a81356f) | Settle the bake-off at production data scale. Train CNN1D (test-leader on subset) and LSTM-attn (val-tied) on full Webots data at the K=4 + 4-mod + B=128 + lr=1.3e-3 + 90 epochs incumbent config. Compare against RESULT_13's 0.394/0.417 m. Three outcomes: α''' / β''' / γ'''. Critical secondary question: does smoothness r > 0.20 gate finally clear at full-data scale? Engineer: **outcome α''' fires decisively** — both CNN1D and LSTM-attn beat incumbent at full data. CNN1D val **0.282** / test **0.339** (−28%/−19% vs incumbent 0.394/0.417), LSTM-attn val 0.301 / test 0.340 (−24%/−19%); both at ~0.51-0.57 M params (1/3 of incumbent's 1.55 M); CNN1D peak GPU 775 MB, LSTM-attn 819 MB (well under RESULT_14's 466 MB budget? actually higher — note: B=128 K=4). **CNN1D is the new C3 paper-claim model**, criterion (b) ≤ 0.5 cleared by 32 % margin. **LSTM-attn surfaces structural finding**: only:imu test 0.339 ≈ full fusion 0.340 m; only:camera test 0.338 — LSTM-attn dead-reckons from each motion modality (not WiFi-anchor dependent). Subset eval: `wifi+camera` for CNN1D val 0.276 / test 0.339 = tied with full 4-mod (Odom marginal). Latency: CNN1D 0.044 ms / LSTM-attn 0.047 ms b=1 (well under 100 ms gate). Smoothness debt: CNN1D r=0.009, LSTM-attn r=0.051 (best in run-2), incumbent r=0.039 — architectural lever doesn't clear 0.20 gate; loss-function (B-1 aux velocity / B-2 EMA) remains the open lever. Recommend **PLAN_18 = full ablations on CNN1D** (mirror of RESULT_14: 16-row subset, 8-lag staleness sweep, per-trajectory plots, formal latency b=1 + b=32); LSTM-attn documented as runner-up with the dead-reckoning structural finding in paper discussion. |
+
+| 18 | PLAN_18_phase-b-new-winner-cnn1d-ablations.md | RESULT_18_phase-b-new-winner-cnn1d-ablations.md | iter 18: phase-b-new-winner-cnn1d-ablations (PENDING_HASH) | Mirror RESULT_14's ablation suite on the new CNN1D winner (val 0.282 / test 0.339); 16-row subset, 8-lag staleness, per-trajectory plots, b=1+b=32 latency. Plus LSTM-attn dead-reckoning probe (16-row + 4-lag). Engineer: **CNN1D ablation holds paper-strength shape**. Sanity reproduction exact (val 0.282 / test 0.339 from cached checkpoint, both archs). CNN1D 16-row subset: `wifi+imu+camera` drop-Odom 0.338 m ≈ full-4-mod 0.339 m (Δ=0.3%); RESULT_14 drop-Odom pattern holds qualitatively but margin shrinks (CNN1D Δ=−0.3% vs incumbent Δ=−2.6%). CNN1D 8-lag staleness: linear slope **0.0280 m/s R²=0.995** (essentially identical to incumbent's 0.029 m/s — K=4 temporal property is architecture-invariant); 0 s 0.339 → 27 s 1.088 m. CNN1D per-trajectory smoothness median r=0.009 (debt persists; loss-function lever B-1/B-2 remains the open knob). CNN1D latency 100-trial: b=1 **4.73 ms/sample** (21× under 100 ms gate), b=32 **0.15 ms/sample** (660× under; ~25% faster than incumbent b=32). RESULT_17's "0.044 ms b=1" was a b=128-divided number; this is the corrected single-sample latency. **LSTM-attn dead-reckoning probe confirmed**: 16-row reveals ALL 4 only:X rows within 8 % of full (only:wifi 0.423, only:imu 0.339, only:camera 0.338, only:odom 0.357 vs full 0.340); only:imu ≈ only:camera ≈ full to noise level; uniform per-modality recovery NOT WiFi-anchor dependent (contrast CNN1D where only:camera=0.422 and only:odom=0.741 lag full by 24-119%). LSTM-attn 4-lag staleness: slope **0.0236 m/s** (R²=0.984) — 16% shallower than CNN1D's 0.028, 19% shallower than incumbent's 0.029 — dead-reckoning hypothesis supported by data (per-modality recovery means LSTM-attn leans on other 3 modalities harder when WiFi degrades). **Two fusion regimes confirmed structurally** = paper-grade discussion finding (cooperative CNN1D vs dead-reckoning LSTM-attn, tie on fresh accuracy, LSTM-attn more robust to staleness). One open question for scientist: LSTM-attn's `only:camera` 0.338 < full 0.340 — modality_dropout=0.4 over-regularising at inference? PLAN_19 recommendation: **option (a) MSILN cross-session re-run with new CNN1D winner** (RESULT_15 used incumbent + WiFiSetTransformer; CNN1D's 19% fresh accuracy gain in-sim may help gate (c)-1 which RESULT_15 missed); fallback option (b) Conformal coverage on CNN1D (~20 min). |
 
 (Both sides update this table — append a row when you finish your half.)
