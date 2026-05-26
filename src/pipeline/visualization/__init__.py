@@ -12,7 +12,13 @@ from .evaluation import (
     plot_subset_eval_bar,
 )
 from .preprocessing import plot_preprocessing_demo
+from .publication import (
+    plot_gt_trajectory,
+    plot_modality_samples,
+    plot_preprocessing_influence,
+)
 from .trajectory import plot_per_trajectory
+from .training_curves import plot_training_curves
 from ._style import COLOR_PALETTE, color_for, set_paper_style
 
 __all__ = [
@@ -22,5 +28,9 @@ __all__ = [
     "plot_subset_eval_bar",
     "plot_main_results_heatmap",
     "plot_preprocessing_demo",
+    "plot_gt_trajectory",
+    "plot_modality_samples",
+    "plot_preprocessing_influence",
+    "plot_training_curves",
     "COLOR_PALETTE", "color_for", "set_paper_style",
 ]

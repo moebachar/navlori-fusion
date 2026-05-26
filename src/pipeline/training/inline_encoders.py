@@ -835,6 +835,21 @@ def train_fusion_arch(
 
     model_pt = save_dir / "model.pt"
     torch.save({"state_dict": trainer.model.state_dict()}, model_pt)
+
+    # Persist the training history (train/val loss + val MAE per epoch) next to
+    # the checkpoint so FAST_MODE=True can render the training curve without
+    # re-training (PLAN_34 take #4).
+    import json as _json
+    hist_dict = {
+        "train_loss": list(getattr(history, "train_loss", []) or []),
+        "val_loss": list(getattr(history, "val_loss", []) or []),
+        "val_mae": list(getattr(history, "val_mae", []) or []),
+        "best_epoch": getattr(history, "best_epoch", None),
+        "best_val_mae": getattr(history, "best_val_mae", None),
+        "elapsed_sec": getattr(history, "elapsed_sec", elapsed),
+    }
+    with open(save_dir / "history.json", "w") as _f:
+        _json.dump(hist_dict, _f)
     if verbose:
         print(f"  {arch}: trained in {elapsed/60:.2f} min; saved {model_pt}", flush=True)
 
