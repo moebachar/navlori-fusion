@@ -16,6 +16,7 @@ from .publication import (
     plot_gt_trajectory,
     plot_modality_samples,
     plot_preprocessing_influence,
+    plot_trajectory_comparison,
 )
 from .trajectory import plot_per_trajectory
 from .training_curves import plot_training_curves
@@ -31,6 +32,7 @@ __all__ = [
     "plot_gt_trajectory",
     "plot_modality_samples",
     "plot_preprocessing_influence",
+    "plot_trajectory_comparison",
     "plot_training_curves",
     "COLOR_PALETTE", "color_for", "set_paper_style",
 ]

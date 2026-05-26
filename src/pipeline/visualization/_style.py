@@ -8,13 +8,14 @@ from __future__ import annotations
 import matplotlib as mpl
 
 
-PAPER_FONT_SIZE = 10
-PAPER_TITLE_SIZE = 11
-PAPER_FIG_DPI = 110
+PAPER_FONT_SIZE = 12
+PAPER_TITLE_SIZE = 13
+PAPER_FIG_DPI = 150
 
 # Color palette used across run-2 figures: stable mapping for the
 # main 4 architectures + per-leg SOTA.
 COLOR_PALETTE = {
+    "transformer":       "#4c4c4c",
     "incumbent":         "#4c4c4c",
     "cnn1d":             "#1f77b4",
     "lstm_attn":         "#2ca02c",

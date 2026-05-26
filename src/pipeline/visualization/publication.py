@@ -96,22 +96,36 @@ def plot_gt_trajectory(name: str, save_to: str | Path | None = None):
     if xy is None or len(xy) < 2:
         return None
 
-    fig, ax = plt.subplots(figsize=(5, 5))
+    fig, ax = plt.subplots(figsize=(8, 6), dpi=150)
     is_scatter = name == "uji_indoorloc"
     if is_scatter:
         ax.scatter(xy[:, 0], xy[:, 1], s=6, alpha=0.5, color="#1f77b4")
+        ax.set_aspect("equal", adjustable="datalim")
     else:
-        ax.plot(xy[:, 0], xy[:, 1], "-", color="#1f77b4", lw=1.4, alpha=0.85)
-        ax.scatter(xy[0, 0], xy[0, 1], color="green", s=45, zorder=5, label="start")
-        ax.scatter(xy[-1, 0], xy[-1, 1], color="red", s=45, zorder=5, label="end")
-        ax.legend()
-    ax.set_aspect("equal", adjustable="datalim")
+        ax.plot(xy[:, 0], xy[:, 1], "-", color="#1f77b4", lw=1.6, alpha=0.85)
+        ax.scatter(xy[0, 0], xy[0, 1], color="green", s=55, zorder=5, label="start")
+        ax.scatter(xy[-1, 0], xy[-1, 1], color="red", s=55, zorder=5, label="end")
+        ax.legend(loc="best")
+        # PLAN_35 take #2: equal aspect by default, but fall back to 'auto' for
+        # extreme thin-strip paths (e.g. IMUWiFine test paths where x_range ≫
+        # y_range collapses the y-axis under aspect='equal').
+        x_range = float(xy[:, 0].max() - xy[:, 0].min())
+        y_range = float(xy[:, 1].max() - xy[:, 1].min())
+        ratio = max(x_range, y_range) / max(min(x_range, y_range), 1e-6)
+        if ratio > 20:
+            ax.set_aspect("auto")
+            ax.set_title(f"Ground truth — {label}\n"
+                          f"(aspect=auto: thin strip, x:y range ratio = {ratio:.0f}:1)")
+        else:
+            ax.set_aspect("equal", adjustable="datalim")
+            ax.set_title(f"Ground truth — {label}")
     ax.set_xlabel("x (m)"); ax.set_ylabel("y (m)")
-    ax.set_title(f"Ground truth — {label}")
+    if is_scatter:
+        ax.set_title(f"Ground truth — {label}")
     ax.grid(True, alpha=0.3)
     fig.tight_layout()
     if save_to is not None:
-        fig.savefig(save_to, dpi=110, bbox_inches="tight")
+        fig.savefig(save_to, dpi=150, bbox_inches="tight")
     return fig
 
 
@@ -133,22 +147,44 @@ def plot_modality_samples(name: str, save_to: str | Path | None = None):
     panels = []  # list of (title, draw_fn)
 
     if "wifi" in mods:
-        rssi = _try_sample_rssi(name, n_paths=1)
-        if (rssi is None or not rssi.size) and name == "uji_indoorloc":
+        # PLAN_35 take #3: UJI is sparse (≈20-50 detected APs of 520 per scan).
+        # Show detected-only RSSI + a sparsity histogram rather than the
+        # "saturated" all-APs view.
+        if name == "uji_indoorloc":
             try:
                 df = pd.read_csv(path_to("data/uji_indoorloc/validationData.csv"))
                 waps = [c for c in df.columns if c.startswith("WAP")]
-                arr = df[waps].head(1).values.astype(float)
-                rssi = np.where(arr == 100, np.nan, arr)
+                X = df[waps].values.astype(float)
+                scan = X[0]
+                detected = scan[scan != 100]
+                n_per_scan = (X != 100).sum(axis=1)
+                def draw_uji_detected(ax, det=detected, n=len(detected)):
+                    ax.bar(np.arange(n), det, color="steelblue", width=1.0)
+                    ax.set_xlabel("detected AP (sorted by index)")
+                    ax.set_ylabel("RSSI (dBm)")
+                    ax.set_ylim(-110, 0)
+                    ax.set_title(f"scan 0: {n}/520 APs detected")
+                def draw_uji_sparsity(ax, n_per_scan=n_per_scan):
+                    ax.hist(n_per_scan, bins=30, color="steelblue", edgecolor="black")
+                    ax.axvline(n_per_scan.mean(), color="red", ls="--",
+                                label=f"mean = {n_per_scan.mean():.1f}")
+                    ax.set_xlabel("detected APs per scan")
+                    ax.set_ylabel("# scans")
+                    ax.legend()
+                    ax.set_title(f"UJI val sparsity (n={len(n_per_scan)} scans)")
+                panels.append(("WiFi — detected-only RSSI", draw_uji_detected))
+                panels.append(("WiFi — scan sparsity", draw_uji_sparsity))
             except Exception:
-                rssi = None
-        if rssi is not None and rssi.size:
-            scan = rssi[0]
-            def draw_wifi(ax, scan=scan):
-                vals = np.where(np.isnan(scan), -100.0, scan)
-                ax.bar(range(len(vals)), vals, color="#1f77b4", width=1.0)
-                ax.set_xlabel("AP index"); ax.set_ylabel("RSSI (dBm)")
-            panels.append(("WiFi — one RSSI scan", draw_wifi))
+                pass
+        else:
+            rssi = _try_sample_rssi(name, n_paths=1)
+            if rssi is not None and rssi.size:
+                scan = rssi[0]
+                def draw_wifi(ax, scan=scan):
+                    vals = np.where(np.isnan(scan), -100.0, scan)
+                    ax.bar(range(len(vals)), vals, color="#1f77b4", width=1.0)
+                    ax.set_xlabel("AP index"); ax.set_ylabel("RSSI (dBm)")
+                panels.append(("WiFi — one RSSI scan", draw_wifi))
 
     if "imu" in mods:
         imu = _try_sample_imu(name, n_paths=1)
@@ -172,19 +208,58 @@ def plot_modality_samples(name: str, save_to: str | Path | None = None):
             panels.append(("IMU — 200-sample window", draw_imu))
 
     if "camera" in mods:
-        img = None
-        try:
-            from PIL import Image
-            cam_dir = path_to("data/tartanair_hospital/P000/image_left")
-            frames = sorted(cam_dir.glob("*.png"))
-            if frames:
-                img = np.asarray(Image.open(str(frames[0])).convert("RGB"))
-        except Exception:
-            img = None
-        if img is not None:
-            def draw_cam(ax, img=img):
-                ax.imshow(img); ax.axis("off")
-            panels.append(("Camera — one frame", draw_cam))
+        # PLAN_35 take #1: pick the correct camera source per dataset.
+        # Webots persists only depth PNGs + cached DPVO features (no raw RGB).
+        # TartanAir has raw RGB. Don't cross-wire the two.
+        if name == "webots":
+            try:
+                import torch
+                from PIL import Image
+                webots_root = path_to("data/async_collection")
+                depth_img, dpvo_feat = None, None
+                for pdir in sorted(webots_root.glob("path_*")):
+                    if depth_img is None:
+                        depths = sorted((pdir / "camera").glob("depth_*.png"))
+                        if depths:
+                            depth_img = np.asarray(
+                                Image.open(str(depths[len(depths) // 2])))
+                    if dpvo_feat is None:
+                        fp = pdir / "dpvo_features.pt"
+                        if fp.is_file():
+                            d = torch.load(str(fp), map_location="cpu",
+                                           weights_only=False)
+                            f = d.get("features") if isinstance(d, dict) else d
+                            if f is not None:
+                                dpvo_feat = np.asarray(f)
+                    if depth_img is not None and dpvo_feat is not None:
+                        break
+                if depth_img is not None:
+                    def draw_webots_depth(ax, img=depth_img):
+                        ax.imshow(img, cmap="viridis"); ax.axis("off")
+                    panels.append(("Webots camera — one depth frame "
+                                     "(raw RGB not persisted)", draw_webots_depth))
+                if dpvo_feat is not None:
+                    def draw_dpvo(ax, feat=dpvo_feat):
+                        ax.imshow(feat, aspect="auto", cmap="magma",
+                                  interpolation="nearest")
+                        ax.set_xlabel("DPVO feature channel")
+                        ax.set_ylabel("frame index")
+                    panels.append(("Webots camera — cached DPVO features",
+                                     draw_dpvo))
+            except Exception:
+                pass
+        elif name == "tartanair_hospital":
+            try:
+                from PIL import Image
+                cam_dir = path_to("data/tartanair_hospital/P000/image_left")
+                frames = sorted(cam_dir.glob("*.png"))
+                if frames:
+                    img = np.asarray(Image.open(str(frames[0])).convert("RGB"))
+                    def draw_cam(ax, img=img):
+                        ax.imshow(img); ax.axis("off")
+                    panels.append(("Camera — one frame", draw_cam))
+            except Exception:
+                pass
 
     if "odom" in mods:
         coll = s.get("collection_dir") or s.get("data_dir") or ""
@@ -215,15 +290,15 @@ def plot_modality_samples(name: str, save_to: str | Path | None = None):
         return None
 
     n = len(panels)
-    fig, axes = plt.subplots(1, n, figsize=(4.2 * n, 3.2), squeeze=False)
+    fig, axes = plt.subplots(1, n, figsize=(5.0 * n, 3.8), squeeze=False, dpi=150)
     axes = axes[0]
     for ax, (title, draw) in zip(axes, panels):
         draw(ax)
-        ax.set_title(title, fontsize=9)
-    fig.suptitle(f"{name} — raw modality samples", fontsize=11)
+        ax.set_title(title, fontsize=11)
+    fig.suptitle(f"{name} — raw modality samples", fontsize=13)
     fig.tight_layout()
     if save_to is not None:
-        fig.savefig(save_to, dpi=110, bbox_inches="tight")
+        fig.savefig(save_to, dpi=150, bbox_inches="tight")
     return fig
 
 
@@ -249,7 +324,7 @@ def plot_preprocessing_influence(name: str, modality: str,
     if raw is None or pre is None or raw.size == 0:
         return None
 
-    fig, axes = plt.subplots(1, 2, figsize=(10, 3.2))
+    fig, axes = plt.subplots(1, 2, figsize=(11, 3.8), dpi=150)
     raw0 = raw[0] if raw.ndim > 1 else raw
     pre0 = pre[0] if pre.ndim > 1 else pre
 
@@ -279,8 +354,73 @@ def plot_preprocessing_influence(name: str, modality: str,
     return fig
 
 
+# --------------------------------------------------------------------------
+# Predicted-vs-GT-vs-SOTA trajectory overlay (PLAN_35 take #7)
+# --------------------------------------------------------------------------
+
+def plot_trajectory_comparison(predictions: dict,
+                               gt,
+                               *,
+                               title: str = "",
+                               equal_aspect: bool = True,
+                               save_to: str | Path | None = None):
+    """Overlay multiple predicted (x, y) trajectories on top of a ground-truth
+    reference path.
+
+    Parameters
+    ----------
+    predictions : dict[str, ndarray]
+        ``{method_name: (N, 2) ndarray}`` of predicted trajectories. All
+        predictions should be on the same temporal grid; missing methods can
+        be omitted.
+    gt : (N, 2) ndarray
+        Ground-truth trajectory in the same frame.
+    title : str
+        Plot title.
+    equal_aspect : bool
+        If True, set ``ax.set_aspect("equal", adjustable="datalim")``; thin-
+        strip paths fall back to ``"auto"`` automatically.
+    """
+    set_paper_style()
+    gt = np.asarray(gt)
+    if gt.ndim != 2 or gt.shape[1] < 2 or len(gt) < 2:
+        return None
+
+    fig, ax = plt.subplots(figsize=(8, 6), dpi=150)
+    ax.plot(gt[:, 0], gt[:, 1], "k-", lw=2.5, alpha=0.9, zorder=5,
+            label="ground truth")
+    palette = ["tab:blue", "tab:orange", "tab:green", "tab:red", "tab:purple",
+               "tab:brown"]
+    for i, (name, pred) in enumerate(predictions.items()):
+        pred = np.asarray(pred)
+        if pred.ndim != 2 or pred.shape[1] < 2 or len(pred) < 2:
+            continue
+        ax.plot(pred[:, 0], pred[:, 1], lw=1.6, alpha=0.85,
+                color=palette[i % len(palette)], label=name)
+    ax.scatter(gt[0, 0], gt[0, 1], c="green", s=70, marker="o", zorder=6,
+               label="start")
+    ax.scatter(gt[-1, 0], gt[-1, 1], c="red", s=70, marker="s", zorder=6,
+               label="end")
+    if equal_aspect:
+        x_range = float(gt[:, 0].max() - gt[:, 0].min())
+        y_range = float(gt[:, 1].max() - gt[:, 1].min())
+        ratio = max(x_range, y_range) / max(min(x_range, y_range), 1e-6)
+        ax.set_aspect("auto" if ratio > 20 else "equal",
+                       adjustable=None if ratio > 20 else "datalim")
+    ax.set_xlabel("x (m)"); ax.set_ylabel("y (m)")
+    if title:
+        ax.set_title(title)
+    ax.legend(loc="best", fontsize=10)
+    ax.grid(True, alpha=0.3)
+    fig.tight_layout()
+    if save_to is not None:
+        fig.savefig(save_to, dpi=150, bbox_inches="tight")
+    return fig
+
+
 __all__ = [
     "plot_gt_trajectory",
     "plot_modality_samples",
     "plot_preprocessing_influence",
+    "plot_trajectory_comparison",
 ]

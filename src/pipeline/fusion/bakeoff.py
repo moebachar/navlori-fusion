@@ -218,3 +218,7 @@ CANDIDATES = {
     "cnn1d": build_cnn1d,
     "mot_transformer": build_mot_transformer,
 }
+# Display alias (PLAN_35 take #4): the run-1 set-transformer is referred to
+# as `transformer` in the notebook + papers; the registry keeps `incumbent`
+# for back-compat with RESULT_NN references and existing checkpoint dirs.
+CANDIDATES["transformer"] = CANDIDATES["incumbent"]
