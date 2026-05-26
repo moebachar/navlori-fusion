@@ -37,9 +37,9 @@ from model_resnet1d import BasicBlock1D, FCOutputModule, ResNet1D  # noqa: E402
 
 from src.pipeline.fusion.builder import load_config  # noqa: E402
 
-OUT_DIR = ROOT / "runs" / "overnight" / "run2_iter_19"
+OUT_DIR_DEFAULT = ROOT / "runs" / "overnight" / "run2_iter_19"
 
-WIN = 32           # IMUWiFine config: imu window = 32 samples (~1 s)
+WIN = 32           # imu window = 32 samples (~1 s after downsample)
 LOOKBACK = 1.0     # velocity target = displacement over the last 1 s
 
 
@@ -118,7 +118,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--epochs", type=int, default=30)
     ap.add_argument("--dataset", default="imuwifine")
+    ap.add_argument("--out-dir", default=None,
+                    help="Override OUT_DIR (default: runs/overnight/run2_iter_19)")
     args = ap.parse_args()
+    OUT_DIR = Path(args.out_dir) if args.out_dir else OUT_DIR_DEFAULT
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     dev = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -210,7 +213,7 @@ def main():
         print("  TEST: no IMU windows available (test paths lack imu.csv).", flush=True)
 
     out = {
-        "method": "RoNIN ResNet1D (trained from scratch on IMUWiFine train)",
+        "method": f"RoNIN ResNet1D (trained from scratch on {args.dataset} train)",
         "n_params": int(n_params),
         "epochs": int(args.epochs),
         "win": WIN,
@@ -226,9 +229,10 @@ def main():
         "test": test_summary,
         "best_val_huber": best_v,
     }
-    with open(OUT_DIR / "ronin_imuwifine.json", "w") as f:
+    out_fn = f"ronin_{args.dataset}.json"
+    with open(OUT_DIR / out_fn, "w") as f:
         json.dump(out, f, indent=2)
-    print(f"\nwrote {OUT_DIR / 'ronin_imuwifine.json'}", flush=True)
+    print(f"\nwrote {OUT_DIR / out_fn}", flush=True)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,24 @@
+# IPIN 2024 Track 3 - floor 0.
+# 16 paths total (native split: train=6 / val=4 / test=6).
+# Modalities: wifi + imu (no odom, no camera - smartphone dataset).
+# GT is POSI waypoints linearly interpolated at 10 Hz then projected
+# to local XY via equirectangular tangent plane at the floor centroid.
+data:
+  name: ipin2024_floor0
+  root: ${oc.env:NAVLORI_DATA_ROOT,data}
+  collection_dir: ipin2024_floor0
+  source: ipin2024
+  modalities: [wifi, imu]
+
+  split:
+    train_paths: [0, 1, 2, 3, 4, 5]
+    val_paths:   [6, 7, 8, 9]
+    test_paths:  [10, 11, 12, 13, 14, 15]
+
+  preprocessing:
+    normalize: true
+    wifi_pca: 128   # reduce 232 APs -> 128 dims
+
+  windows:
+    imu: 32    # ~1 s at 32 Hz
+    wifi: 1    # single scan

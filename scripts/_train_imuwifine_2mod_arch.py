@@ -29,7 +29,7 @@ from src.pipeline.fusion.builder import (  # noqa: E402
 )
 from src.pipeline.training.fusion_trainer import FusionTrainer  # noqa: E402
 
-OUT_DIR = ROOT / "runs" / "overnight" / "run2_iter_19"
+OUT_DIR_DEFAULT = ROOT / "runs" / "overnight" / "run2_iter_19"
 
 
 def per_path_distribution(preds, gts, pid):
@@ -93,11 +93,16 @@ def main():
     ap.add_argument("--epochs", type=int, default=90)
     ap.add_argument("--batch-size", type=int, default=128)
     ap.add_argument("--pretest-epochs", type=int, default=5)
+    ap.add_argument("--dataset", default="imuwifine",
+                    help="Hydra dataset config name (e.g. imuwifine, ipin2024_floor0)")
+    ap.add_argument("--out-dir", default=None,
+                    help="Override OUT_DIR (default runs/overnight/run2_iter_19)")
     args = ap.parse_args()
 
+    OUT_DIR = Path(args.out_dir) if args.out_dir else OUT_DIR_DEFAULT
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    print(f"=== arch={args.arch}  IMUWiFine WiFi+IMU K=4 B={args.batch_size} ===", flush=True)
-    cfg = load_config("imuwifine")
+    print(f"=== arch={args.arch}  dataset={args.dataset}  WiFi+IMU K=4 B={args.batch_size} ===", flush=True)
+    cfg = load_config(args.dataset)
     cfg.dataset.modalities = ["wifi", "imu"]
     cfg.temporal.n_instants = 4
     cfg.data.batch_size = args.batch_size
@@ -196,11 +201,11 @@ def main():
         if m.sum() > 5:
             plot_path(pred[m], gt[m], p,
                       OUT_DIR / "test_paths" / f"{args.arch}_path_{p:02d}.png",
-                      f"({args.arch} IMUWiFine)")
+                      f"({args.arch} {args.dataset})")
 
     out = {
         "arch": args.arch,
-        "config": {"dataset": "imuwifine",
+        "config": {"dataset": args.dataset,
                     "modalities": list(model.modalities),
                     "n_instants": int(cfg.temporal.n_instants),
                     "batch_size": int(cfg.data.batch_size),
@@ -219,9 +224,10 @@ def main():
         "n_params": int(n_params),
         "test_top5_longest_paths": top5,
     }
-    with open(OUT_DIR / f"{args.arch}_imuwifine.json", "w") as f:
+    out_fn = f"{args.arch}_{args.dataset}.json"
+    with open(OUT_DIR / out_fn, "w") as f:
         json.dump(out, f, indent=2)
-    print(f"\nwrote {OUT_DIR / f'{args.arch}_imuwifine.json'}", flush=True)
+    print(f"\nwrote {OUT_DIR / out_fn}", flush=True)
 
 
 if __name__ == "__main__":
