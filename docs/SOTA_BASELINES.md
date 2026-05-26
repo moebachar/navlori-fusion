@@ -1,70 +1,116 @@
-# SOTA baselines — open-source references + controlled fusion comparison
+# SOTA baselines + run-2 main results
 
-**Plan (decided 2026-05-22, supersedes earlier cross-dataset framing).**
-Anchor2Vec/eAaT+ has no open code, so the *reference* baselines are open-source methods:
-- **WiFi baseline = CNNLoc** (open source) on **UJIIndoorLoc**.
-- **IMU baseline = RoNIN** (open source) on the **RoNIN** dataset.
+> Run-2 closed 2026-05-26 (`GOAL_REACHED: true with documented
+> limitations`). Source of truth for the paper-facing numbers is
+> [`handoff/SUMMARY.md`](../handoff/SUMMARY.md). This doc mirrors
+> the headline table for reproducibility + cross-references the
+> consolidated APIs that produce each cell.
 
-Two phases:
+## Paper-facing main results (6 rows × 9 columns)
 
-### Phase A — per-leg validation (each on the baseline's own dataset)
-Run **our** encoder on the same benchmark + protocol as the open-source baseline and show we match/beat it:
-- our WiFi encoder vs **CNNLoc** on UJIIndoorLoc.
-- our IMU method (RoNIN-class net, to be built) vs **RoNIN** on the RoNIN unseen-subjects set (ATE/RTE).
+Exclusions per
+[`handoff/SCIENTIST_NOTE_notebook-exclusions.md`](../handoff/SCIENTIST_NOTE_notebook-exclusions.md):
+- **IPIN 2024 floor 0** dropped from paper-facing rows (RESULT_22 β5).
+- **MoTTransformer** dropped from paper-facing columns (RESULT_21 γ5).
 
-### Phase B — controlled fusion comparison (one both-modality dataset)
-On a dataset with BOTH WiFi+IMU (IPIN floor −2):
-- run **CNNLoc** using WiFi only → its number on IPIN.
-- run **RoNIN** using IMU only → its number on IPIN.
-- run **our fusion** (both modalities) → our number on IPIN.
-- claim: **our fusion < CNNLoc and < RoNIN on the same data.** This is the clean, controlled "fusion beats each single-modality SOTA" result — no cross-dataset confound.
+Both remain in the repo for reproducibility (see
+`src/pipeline/data/ipin2024.py`, `src/pipeline/fusion/mot_transformer.py`,
+`runs/overnight/run2_iter_{21,22}/`).
 
-This is the only framing that supports a defensible fusion-wins claim. The earlier idea (compare our IPIN fusion number to CNNLoc-on-UJI / RoNIN-on-RoNIN) is invalid (different datasets/scales) and is dropped.
+Render the live table via:
 
----
+```python
+from src.pipeline.evaluation import MainResultsTable
+print(MainResultsTable.from_archive().to_markdown())
+```
 
-## Status
+| dataset            | modalities         | wlan_localization | RoNIN ResNet1D  | TartanVO     | Anchor2Vec | DPVOMotion  | IMUCNN      | incumbent       | cnn1d (winner)        | lstm_attn          |
+|--------------------|--------------------|-------------------|-----------------|--------------|------------|-------------|-------------|-----------------|-----------------------|--------------------|
+| Webots sim         | WiFi+IMU+Cam+Odom  | n/a               | n/a             | n/a          | n/a        | n/a         | n/a         | 0.394 v/0.417 t | **0.282 v / 0.339 t** | 0.301 v / 0.340 t  |
+| IMUWiFine fl.4 (1) | WiFi+IMU           | 4.17 v / 8.50 t   | 26.84 v / n.a.  | n/a          | n/a        | n/a         | n/a         | n/a             | 1.40 v / 7.09 t       | **1.26 v** / 7.20 t|
+| MSILN site1/B1     | WiFi+IMU x-session | 21.26 v / 28.31 t | n/a             | n/a          | n/a        | n/a         | n/a         | 16.60 v / 14.02 t | (PLAN_15 incumbent)  | n/a                |
+| RoNIN canonical (2)| IMU only           | n/a               | **5.140 t**     | n/a          | n/a        | n/a         | 9.961 t     | n/a             | 7.59 t (Umey 5.95)    | 7.50 t (Umey 6.12) |
+| TartanAir hosp.    | Camera only        | n/a               | n/a             | **0.012 t-20%** | n/a     | 0.293 t-20% | n/a         | n/a             | n/a (3)               | n/a (3)            |
+| UJI IndoorLoc      | WiFi only val      | 15.17 v           | n/a             | n/a          | **8.69 v** | n/a         | n/a         | n/a             | 8.72 v                | **8.43 v**         |
 
-### WiFi  (Phase A: validated against open-source baseline)
-| | UJI `validationData.csv` mean Euclidean |
-|---|---|
-| **Our Anchor2Vec** (`scripts/eval_uji_wifi.py`) | **8.55 m** |
-| **Open-source baseline** — sharan-naribole/wlan_localization (`scripts/eval_wlanloc_uji.py`) | **13.92 m** global / 12.99 m cascade-oracle |
+Notes:
+1. IMUWiFine test split lacks IMU per dataset design (RESULT_20 audit) →
+   fusion test = WiFi-only inference floor.
+2. RoNIN raw / Umeyama-aligned ATE; reuses RESULT_07 pretrained ResNet1D
+   (paper-exact 5.140). CNN1D's **Umeyama gap +15.7 % clears the 20 %
+   audit gate** (RESULT_23).
+3. Camera external-SOTA validation queued as Phase C extension
+   (paper-soft per RESULT_08); fusion test n/a — image-only sequence,
+   no co-recording multi-mod data.
 
-The baseline is the open-source `wlan_localization` package (MIT, 2.6-8.2m advertised, github.com/sharan-naribole/wlan_localization), **run from their installed code** — we import their `PositionRegressor` and `DataPreprocessor` classes directly from their source files (via `importlib`) to bypass a broken `__init__` chain (their `imblearn` dependency clashes with our `scikit-learn`). No source modifications. Pinning their `imbalanced-learn` to a working version did not resolve the chain conflict, so we use the underlying classes pure.
+## Reproducing each cell
 
-**Anchor2Vec beats their open-source code on the standard UJI val by 5.4m** (8.55 vs 13.92, same data + metric). Their README claims 5.28m, but that figure is on a stratified 90/10 *internal* split of `trainingData.csv` (their `cascade_optimal.yaml` has `test_size: 0.1`) — not on the canonical UJI `validationData.csv`. On the standard benchmark their own code gives ~13m, ours gives 8.55m. The earlier CNNLoc *reimplementation* (`eval_cnnloc_uji.py`, 9.38m) is retired — replaced by the open-source baseline above per demand #3 (no manual reimplementation).
+Each canonical script is built on the consolidated APIs from
+PLAN_26-28 (`src.pipeline.baselines`, `src.pipeline.data`,
+`src.pipeline.fusion`, `src.pipeline.training`):
 
-### IMU  (Phase A: validated, symmetric)
-| method | RoNIN unseen ATE (raw / aligned) |
-|---|---|
-| **Our IMUCNN** (light, ~500k params, with RoNIN preprocessing) | **14.41 m / 8.41 m** |
-| **RoNIN ResNet** (baseline, ResNet18, ~4.6M params) | **5.93 m** raw (paper 5.14m) |
+| script | reproduces | numbers |
+|--------|-----------|---------|
+| `scripts/eval_uji.py` | RESULT_01 | wlanloc 15.17 m + Anchor2Vec 8.69 m on UJI val |
+| `scripts/eval_ronin_canonical.py` | RESULT_07 | ResNet1D pretrained 5.140 m on canonical unseen |
+| `scripts/eval_tartanair_hospital.py` | RESULT_08 | TartanVO 0.012 m + DPVOMotion 0.293 m last-20% |
+| `scripts/_eval_wlanloc_imuwifine.py` | RESULT_19 | wlanloc on IMUWiFine fl.4 (val 4.17 / test 8.50) |
+| `scripts/_eval_wlanloc_msiln.py` | RESULT_15 | wlanloc on MSILN (val 21.26 / test 28.31) |
 
-Both run dead-reckoning (predict per-step velocity → cumulative integration → ATE) on the official `list_test_unseen.txt` (32 sequences). Both use RoNIN's `GlobSpeedSequence` loader (their open-source preprocessing, imported pure — no source edits; numpy `np.int` compat applied as a runtime shim, not a file patch).
+The `scripts/_eval_*.py` underscore-prefix variants are
+iteration-scoped historical runners. The non-underscore
+`scripts/eval_*.py` versions are the consolidated canonical
+wrappers PLAN_29 promoted.
 
-**Disaster fix:** an earlier hand-rolled preprocessing (yaw-only rotation, no IMU calibration, no gravity/pitch-roll stabilization) leaked gravity into horizontal accel and gave 52 m / 29 m ATE. Same encoder on RoNIN's proper world-frame 6-channel preprocessing drops to 14.41 m / 8.41 m — **3.5× drop from one preprocessing fix**. Diagnostic: the loader's z-accel channel mean is **9.817 m/s² (≈ gravity)** in world z, where it belongs.
+## Cross-cutting findings
 
-Honest read: our small IMUCNN is **half as accurate** as RoNIN's purpose-built ResNet18, which is appropriate given the 9× parameter gap. It's a real velocity / dead-reckoning encoder, not a "fusion-aid only" excuse. The encoder of choice in Phase B fusion remains RoNIN ResNet (per the user decision, demand #3 keeps it open-source pure).
+See [`handoff/SUMMARY.md`](../handoff/SUMMARY.md) §4 (5 paragraphs):
 
-### Fusion (Phase B: validated against open-source baselines)
+1. **LSTM-attn dead-reckoning regime** confirmed across 3 datasets ×
+   4 scenarios (Webots, IMUWiFine, IPIN floor 0).
+2. **Smoothness debt is architecture-invariant** — falsified the
+   architectural-lever hypothesis (4 archs × 5+ datasets all under
+   r=0.20 gate).
+3. **RoNIN RTE-to-ATE asymmetry** is the same loss-function signal
+   as the smoothness debt — same fix.
+4. **Three distinct fusion regimes** emerged: CNN1D cooperative,
+   LSTM-attn dead-reckoning, MoTTransformer WiFi-anchored. Same
+   encoders + protocol; only the aggregator differs.
+5. **Cross-dataset transferability**: Anchor2Vec beats wlanloc on
+   UJI + IPIN per-leg. Fusion's value is the 4-modality story on
+   Webots, not universal cross-dataset dominance.
 
-Controlled head-to-head on IPIN floor −2 val (same data, same per-sample mean Euclidean metric). **Both single-modality baselines run from the open-source code unmodified** (`PositionRegressor` for WiFi; RoNIN's `model_resnet1d`+`GlobSpeedSequence` for IMU).
+## Criterion verdicts (a-e)
 
-| method | modality | IPIN val MAE | per-path |
-|---|---|---|---|
-| **Our fusion** (M4 decomposed, M1 raw WiFi + M4 world IMU) | WiFi+IMU | **10.05 m** | 5.4–16.1 m |
-| `wlan_localization` (open-source baseline, scripts/eval_wlanloc_ipin.py) | WiFi | 23.12 m | — |
-| RoNIN ResNet1D (open-source baseline, scripts/eval_ronin_ipin.py) | IMU | 42.87 m | 32.5–53.3 m |
+| crit. | description                                | status | source       |
+|-------|--------------------------------------------|:-------|--------------|
+| (a)   | per-leg SOTA ≤ 20 %                        | partial | RESULT_01/07/08 |
+| (b)   | 4-mod Webots test ≤ 0.5 m                  | ✓ 32 % margin | RESULT_17    |
+| (c)   | MSILN cross-session                        | partial | RESULT_15    |
+| (d)   | per-path + smoothness r > 0.20             | smoothness UNMET | run-2 4-arch falsification |
+| (e)   | latency < 100 ms / sample                  | ✓✓ 21×-660× under | RESULT_18    |
 
-**Our fusion beats each open-source single-modality SOTA baseline on the same data:**
-- vs `wlan_localization` (WiFi-only): **−13.07 m**. The library's preprocessor (Box-Cox + PCA, 520-AP UJI tuning) doesn't transfer well to IPIN's 166-AP / 9.9k-sample regime. We don't tune their hyperparameters — code is used unmodified per demand #3.
-- vs RoNIN ResNet1D (IMU-only): **−32.82 m**. Expected and structural — IMU dead-reckoning over IPIN's multi-minute val paths drifts catastrophically without an absolute anchor; no method fixes this with IMU alone.
+## Open follow-ups (post-run-2)
 
-**Caveats to state plainly:**
-- Margin over CNNLoc is small. A bigger relative win would need either denser WiFi data (IPIN val has 29% of samples with WiFi >15 s stale — see autopsy Probe 9) or a stronger WiFi encoder. The autopsy quantified that even a perfect WiFi+motion system is capped near 6–7 m on IPIN by data sparsity.
-- RoNIN-on-IPIN's 42.87 m is a fair use of their architecture/protocol but cannot improve much in this regime: standalone IMU integration over minute-long paths drifts to tens of meters by physics, no matter the network. The point is that **fusion provides the anchor IMU can't**, which is the whole reason for fusion existing.
+Per SUMMARY.md §6:
 
-## The defensible claim
+1. **PLAN_25b**: B-1 auxiliary velocity loss / B-2 EMA token
+   smoothing on CNN1D winner — close smoothness debt + RoNIN RTE
+   asymmetry in one experiment (~30 min).
+2. **MSILN re-run with CNN1D + Anchor2Vec** (~3 h) — may close
+   gate (c)-1.
+3. **Camera external-SOTA full validation** (~1 day) — paper-soft → clean.
+4. **Conformal coverage on CNN1D** (~30 min).
+5. **Pre-submission cleanup**: figure regeneration; mechanical.
 
-> Our WiFi encoder reproduces published SOTA on UJIIndoorLoc (8.55 m vs eAaT+ 8.16 m). Our IMU encoder reproduces published RoNIN ResNet on RoNIN unseen subjects (5.93 m vs paper 5.14 m, with half the data). On a third, both-modality dataset (IPIN floor −2 trial-out), our fusion beats both open-source single-modality SOTA baselines (CNNLoc 10.36 m, RoNIN-IPIN 42.87 m) on the same data with the same metric — fusion 10.05 m. The fusion improvement over the best single leg is genuine but small, bounded by IPIN's WiFi sparsity (29% of val samples > 15 s stale; per-leg ceiling ~6–7 m).
+## Historical context (pre-run-2 framing)
+
+The original SOTA-baselines plan from 2026-05-22 named:
+- WiFi baseline = CNNLoc on UJI.
+- IMU baseline = RoNIN on the RoNIN unseen-subjects set.
+
+Run-2 retained the structure but updated the WiFi baseline to
+`sharan-naribole/wlan_localization` (CNNLoc had no working open
+release at the time; RESULT_01 reproduces wlanloc 15.17 m as the
+SOTA reference). The IMU side stuck with RoNIN ResNet1D
+(RESULT_07 paper-exact reproduction at 5.140 m).
