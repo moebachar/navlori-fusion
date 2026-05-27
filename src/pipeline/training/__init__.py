@@ -26,6 +26,8 @@ from .inline_encoders import (
     train_fusion_arch,
     train_imucnn,
     train_odomcnn,
+    train_ronin_canonical_arch,
+    train_uji_arch,
 )
 from .trainer import EncoderTrainer
 
@@ -36,4 +38,5 @@ __all__ = [
     "train_odomcnn", "load_webots_odom_pb", "compute_trivial_integration_floor",
     "train_dpvo_motion_head",
     "train_fusion_arch",
+    "train_uji_arch", "train_ronin_canonical_arch",
 ]

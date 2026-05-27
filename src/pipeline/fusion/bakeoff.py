@@ -118,6 +118,36 @@ class _DilatedTCN(nn.Module):
         return out * keep
 
 
+class _PlainTransformer(nn.Module):
+    """Small set-transformer aggregator over (B, S, D) — drop-in replacement
+    for ``_PlainCNN1D`` / ``_MaskedBiLSTM`` with the same
+    ``(x, key_padding_mask) -> x`` signature.
+
+    Used by the single-modality scaffolds (UJI K=1 M=1 / RoNIN canonical
+    K=4 M=1) to fill the `transformer` column of Table C in PLAN_37. At
+    K=1 it's degenerate (self-attention over 1 token is identity-with-MLP);
+    at K=4 it performs real cross-time attention.
+    """
+
+    def __init__(self, embed_dim: int, n_heads: int = 4, ff_mult: int = 4,
+                 dropout: float = 0.1, num_layers: int = 2):
+        super().__init__()
+        layer = nn.TransformerEncoderLayer(
+            d_model=embed_dim, nhead=n_heads,
+            dim_feedforward=embed_dim * ff_mult,
+            dropout=dropout, activation="gelu", batch_first=True,
+            norm_first=False,
+        )
+        self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
+        self.norm = nn.LayerNorm(embed_dim)
+
+    def forward(self, x: torch.Tensor, key_padding_mask: torch.Tensor) -> torch.Tensor:
+        out = self.encoder(x, src_key_padding_mask=key_padding_mask)
+        out = self.norm(x + out)  # residual; matches the other aggregators' pattern
+        keep = (~key_padding_mask).unsqueeze(-1).to(out.dtype)
+        return out * keep
+
+
 class _PlainCNN1D(nn.Module):
     """3-layer plain 1D conv (no dilation) — minimum-baseline candidate."""
 

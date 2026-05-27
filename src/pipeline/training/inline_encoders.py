@@ -856,10 +856,277 @@ def train_fusion_arch(
     return trainer, history, model_pt
 
 
+# ---------------------------------------------------------------------------
+# Per-leg single-mod arch sweeps for Table C (PLAN_37): UJI K=1 M=1 and
+# RoNIN canonical K=4 M=1 — same scaffolds the run-2 scripts used, generalised
+# over the three bake-off aggregators (cnn1d / lstm_attn / transformer).
+# ---------------------------------------------------------------------------
+
+def _build_aggregator(arch: str, embed_dim: int = 128, dropout: float = 0.1):
+    """Construct one of the bake-off aggregators with the canonical signature
+    ``(x, key_padding_mask) -> x``. Supports the three archs we need for the
+    main results table (PLAN_37)."""
+    from src.pipeline.fusion.bakeoff import (
+        _MaskedBiLSTM, _PlainCNN1D, _PlainTransformer,
+    )
+    if arch == "cnn1d":
+        return _PlainCNN1D(embed_dim=embed_dim, dropout=dropout)
+    if arch == "lstm_attn":
+        return _MaskedBiLSTM(embed_dim=embed_dim, hidden_dim=embed_dim,
+                              num_layers=2, dropout=dropout)
+    if arch == "transformer":
+        return _PlainTransformer(embed_dim=embed_dim, dropout=dropout)
+    raise ValueError(f"unknown arch {arch!r}; expected cnn1d/lstm_attn/transformer")
+
+
+def train_uji_arch(arch: str, *,
+                    n_anchors: int = 64,
+                    embed_dim: int = 128,
+                    epochs: int = 120,
+                    batch_size: int = 256,
+                    lr: float = 1e-3,
+                    seed: int = 42,
+                    device: str | None = None,
+                    verbose: bool = True):
+    """Anchor2Vec + per-arch aggregator (degenerate at K=1) on UJIIndoorLoc.
+
+    Mirrors ``scripts/_train_uji_arch.py`` (RESULT_24) but generalised over
+    the three Table-C archs. Returns ``(model_dict, history)`` with
+    ``model_dict`` carrying the encoder + aggregator + head and the best
+    val mean-Euclidean error.
+    """
+    from pathlib import Path
+    import pandas as pd
+    from src.pipeline.encoders import Anchor2Vec
+
+    device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+    torch.manual_seed(seed); np.random.seed(seed)
+    data_dir = Path(__file__).resolve().parents[3] / "data" / "uji_indoorloc"
+
+    def _load(csv_name):
+        df = pd.read_csv(data_dir / csv_name)
+        waps = [c for c in df.columns if c.startswith("WAP")]
+        rssi = df[waps].values.astype(np.float32)
+        rssi = np.where(rssi == 100, -100.0, rssi)
+        rssi = np.clip(rssi, -100.0, 0.0)
+        feat = (rssi + 100.0) / 100.0
+        xy = df[["LONGITUDE", "LATITUDE"]].values.astype(np.float32)
+        return feat, xy
+
+    Xtr, Ytr = _load("trainingData.csv")
+    Xva, Yva = _load("validationData.csv")
+    n_aps = Xtr.shape[1]
+    mu = Ytr.mean(0)
+    Ytr_c, Yva_c = Ytr - mu, Yva - mu
+
+    class _UjiArch(nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.enc = Anchor2Vec(n_aps=n_aps, embed_dim=embed_dim,
+                                   n_anchors=n_anchors)
+            self.aggregator = _build_aggregator(arch, embed_dim=embed_dim)
+            self.head = nn.Linear(embed_dim, 2)
+
+        def forward(self, x):
+            z = self.enc(x)
+            B = z.shape[0]
+            z = z.unsqueeze(1)
+            pad = torch.zeros(B, 1, dtype=torch.bool, device=z.device)
+            z = self.aggregator(z, pad).squeeze(1)
+            return self.head(z)
+
+    Xtr_t = torch.tensor(Xtr, device=device).unsqueeze(1)
+    Ytr_t = torch.tensor(Ytr_c, device=device)
+    Xva_t = torch.tensor(Xva, device=device).unsqueeze(1)
+    Yva_t = torch.tensor(Yva_c, device=device)
+
+    model = _UjiArch().to(device)
+    n_params = sum(p.numel() for p in model.parameters())
+    if verbose:
+        print(f"  UJI {arch}+Anchor2Vec params: {n_params/1e6:.3f} M", flush=True)
+
+    opt = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
+    steps = max(1, len(Xtr) // batch_size)
+    sched = torch.optim.lr_scheduler.OneCycleLR(
+        opt, max_lr=lr, epochs=epochs, steps_per_epoch=steps, pct_start=0.3)
+    crit = nn.HuberLoss(delta=1.0)
+    history = {"train_loss": [], "val_mae": []}
+    best = float("inf"); best_state = None
+    t0 = time.time()
+    for ep in range(epochs):
+        model.train(); perm = torch.randperm(len(Xtr_t), device=device)
+        ep_loss = 0.0
+        for s in range(steps):
+            idx = perm[s * batch_size:(s + 1) * batch_size]
+            pred = model(Xtr_t[idx])
+            loss = crit(pred, Ytr_t[idx])
+            opt.zero_grad(); loss.backward(); opt.step(); sched.step()
+            ep_loss += loss.item()
+        history["train_loss"].append(ep_loss / max(steps, 1))
+        model.eval()
+        with torch.no_grad():
+            mae = float(torch.linalg.norm(model(Xva_t) - Yva_t, dim=1).mean())
+        history["val_mae"].append(mae)
+        if mae < best:
+            best = mae
+            best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+        if verbose and (ep <= 1 or ep % 30 == 0 or ep == epochs - 1):
+            print(f"  ep {ep:3d}/{epochs}  val_mae={mae:.3f}  (best {best:.3f})",
+                  flush=True)
+    elapsed = time.time() - t0
+    if best_state is not None:
+        model.load_state_dict(best_state)
+    history["elapsed_s"] = elapsed
+    history["best_val_mae"] = best
+    history["target_mu"] = mu.tolist()
+    if verbose:
+        print(f"  done in {elapsed:.0f}s; best val mean Euclidean = {best:.3f} m",
+              flush=True)
+    return {"model": model, "arch": arch, "best_val_mae": best,
+            "n_params": int(n_params), "target_mu": mu.tolist()}, history
+
+
+def train_ronin_canonical_arch(arch: str, *,
+                                train_dir, test_dir,
+                                window: int = 200, step: int = 10,
+                                K: int = 4, embed_dim: int = 128,
+                                epochs: int = 20, batch_size: int = 128,
+                                lr: float = 1e-3, seed: int = 42,
+                                device: str | None = None,
+                                verbose: bool = True):
+    """IMUCNN per K=4 sub-window + per-arch aggregator + mean-pool + linear head
+    on canonical RoNIN unseen. Mirrors ``scripts/_train_ronin_canonical_arch.py``
+    (RESULT_23) generalised over cnn1d / lstm_attn / transformer."""
+    from pathlib import Path
+    from src.pipeline.baselines import (
+        GlobSpeedSequence, StridedSequenceDataset, compute_ate_rte, RONIN_LISTS,
+    )
+    from src.pipeline.encoders import IMUCNN
+
+    device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+    torch.manual_seed(seed); np.random.seed(seed)
+    train_dir = Path(train_dir); test_dir = Path(test_dir)
+
+    sub_window = window // K  # e.g. 50 for K=4 / window=200
+    train_seqs = (RONIN_LISTS / "list_train.txt").read_text().split()
+    train_seqs = [s for s in train_seqs if (train_dir / s).is_dir()]
+    test_seqs = (RONIN_LISTS / "list_test_unseen.txt").read_text().split()
+    test_seqs = [s for s in test_seqs if (test_dir / s).is_dir()]
+    if verbose:
+        print(f"  RoNIN canonical {arch} train seqs: {len(train_seqs)}  "
+              f"test seqs: {len(test_seqs)}  K={K} sub_window={sub_window}",
+              flush=True)
+
+    class _RoninArch(nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.imucnn = IMUCNN(in_features=6, embed_dim=embed_dim)
+            self.aggregator = _build_aggregator(arch, embed_dim=embed_dim)
+            self.head = nn.Linear(embed_dim, 2)
+
+        def forward(self, x):  # x: (B, window, 6)
+            B = x.shape[0]
+            # Chunk into K sub-windows; IMUCNN expects (B, T, C) and transposes internally.
+            x = x.reshape(B, K, sub_window, 6)
+            tokens = []
+            for k in range(K):
+                tokens.append(self.imucnn(x[:, k]))
+            z = torch.stack(tokens, dim=1)  # (B, K, D)
+            pad = torch.zeros(B, K, dtype=torch.bool, device=z.device)
+            z = self.aggregator(z, pad)
+            return self.head(z.mean(dim=1))
+
+    train_ds = StridedSequenceDataset(
+        GlobSpeedSequence, str(train_dir), list(train_seqs), None,
+        step, window, random_shift=step // 2, shuffle=False,
+    )
+    loader = torch.utils.data.DataLoader(
+        train_ds, batch_size=batch_size, shuffle=True,
+        num_workers=0, drop_last=True, pin_memory=False,
+    )
+
+    model = _RoninArch().to(device)
+    n_params = sum(p.numel() for p in model.parameters())
+    if verbose:
+        print(f"  RoNIN {arch} params: {n_params/1e6:.3f} M", flush=True)
+
+    opt = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
+    steps = max(1, len(train_ds) // batch_size)
+    sched = torch.optim.lr_scheduler.OneCycleLR(
+        opt, max_lr=lr, epochs=epochs, steps_per_epoch=steps, pct_start=0.3)
+    crit = nn.HuberLoss(delta=0.5)
+    history = {"train_loss": []}
+    t0 = time.time()
+    for ep in range(epochs):
+        model.train()
+        tot, n = 0.0, 0
+        for feat, targ, _, _ in loader:
+            # StridedSequenceDataset yields feat (B, C, window); we want (B, window, C).
+            x = feat.transpose(1, 2).contiguous().to(device)
+            y = targ.to(device)
+            pred = model(x)
+            loss = crit(pred, y)
+            opt.zero_grad(); loss.backward(); opt.step(); sched.step()
+            tot += loss.item() * x.size(0); n += x.size(0)
+        avg = tot / max(n, 1)
+        history["train_loss"].append(avg)
+        if verbose and (ep <= 1 or ep % 2 == 0 or ep == epochs - 1):
+            print(f"  ep {ep:3d}/{epochs}  vel_huber={avg:.5f}  "
+                  f"({time.time()-t0:.0f}s)", flush=True)
+    train_s = time.time() - t0
+
+    # Per-test-sequence ATE (raw + Umeyama).
+    model.eval()
+    rows = []
+    pred_per_min = 200 * 60
+    with torch.no_grad():
+        for sname in test_seqs:
+            seq = GlobSpeedSequence(str(test_dir / sname), interval=window,
+                                     max_ori_error=20.0, grv_only=True)
+            feat, ts, gt = seq.features, seq.ts, seq.gt_pos[:, :2]
+            if len(feat) < window + 5:
+                continue
+            ends = np.arange(window, len(feat), step)
+            vel = []
+            BS = 256
+            for i in range(0, len(ends), BS):
+                ebatch = ends[i:i + BS]
+                wins = np.stack([feat[e - window:e] for e in ebatch]).astype(np.float32)
+                xw = torch.tensor(wins, device=device)
+                vel.append(model(xw).cpu().numpy())
+            vel = np.concatenate(vel, axis=0)
+            traj = np.zeros((len(ends), 2), np.float32)
+            cur = gt[window].copy(); traj[0] = cur
+            for i in range(1, len(ends)):
+                cur = cur + vel[i - 1] * (ts[ends[i]] - ts[ends[i - 1]])
+                traj[i] = cur
+            gtm = gt[ends]
+            ate, rte = compute_ate_rte(traj, gtm, pred_per_min)
+            raw = float(np.sqrt(((traj - gtm) ** 2).sum(1).mean()))
+            traj_u, _ = _umeyama_align(traj, gtm)
+            umey = float(np.sqrt(((traj_u - gtm) ** 2).sum(1).mean()))
+            rows.append({"seq": sname, "ate_ronin": float(ate),
+                         "raw_simple": raw, "umeyama": umey,
+                         "rte_ronin": float(rte)})
+    summary = {}
+    for k in ("ate_ronin", "raw_simple", "umeyama", "rte_ronin"):
+        vals = np.array([r[k] for r in rows])
+        summary[k] = {"mean": float(vals.mean()), "median": float(np.median(vals)),
+                       "n": int(len(vals))}
+    history["elapsed_s"] = train_s
+    if verbose:
+        print(f"  done in {train_s:.0f}s; per-seq mean raw_simple="
+              f"{summary['raw_simple']['mean']:.3f} m  "
+              f"umeyama={summary['umeyama']['mean']:.3f} m", flush=True)
+    return {"model": model, "arch": arch, "per_seq": rows,
+            "summary": summary, "n_params": int(n_params)}, history
+
+
 __all__ = [
     "train_anchor2vec", "anchor2vec_predict", "anchor2vec_val_mae",
     "train_imucnn",
     "train_odomcnn", "load_webots_odom_pb", "compute_trivial_integration_floor",
     "train_dpvo_motion_head",
     "train_fusion_arch",
+    "train_uji_arch", "train_ronin_canonical_arch",
 ]
