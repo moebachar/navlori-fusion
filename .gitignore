@@ -10,6 +10,10 @@ build/
 data/async_collection/
 !/data/.gitkeep
 
+# Third-party datasets (downloaded, not tracked)
+data/iln20/
+data/iln20_*/
+
 # Experiment tracking
 mlruns/
 tb_logs/
@@ -37,3 +41,15 @@ runs/**/*.pt
 
 .claude/*
 CLAUDE.md
+# ICINCO paper agent
+paper-workspace/zotero-export.json
+paper-workspace/corpus-pdfs/
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.bbl
+paper/*.blg
+paper/*.fdb_latexmk
+paper/*.fls
+paper/*.synctex.gz
+paper/main.pdf
