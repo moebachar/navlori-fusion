@@ -53,3 +53,11 @@ paper/*.fdb_latexmk
 paper/*.fls
 paper/*.synctex.gz
 paper/main.pdf
+
+# Re-include paper agent files (override earlier .claude/ ignore)
+!.claude/agents/
+!.claude/agents/**
+!.claude/skills/paper-content/
+!.claude/skills/paper-content/**
+!.claude/skills/paper-format/
+!.claude/skills/paper-format/**
