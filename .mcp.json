@@ -1,13 +1,21 @@
-﻿{
+{
   "mcpServers": {
     "zotero": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["zotero-mcp"],
+      "args": [
+        "zotero-mcp"
+      ],
       "env": {
         "ZOTERO_LOCAL": "true",
         "ZOTERO_LIBRARY_ID": "0"
       }
+    },
+    "notebooklm": {
+      "type": "stdio",
+      "command": "notebooklm-mcp",
+      "args": [],
+      "env": {}
     }
   }
 }
