@@ -1,0 +1,28 @@
+[
+  {
+    "name": "mamba_imu_place_conditioned_encoder",
+    "status": "ok",
+    "val_mae_m": 14.951,
+    "test_mae_m": 10.144,
+    "phase_b_test": 9.127,
+    "elapsed_min": 72.79,
+    "family": "alt-backbones",
+    "log": "X:\\navlori-fusion\\experiments\\logs\\phase_c2_mamba_imu_place_conditioned_encoder.log"
+  },
+  {
+    "name": "pairwise_rssi_difference_invariant",
+    "status": "failed",
+    "rc": 2,
+    "elapsed_min": 0.08
+  },
+  {
+    "name": "bssid_top_k_set_fingerprint_no_magnitudes",
+    "status": "ok",
+    "val_mae_m": 18.34,
+    "test_mae_m": 10.35,
+    "phase_b_test": 10.293,
+    "elapsed_min": 1.41,
+    "family": "observation-engineering",
+    "log": "X:\\navlori-fusion\\experiments\\logs\\phase_c2_bssid_top_k_set_fingerprint_no_magnitudes.log"
+  }
+]

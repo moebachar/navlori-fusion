@@ -1,0 +1,12 @@
+[
+  {
+    "name": "idea1_seed7",
+    "status": "ok",
+    "val_mae_m": 15.777,
+    "test_mae_m": 9.78,
+    "phase_b_test": 9.695,
+    "epochs": 40,
+    "elapsed_min": 3.79,
+    "log": "X:\\navlori-fusion\\experiments\\logs\\phase_c_idea1_seed7.log"
+  }
+]

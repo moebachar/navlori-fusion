@@ -1,0 +1,59 @@
+[
+  {
+    "name": "idea1_seed7",
+    "status": "ok",
+    "val_mae_m": 15.88,
+    "test_mae_m": 9.695,
+    "epochs": 40,
+    "elapsed_min": 4.17,
+    "log": "X:\\navlori-fusion\\experiments\\logs\\phase_b_idea1_seed7.log",
+    "runner": "X:\\navlori-fusion\\experiments\\idea1_wifi_pe_imu.py"
+  },
+  {
+    "name": "idea1_seed123",
+    "status": "ok",
+    "val_mae_m": 15.936,
+    "test_mae_m": 10.267,
+    "epochs": 40,
+    "elapsed_min": 3.78,
+    "log": "X:\\navlori-fusion\\experiments\\logs\\phase_b_idea1_seed123.log",
+    "runner": "X:\\navlori-fusion\\experiments\\idea1_wifi_pe_imu.py"
+  },
+  {
+    "name": "lead1_rank_residual",
+    "status": "ok",
+    "val_mae_m": 16.357,
+    "test_mae_m": 13.078,
+    "epochs": 12,
+    "elapsed_min": 20.01,
+    "log": "X:\\navlori-fusion\\experiments\\logs\\phase_b_lead1_rank_residual.log",
+    "runner": "X:\\navlori-fusion\\experiments\\leads\\lead1_rank_residual_wifi.py"
+  },
+  {
+    "name": "lead3_jepa",
+    "status": "ok",
+    "val_mae_m": 15.544,
+    "test_mae_m": 13.013,
+    "epochs": 12,
+    "elapsed_min": 22.71,
+    "log": "X:\\navlori-fusion\\experiments\\logs\\phase_b_lead3_jepa.log",
+    "runner": "X:\\navlori-fusion\\experiments\\leads\\lead3_jepa_wifi.py"
+  },
+  {
+    "name": "lead4_trust_gate",
+    "status": "ok",
+    "val_mae_m": 17.564,
+    "test_mae_m": 21.144,
+    "epochs": 12,
+    "elapsed_min": 20.02,
+    "log": "X:\\navlori-fusion\\experiments\\logs\\phase_b_lead4_trust_gate.log",
+    "runner": "X:\\navlori-fusion\\experiments\\leads\\lead4_trust_gate.py"
+  },
+  {
+    "name": "lead5_kinematic",
+    "status": "failed",
+    "rc": 1,
+    "elapsed_min": 1.14,
+    "log": "X:\\navlori-fusion\\experiments\\logs\\phase_b_lead5_kinematic.log"
+  }
+]

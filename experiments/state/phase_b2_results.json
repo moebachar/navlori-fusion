@@ -1,0 +1,112 @@
+[
+  {
+    "name": "bssid_top_k_set_fingerprint_no_magnitudes",
+    "status": "ok",
+    "val_mae_m": 18.34,
+    "test_mae_m": 10.293,
+    "epochs": 20,
+    "elapsed_min": 1.15,
+    "log": "X:\\navlori-fusion\\experiments\\logs\\phase_b2_bssid_top_k_set_fingerprint_no_magnitudes.log",
+    "runner": "X:\\navlori-fusion\\experiments\\leads_night2\\lead_obseng_1_topk_jaccard.py",
+    "family": "observation-engineering"
+  },
+  {
+    "name": "per_path_trajectory_cost_minimization",
+    "status": "ok",
+    "val_mae_m": 120.43,
+    "test_mae_m": 155.27,
+    "epochs": 0,
+    "elapsed_min": 1.85,
+    "log": "X:\\navlori-fusion\\experiments\\logs\\phase_b2_per_path_trajectory_cost_minimization.log",
+    "runner": "X:\\navlori-fusion\\experiments\\leads_night2\\lead_classical_1_costmin.py",
+    "family": "classical-non-deep"
+  },
+  {
+    "name": "whole_path_bidirectional_transformer",
+    "status": "ok",
+    "val_mae_m": 17.125,
+    "test_mae_m": 16.925,
+    "epochs": 30,
+    "elapsed_min": 2.68,
+    "log": "X:\\navlori-fusion\\experiments\\logs\\phase_b2_whole_path_bidirectional_transformer.log",
+    "runner": "X:\\navlori-fusion\\experiments\\leads_night2\\seq_lead_A_whole_path.py",
+    "family": "sequence-level"
+  },
+  {
+    "name": "hierarchical_zone_then_residual_head",
+    "status": "ok",
+    "val_mae_m": 21.026,
+    "test_mae_m": 12.609,
+    "epochs": 30,
+    "elapsed_min": 1.63,
+    "log": "X:\\navlori-fusion\\experiments\\logs\\phase_b2_hierarchical_zone_then_residual_head.log",
+    "runner": "X:\\navlori-fusion\\experiments\\leads_night2\\lead_taskref_T2_zone_residual.py",
+    "family": "task-reformulation"
+  },
+  {
+    "name": "pairwise_rssi_difference_invariant",
+    "status": "ok",
+    "val_mae_m": 15.69,
+    "test_mae_m": 10.25,
+    "epochs": 30,
+    "elapsed_min": 4.29,
+    "log": "X:\\navlori-fusion\\experiments\\logs\\phase_b2_pairwise_rssi_difference_invariant.log",
+    "runner": "X:\\navlori-fusion\\experiments\\leads_night2\\lead_phys3_pairwise_diff.py",
+    "family": "physics-aware"
+  },
+  {
+    "name": "differentiable_knn_over_learned_rssi_metric",
+    "status": "ok",
+    "val_mae_m": 18.537,
+    "test_mae_m": 14.362,
+    "epochs": 40,
+    "elapsed_min": 1.35,
+    "log": "X:\\navlori-fusion\\experiments\\logs\\phase_b2_differentiable_knn_over_learned_rssi_metric.log",
+    "runner": "X:\\navlori-fusion\\experiments\\leads_night2\\lead_R1_diffknn_metric.py",
+    "family": "retrieval-memory"
+  },
+  {
+    "name": "session_maml_with_first_path_support",
+    "status": "ok",
+    "val_mae_m": 73.342,
+    "test_mae_m": 38.446,
+    "epochs": 2000,
+    "elapsed_min": 0.72,
+    "log": "X:\\navlori-fusion\\experiments\\logs\\phase_b2_session_maml_with_first_path_support.log",
+    "runner": "X:\\navlori-fusion\\experiments\\leads_night2\\lead_P1_session_maml.py",
+    "family": "paradigm-shift"
+  },
+  {
+    "name": "mixture_density_network_with_mc_dropout",
+    "status": "ok",
+    "val_mae_m": 65.416,
+    "test_mae_m": 49.822,
+    "epochs": 40,
+    "elapsed_min": 1.45,
+    "log": "X:\\navlori-fusion\\experiments\\logs\\phase_b2_mixture_density_network_with_mc_dropout.log",
+    "runner": "X:\\navlori-fusion\\experiments\\leads_night2\\lead_G3_mdn_mcdropout.py",
+    "family": "generative-models"
+  },
+  {
+    "name": "mamba_imu_place_conditioned_encoder",
+    "status": "ok",
+    "val_mae_m": 15.255,
+    "test_mae_m": 9.127,
+    "epochs": 30,
+    "elapsed_min": 28.05,
+    "log": "X:\\navlori-fusion\\experiments\\logs\\phase_b2_mamba_imu_place_conditioned_encoder.log",
+    "runner": "X:\\navlori-fusion\\experiments\\leads_night2\\lead_altA_mamba_imu.py",
+    "family": "alt-backbones"
+  },
+  {
+    "name": "path_id_and_ap_visibility_classification_auxiliaries",
+    "status": "ok",
+    "val_mae_m": 17.231,
+    "test_mae_m": 13.335,
+    "epochs": 15,
+    "elapsed_min": 19.94,
+    "log": "X:\\navlori-fusion\\experiments\\logs\\phase_b2_path_id_and_ap_visibility_classification_auxiliaries.log",
+    "runner": "X:\\navlori-fusion\\experiments\\leads_night2\\lead_mtl_pathvis.py",
+    "family": "multi-task-aux"
+  }
+]
