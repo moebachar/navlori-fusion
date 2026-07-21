@@ -1,0 +1,6 @@
+outs:
+- md5: 95583b8543aecd56d8dace166e52e9ac.dir
+  size: 26846479764
+  nfiles: 239
+  hash: md5
+  path: ronin_frdr

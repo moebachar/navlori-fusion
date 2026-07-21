@@ -1,4 +1,6 @@
 [core]
     remote = local
+[cache]
+    type = "hardlink,copy"
 ['remote "local"']
-    url = D:/dvc_store
+    url = X:/navlori-data
