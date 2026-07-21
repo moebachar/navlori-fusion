@@ -1,7 +1,7 @@
 """Single-modality encoder trainer.
 
 Trains an encoder + linear position head end-to-end, then runs the
-full evaluation harness. Follows configs/training/default.yaml defaults.
+full evaluation harness (AdamW + OneCycleLR + Huber loss, early stopping).
 
 Usage::
 

@@ -1,8 +1,0 @@
-# Stage C — Cross-Modal Fusion: 6-pair cross-attention
-fusion:
-  name: cross_attention
-  embed_dim: 128
-  num_heads: 8
-  num_layers: 2
-  dropout: 0.1
-  modality_dropout: 0.15  # X-Fi style: drop entire modalities during training

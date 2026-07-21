@@ -1,7 +1,0 @@
-# Stage B — Temporal Alignment: mTAN continuous-time keys
-temporal:
-  name: mtan
-  embed_dim: 128
-  num_heads: 4
-  time_embed_dim: 64
-  learn_time_embedding: true

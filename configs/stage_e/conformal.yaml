@@ -1,5 +1,0 @@
-# Stage E — Uncertainty Quantification: Conformal Prediction
-uncertainty:
-  name: conformal
-  alpha: 0.1  # 90% coverage target
-  calibration_fraction: 0.2

@@ -1,8 +1,0 @@
-# Stage D — State Estimation: KalmanNet with attention-conditioned gain
-filter:
-  name: kalmannet
-  state_dim: 4  # x, y, vx, vy
-  obs_dim: 2    # x, y from fused representation
-  gain_hidden_dim: 64
-  use_gru_decay: true
-  decay_init: 0.1

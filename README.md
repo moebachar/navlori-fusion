@@ -66,13 +66,10 @@ navlori-fusion/
 │   └── services/
 │       └── grafana/                # Dashboard configs + provisioning
 ├── external_methods/               # 6 SOTA baseline git submodules
-├── configs/                        # Hydra YAML configs
-│   ├── config.yaml                 # Root config
-│   ├── stage_a/                    # Encoder configs
-│   ├── stage_b/ ... stage_e/       # Per-stage configs
-│   ├── data/                       # Dataset configs
-│   ├── training/                   # Training configs
-│   └── experiment/                 # Full experiment compositions
+├── configs/                        # OmegaConf YAML configs (see configs/README.md)
+│   ├── stage_a/                    # Stage-A encoder configs (wifi/imu/odom/vision)
+│   ├── stage_c/fusion.yaml         # Stage B+C fusion transformer + training
+│   └── data/                       # One yaml per selectable dataset (filename = name)
 ├── notebooks/
 │   ├── run2_walkthrough.ipynb      # Full experiment-campaign walkthrough (live numbers)
 │   ├── paper_results.ipynb         # Paper-scoped results (WiFi+IMU, set-transformer)

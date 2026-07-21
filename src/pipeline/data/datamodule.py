@@ -75,7 +75,7 @@ class FusionDataModule:
 
     @classmethod
     def from_hydra(cls, cfg) -> "FusionDataModule":
-        """Create from a Hydra DictConfig (configs/data/simulation.yaml)."""
+        """Create from an OmegaConf DictConfig (configs/data/simulation.yaml)."""
         return cls(
             data_dir=cfg.data.root + "/async_collection",
             train_paths=list(cfg.data.split.train_paths),
