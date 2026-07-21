@@ -19,3 +19,4 @@
 [submodule "external_methods/indoor_location_competition_20"]
 	path = external_methods/indoor_location_competition_20
 	url = https://github.com/location-competition/indoor-location-competition-20
+	ignore = untracked
