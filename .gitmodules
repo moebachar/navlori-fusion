@@ -13,3 +13,9 @@
 [submodule "external_methods/dpvo"]
 	path = external_methods/dpvo
 	url = https://github.com/princeton-vl/DPVO
+[submodule "external_methods/imuwifine"]
+	path = external_methods/imuwifine
+	url = https://github.com/IS2AI/IMUWiFine
+[submodule "external_methods/indoor_location_competition_20"]
+	path = external_methods/indoor_location_competition_20
+	url = https://github.com/location-competition/indoor-location-competition-20
