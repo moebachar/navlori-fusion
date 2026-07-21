@@ -1,0 +1,84 @@
+\section{\uppercase{Related Work and Motivation}}\label{sec:related}
+
+\noindent WiFi received signal strength indicator (RSSI) fingerprints recover absolute
+indoor position by matching a live scan to a labeled survey~\cite{bahl2000radar}.
+On UJIIndoorLoc~\cite{torressospedra2014ujiindoorloc}, a 1-NN reference method
+reports a 7.9~m error. Such fingerprinting stays single-modality, encodes neither
+elapsed time nor inertial motion, and drifts as environment and hardware change,
+which motivates pairing WiFi with a dense motion modality.
+
+Learned inertial navigation provides dense relative estimates.
+RoNIN~\cite{yan2019ronin} is the standard benchmark, and attention entered the
+field through iMoT~\cite{nguyen2025imot}, which uses accelerometer and gyroscope
+channels. Yet the sampling rate is fixed by the window length or token dimension,
+and inertial tracking drifts due to the absence of absolute reference; combining WiFi's
+absolute reference with inertial motion is the remedy.
+
+The fusion of these two heterogeneous streams is well studied, but mostly through
+a separate branch per modality, merged by a classical filter or late
+concatenation. WIO-EKF, evaluated across a ten-day session
+gap~\cite{zhou2024wioekf}, keeps each sensor in its own EKF branch. Deep variants
+concatenate recurrent streams or substitute a null vector when WiFi is
+absent~\cite{wei2021sensorfusion}, and where attention appears it sits inside a
+branch rather than as the fusion itself. Two limits recur: streams are resampled
+onto a common grid before fusion, and robustness to a missing sensor is hand-set
+or filter-based rather than learned. Evaluation also tends to use random or
+cross-user splits, leaving generalization across sessions lightly tested.
+
+The ingredients for a different representation already exist, scattered across
+domains. The Transformer's positional encoding assumes equidistant
+positions~\cite{vaswani2017transformer}, which breaks for multi-rate sensors,
+whereas set models are permutation-invariant over unordered
+inputs~\cite{lee2019settransformer}. Dropping an entire modality at training time,
+the precedent for robustness to an absent channel, originates with
+ModDrop~\cite{neverova2014moddrop}. The learned embedding of real-valued time
+builds on Time2Vec and mTAN~\cite{kazemi2019time2vec,shukla2021mtan}. SeFT and
+STraTS realize a single continuous-time set transformer without an ODE solver, but
+for clinical data~\cite{horn2020seft,tipirneni2022strats}. Two differences set the
+proposed method apart from STraTS, beyond the domain shift. It adds an encoder per
+modality that maps heterogeneous WiFi RSSI scans and inertial windows into the
+shared token, where STraTS assumes scalar clinical observations. It also trains
+with modality and instant dropout for robustness across sessions, which STraTS
+does not address. The closest localisation
+assemblies remain partial: AFT-VO fuses asynchronous sources in one transformer
+but is camera-only and bins time~\cite{kaygusuz2022aftvo}, while ContiFormer puts
+an ODE solver inside attention at high cost~\cite{chen2023contiformer}.
+
+Three properties separate these assemblies, and each holds only a subset.
+P1 is continuous-time tokens that avoid resampling and an ODE solver; P2 is one
+permutation-invariant set transformer doing cross-modal and cross-time fusion in
+a single self-attention block; P3 is learned robustness to missing or stale
+sensors, validated across sessions. Table~\ref{tab:properties} scores the methods
+discussed above against the three.
+
+% src: P1/P2/P3 defined in the paragraph above and in sec:method (eq:token,
+%   eq:time = continuous-time tokens; eq:layer = single self-attention block);
+%   each row restates this section's prose for the cited method.
+\begin{table}[tb]
+\caption{Methods scored against the three properties. P1: continuous-time tokens
+  without resampling or an ODE solver. P2: one permutation-invariant set
+  transformer for cross-modal and cross-time fusion in a single self-attention
+  block. P3: learned robustness to missing or stale sensors, validated across
+  sessions. \checkmark\ holds, $\sim$ partial, -- absent or not applicable.}
+\label{tab:properties}
+\centering
+\begin{tabular}{|l|l|c|c|c|}\hline
+Method & Domain & P1 & P2 & P3 \\ \hline
+iMoT              & IMU       & --        & --        & --        \\ \hline % src: 02_related_work "iMoT is inertial-only with rate-fixed windows"
+AFT-VO         & camera    & --        & $\sim$    & --        \\ \hline % src: 02_related_work "AFT-VO ... camera-only and bins time"
+ContiFormer & general   & $\sim$    & --        & --        \\ \hline % src: 02_related_work "ContiFormer puts an ODE solver inside attention at high cost"
+SeFT / STraTS & clinical & \checkmark & \checkmark & -- \\ \hline % src: 02_related_work "single continuous-time set transformer ... for clinical data"
+WIO-EKF          & WiFi+IMU  & --        & --        & $\sim$    \\ \hline % src: 02_related_work "evaluated across a ten-day session gap ... keeps each sensor in its own EKF branch"
+Deep concat fusion & WiFi+IMU & --     & --        & $\sim$    \\ \hline % src: 02_related_work "concatenate recurrent streams or substitute a null vector when WiFi is absent"
+Ours                                   & WiFi+IMU  & \checkmark & \checkmark & \checkmark \\ \hline % src: 02_related_work final paragraph; sec:method; sec:results staleness/dropout
+\end{tabular}
+\end{table}
+
+The proposed method completes the combination for asynchronous WiFi--IMU
+localization. Each observation carries a learned sinusoidal encoding of its
+real-valued elapsed $\Delta t$, a lightweight alternative to resampling and
+ODE-in-attention. One set transformer performs cross-modal and cross-time fusion
+in a single self-attention block. Modality and instant dropout extend the earlier
+whole-modality scheme to the (modality, time) token set, giving graceful
+degradation under missing and stale sensors that evaluation across sessions
+confirms.

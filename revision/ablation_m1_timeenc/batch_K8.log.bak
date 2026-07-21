@@ -1,0 +1,270 @@
+[batch] 24 runs planned
+[1/24] START 2026-06-18T11:54:58 dataset=simulation_2mod mode=learned_continuous seed=42
+[run] dataset=simulation_2mod time_enc_mode=learned_continuous seed=42 epochs=90 mods=['wifi', 'imu']
+  Epoch   0/90  train=4.2394  val=2.3734  val_mae=8.326m  lr=5.62e-05  *
+  Epoch  10/90  train=0.8555  val=0.1446  val_mae=0.774m  lr=4.97e-04  
+  Epoch  20/90  train=0.7858  val=0.2233  val_mae=1.025m  lr=1.15e-03  
+  Epoch  30/90  train=0.6960  val=0.1370  val_mae=0.726m  lr=1.29e-03  
+  Epoch  40/90  train=0.6387  val=0.0948  val_mae=0.566m  lr=1.15e-03  
+  Epoch  50/90  train=0.6510  val=0.0737  val_mae=0.489m  lr=8.87e-04  
+  Epoch  60/90  train=0.5771  val=0.0810  val_mae=0.501m  lr=5.69e-04  
+  Epoch  70/90  train=0.5188  val=0.0480  val_mae=0.381m  lr=2.70e-04  
+  Epoch  80/90  train=0.5544  val=0.0526  val_mae=0.394m  lr=6.42e-05  
+  Epoch  89/90  train=0.5569  val=0.0533  val_mae=0.395m  lr=5.39e-09  
+  Done in 266.5s — best val MAE: 0.377m (epoch 68)
+
+  Post-fit diagnostics
+  ----------------------------------------------------------------------
+    all             MAE=0.377m  RMSE=0.447m
+    only:wifi       MAE=0.418m  RMSE=0.487m
+    only:imu        MAE=2.813m  RMSE=3.974m
+  ----------------------------------------------------------------------
+SUMMARY: {"dataset": "simulation_2mod", "time_enc_mode": "learned_continuous", "seed": 42, "epochs": 90, "modalities": ["wifi", "imu"], "val_mae_m": 0.3765546679496765, "test_mae_m": 0.4544070065021515, "elapsed_s": 266.94687128067017, "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_simulation_2mod_learned_continuous_s42\\fusion_20260618_115516"}
+  -> val=0.377m test=0.454m (4.8min)
+[2/24] START 2026-06-18T11:59:44 dataset=simulation_2mod mode=learned_continuous seed=7
+[run] dataset=simulation_2mod time_enc_mode=learned_continuous seed=7 epochs=90 mods=['wifi', 'imu']
+  Epoch   0/90  train=4.7352  val=2.4293  val_mae=8.486m  lr=5.62e-05  *
+  Epoch  10/90  train=0.8816  val=0.1646  val_mae=0.832m  lr=4.97e-04  
+  Epoch  20/90  train=0.7555  val=0.1582  val_mae=0.798m  lr=1.15e-03  
+  Epoch  30/90  train=0.6647  val=0.1235  val_mae=0.689m  lr=1.29e-03  
+  Epoch  40/90  train=0.7903  val=0.1255  val_mae=0.671m  lr=1.15e-03  
+  Epoch  50/90  train=0.6368  val=0.0922  val_mae=0.566m  lr=8.87e-04  
+  Epoch  60/90  train=0.6166  val=0.0698  val_mae=0.481m  lr=5.69e-04  
+  Epoch  70/90  train=0.5992  val=0.0587  val_mae=0.437m  lr=2.70e-04  
+  Epoch  80/90  train=0.5216  val=0.0559  val_mae=0.412m  lr=6.42e-05  
+  Epoch  89/90  train=0.5332  val=0.0526  val_mae=0.398m  lr=5.39e-09  
+  Done in 267.0s — best val MAE: 0.388m (epoch 79)
+
+  Post-fit diagnostics
+  ----------------------------------------------------------------------
+    all             MAE=0.388m  RMSE=0.481m
+    only:wifi       MAE=0.445m  RMSE=0.527m
+    only:imu        MAE=2.813m  RMSE=4.051m
+  ----------------------------------------------------------------------
+SUMMARY: {"dataset": "simulation_2mod", "time_enc_mode": "learned_continuous", "seed": 7, "epochs": 90, "modalities": ["wifi", "imu"], "val_mae_m": 0.3880893290042877, "test_mae_m": 0.48499199748039246, "elapsed_s": 267.50956439971924, "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_simulation_2mod_learned_continuous_s7\\fusion_20260618_120001"}
+  -> val=0.388m test=0.485m (4.8min)
+[3/24] START 2026-06-18T12:04:30 dataset=simulation_2mod mode=learned_continuous seed=123
+[run] dataset=simulation_2mod time_enc_mode=learned_continuous seed=123 epochs=90 mods=['wifi', 'imu']
+  Epoch   0/90  train=4.5770  val=2.2702  val_mae=7.956m  lr=5.62e-05  *
+  Epoch  10/90  train=0.8600  val=0.2406  val_mae=1.061m  lr=4.97e-04  
+  Epoch  20/90  train=0.7111  val=0.1295  val_mae=0.712m  lr=1.15e-03  
+  Epoch  30/90  train=0.6518  val=0.1410  val_mae=0.740m  lr=1.29e-03  
+  Epoch  40/90  train=0.6549  val=0.1130  val_mae=0.615m  lr=1.15e-03  
+  Epoch  50/90  train=0.6350  val=0.0848  val_mae=0.539m  lr=8.87e-04  
+  Epoch  60/90  train=0.5139  val=0.0794  val_mae=0.510m  lr=5.69e-04  
+  Epoch  70/90  train=0.5485  val=0.0574  val_mae=0.414m  lr=2.70e-04  *
+  Epoch  80/90  train=0.5108  val=0.0562  val_mae=0.409m  lr=6.42e-05  
+  Epoch  89/90  train=0.5562  val=0.0584  val_mae=0.414m  lr=5.39e-09  
+  Done in 268.1s — best val MAE: 0.396m (epoch 77)
+
+  Post-fit diagnostics
+  ----------------------------------------------------------------------
+    all             MAE=0.396m  RMSE=0.494m
+    only:wifi       MAE=0.465m  RMSE=0.551m
+    only:imu        MAE=3.018m  RMSE=4.204m
+  ----------------------------------------------------------------------
+SUMMARY: {"dataset": "simulation_2mod", "time_enc_mode": "learned_continuous", "seed": 123, "epochs": 90, "modalities": ["wifi", "imu"], "val_mae_m": 0.39623725414276123, "test_mae_m": 0.38819658756256104, "elapsed_s": 268.57569885253906, "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_simulation_2mod_learned_continuous_s123\\fusion_20260618_120447"}
+  -> val=0.396m test=0.388m (4.8min)
+[4/24] START 2026-06-18T12:09:17 dataset=simulation_2mod mode=none seed=42
+[run] dataset=simulation_2mod time_enc_mode=none seed=42 epochs=90 mods=['wifi', 'imu']
+  Epoch   0/90  train=4.2608  val=2.3454  val_mae=8.211m  lr=5.62e-05  *
+  Epoch  10/90  train=0.7913  val=0.2692  val_mae=1.178m  lr=4.97e-04  
+  Epoch  20/90  train=0.8824  val=0.2955  val_mae=1.245m  lr=1.15e-03  
+  Epoch  30/90  train=0.8082  val=0.2268  val_mae=1.017m  lr=1.29e-03  
+  Epoch  40/90  train=0.6998  val=0.2423  val_mae=1.071m  lr=1.15e-03  
+  Epoch  50/90  train=0.6683  val=0.2062  val_mae=0.971m  lr=8.87e-04  
+  Epoch  60/90  train=0.6870  val=0.2043  val_mae=0.959m  lr=5.69e-04  
+  Epoch  70/90  train=0.6570  val=0.2047  val_mae=0.954m  lr=2.70e-04  
+  Epoch  80/90  train=0.5680  val=0.1890  val_mae=0.903m  lr=6.42e-05  
+  Epoch  89/90  train=0.5142  val=0.1893  val_mae=0.907m  lr=5.39e-09  
+  Done in 260.6s — best val MAE: 0.892m (epoch 77)
+
+  Post-fit diagnostics
+  ----------------------------------------------------------------------
+    all             MAE=0.892m  RMSE=0.949m
+    only:wifi       MAE=0.973m  RMSE=1.033m
+    only:imu        MAE=2.750m  RMSE=3.808m
+  ----------------------------------------------------------------------
+SUMMARY: {"dataset": "simulation_2mod", "time_enc_mode": "none", "seed": 42, "epochs": 90, "modalities": ["wifi", "imu"], "val_mae_m": 0.8917478322982788, "test_mae_m": 1.0048580169677734, "elapsed_s": 260.9919652938843, "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_simulation_2mod_none_s42\\fusion_20260618_120934"}
+  -> val=0.892m test=1.005m (4.7min)
+[5/24] START 2026-06-18T12:13:56 dataset=simulation_2mod mode=none seed=7
+[run] dataset=simulation_2mod time_enc_mode=none seed=7 epochs=90 mods=['wifi', 'imu']
+  Epoch   0/90  train=4.1434  val=2.2671  val_mae=8.026m  lr=5.62e-05  *
+  Epoch  10/90  train=0.8199  val=0.2606  val_mae=1.156m  lr=4.97e-04  *
+  Epoch  20/90  train=0.7678  val=0.2522  val_mae=1.089m  lr=1.15e-03  
+  Epoch  30/90  train=0.7222  val=0.2630  val_mae=1.134m  lr=1.29e-03  
+  Epoch  40/90  train=0.7742  val=0.2219  val_mae=1.020m  lr=1.15e-03  
+  Epoch  50/90  train=0.6469  val=0.2400  val_mae=1.089m  lr=8.87e-04  
+  Epoch  60/90  train=0.6445  val=0.2099  val_mae=0.973m  lr=5.69e-04  
+  Epoch  70/90  train=0.7154  val=0.2039  val_mae=0.953m  lr=2.70e-04  
+  Epoch  72/90  train=0.5661  val=0.1940  val_mae=0.926m  lr=2.20e-04  
+  Early stopping at epoch 72 (best=32)
+  Done in 212.7s — best val MAE: 0.904m (epoch 32)
+
+  Post-fit diagnostics
+  ----------------------------------------------------------------------
+    all             MAE=0.904m  RMSE=0.980m
+    only:wifi       MAE=0.994m  RMSE=1.094m
+    only:imu        MAE=3.405m  RMSE=4.425m
+  ----------------------------------------------------------------------
+SUMMARY: {"dataset": "simulation_2mod", "time_enc_mode": "none", "seed": 7, "epochs": 90, "modalities": ["wifi", "imu"], "val_mae_m": 0.9037175178527832, "test_mae_m": 1.0874918699264526, "elapsed_s": 213.15038061141968, "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_simulation_2mod_none_s7\\fusion_20260618_121414"}
+  -> val=0.904m test=1.087m (3.9min)
+[6/24] START 2026-06-18T12:17:48 dataset=simulation_2mod mode=none seed=123
+[run] dataset=simulation_2mod time_enc_mode=none seed=123 epochs=90 mods=['wifi', 'imu']
+  Epoch   0/90  train=4.6090  val=2.3534  val_mae=8.207m  lr=5.62e-05  *
+  Epoch  10/90  train=0.8419  val=0.2736  val_mae=1.183m  lr=4.97e-04  
+  Epoch  20/90  train=0.8820  val=0.2068  val_mae=0.978m  lr=1.15e-03  *
+  Epoch  30/90  train=0.6703  val=0.1811  val_mae=0.874m  lr=1.29e-03  *
+  Epoch  40/90  train=0.7387  val=0.2289  val_mae=1.044m  lr=1.15e-03  
+  Epoch  50/90  train=0.6995  val=0.2072  val_mae=0.960m  lr=8.87e-04  
+  Epoch  60/90  train=0.6175  val=0.1999  val_mae=0.947m  lr=5.69e-04  
+  Epoch  70/90  train=0.6092  val=0.1956  val_mae=0.918m  lr=2.70e-04  
+  Early stopping at epoch 70 (best=30)
+  Done in 206.9s — best val MAE: 0.874m (epoch 30)
+
+  Post-fit diagnostics
+  ----------------------------------------------------------------------
+    all             MAE=0.874m  RMSE=0.978m
+    only:wifi       MAE=0.952m  RMSE=1.071m
+    only:imu        MAE=3.861m  RMSE=4.811m
+  ----------------------------------------------------------------------
+SUMMARY: {"dataset": "simulation_2mod", "time_enc_mode": "none", "seed": 123, "epochs": 90, "modalities": ["wifi", "imu"], "val_mae_m": 0.8739233613014221, "test_mae_m": 1.0990639925003052, "elapsed_s": 207.28136444091797, "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_simulation_2mod_none_s123\\fusion_20260618_121806"}
+  -> val=0.874m test=1.099m (3.8min)
+[7/24] START 2026-06-18T12:21:34 dataset=simulation_2mod mode=binned seed=42
+[run] dataset=simulation_2mod time_enc_mode=binned seed=42 epochs=90 mods=['wifi', 'imu']
+  Epoch   0/90  train=4.5681  val=2.4168  val_mae=8.438m  lr=5.62e-05  *
+  Epoch  10/90  train=0.8159  val=0.2463  val_mae=1.113m  lr=4.97e-04  
+  Epoch  20/90  train=0.8356  val=0.1252  val_mae=0.696m  lr=1.15e-03  *
+  Epoch  30/90  train=0.7827  val=0.1097  val_mae=0.622m  lr=1.29e-03  *
+  Epoch  40/90  train=0.6426  val=0.1238  val_mae=0.676m  lr=1.15e-03  
+  Epoch  50/90  train=0.6709  val=0.0937  val_mae=0.568m  lr=8.87e-04  
+  Epoch  60/90  train=0.6133  val=0.0836  val_mae=0.523m  lr=5.69e-04  
+  Epoch  70/90  train=0.5784  val=0.0809  val_mae=0.510m  lr=2.70e-04  
+  Epoch  80/90  train=0.6308  val=0.0622  val_mae=0.431m  lr=6.42e-05  
+  Epoch  89/90  train=0.4862  val=0.0620  val_mae=0.429m  lr=5.39e-09  
+  Done in 264.5s — best val MAE: 0.425m (epoch 83)
+
+  Post-fit diagnostics
+  ----------------------------------------------------------------------
+    all             MAE=0.425m  RMSE=0.569m
+    only:wifi       MAE=0.452m  RMSE=0.577m
+    only:imu        MAE=3.054m  RMSE=4.289m
+  ----------------------------------------------------------------------
+SUMMARY: {"dataset": "simulation_2mod", "time_enc_mode": "binned", "seed": 42, "epochs": 90, "modalities": ["wifi", "imu"], "val_mae_m": 0.4246343672275543, "test_mae_m": 0.42668458819389343, "elapsed_s": 264.87694692611694, "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_simulation_2mod_binned_s42\\fusion_20260618_122152"}
+  -> val=0.425m test=0.427m (4.7min)
+[8/24] START 2026-06-18T12:26:18 dataset=simulation_2mod mode=binned seed=7
+[run] dataset=simulation_2mod time_enc_mode=binned seed=7 epochs=90 mods=['wifi', 'imu']
+  Epoch   0/90  train=4.2974  val=2.3942  val_mae=8.407m  lr=5.62e-05  *
+  Epoch  10/90  train=0.8825  val=0.2362  val_mae=1.059m  lr=4.97e-04  
+  Epoch  20/90  train=0.7758  val=0.0999  val_mae=0.589m  lr=1.15e-03  *
+  Epoch  30/90  train=0.7002  val=0.1001  val_mae=0.590m  lr=1.29e-03  
+  Epoch  40/90  train=0.7645  val=0.0820  val_mae=0.528m  lr=1.15e-03  
+  Epoch  50/90  train=0.7612  val=0.0674  val_mae=0.467m  lr=8.87e-04  
+  Epoch  60/90  train=0.6575  val=0.0561  val_mae=0.418m  lr=5.69e-04  *
+  Epoch  70/90  train=0.5433  val=0.0601  val_mae=0.438m  lr=2.70e-04  
+  Epoch  80/90  train=0.5326  val=0.0518  val_mae=0.393m  lr=6.42e-05  
+  Epoch  89/90  train=0.5521  val=0.0504  val_mae=0.386m  lr=5.39e-09  
+  Done in 266.5s — best val MAE: 0.370m (epoch 73)
+
+  Post-fit diagnostics
+  ----------------------------------------------------------------------
+    all             MAE=0.370m  RMSE=0.440m
+    only:wifi       MAE=0.407m  RMSE=0.485m
+    only:imu        MAE=2.650m  RMSE=3.859m
+  ----------------------------------------------------------------------
+SUMMARY: {"dataset": "simulation_2mod", "time_enc_mode": "binned", "seed": 7, "epochs": 90, "modalities": ["wifi", "imu"], "val_mae_m": 0.3701358735561371, "test_mae_m": 0.44027620553970337, "elapsed_s": 266.90199398994446, "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_simulation_2mod_binned_s7\\fusion_20260618_122636"}
+  -> val=0.370m test=0.440m (4.8min)
+[9/24] START 2026-06-18T12:31:04 dataset=simulation_2mod mode=binned seed=123
+[run] dataset=simulation_2mod time_enc_mode=binned seed=123 epochs=90 mods=['wifi', 'imu']
+  Epoch   0/90  train=4.4979  val=2.3088  val_mae=8.038m  lr=5.62e-05  *
+  Epoch  10/90  train=0.7625  val=0.1502  val_mae=0.794m  lr=4.97e-04  *
+  Epoch  20/90  train=0.6834  val=0.1747  val_mae=0.863m  lr=1.15e-03  
+  Epoch  30/90  train=0.7050  val=0.1155  val_mae=0.653m  lr=1.29e-03  
+  Epoch  40/90  train=0.7126  val=0.0883  val_mae=0.553m  lr=1.15e-03  
+  Epoch  50/90  train=0.7150  val=0.0823  val_mae=0.528m  lr=8.87e-04  
+  Epoch  60/90  train=0.5850  val=0.0821  val_mae=0.516m  lr=5.69e-04  
+  Epoch  70/90  train=0.5587  val=0.0577  val_mae=0.427m  lr=2.70e-04  
+  Epoch  80/90  train=0.6546  val=0.0510  val_mae=0.396m  lr=6.42e-05  
+  Epoch  89/90  train=0.5409  val=0.0512  val_mae=0.399m  lr=5.39e-09  
+  Done in 265.7s — best val MAE: 0.389m (epoch 82)
+
+  Post-fit diagnostics
+  ----------------------------------------------------------------------
+    all             MAE=0.389m  RMSE=0.462m
+    only:wifi       MAE=0.420m  RMSE=0.495m
+    only:imu        MAE=2.697m  RMSE=3.989m
+  ----------------------------------------------------------------------
+SUMMARY: {"dataset": "simulation_2mod", "time_enc_mode": "binned", "seed": 123, "epochs": 90, "modalities": ["wifi", "imu"], "val_mae_m": 0.389229416847229, "test_mae_m": 0.3948362171649933, "elapsed_s": 266.1334331035614, "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_simulation_2mod_binned_s123\\fusion_20260618_123121"}
+  -> val=0.389m test=0.395m (4.7min)
+[10/24] START 2026-06-18T12:35:48 dataset=simulation_2mod mode=posindex seed=42
+[run] dataset=simulation_2mod time_enc_mode=posindex seed=42 epochs=90 mods=['wifi', 'imu']
+  Epoch   0/90  train=4.2083  val=2.3526  val_mae=8.255m  lr=5.62e-05  *
+  Epoch  10/90  train=0.8639  val=0.2609  val_mae=1.146m  lr=4.97e-04  *
+  Epoch  20/90  train=0.8110  val=0.2795  val_mae=1.189m  lr=1.15e-03  
+  Epoch  30/90  train=0.7245  val=0.2691  val_mae=1.156m  lr=1.29e-03  
+  Epoch  40/90  train=0.6791  val=0.1823  val_mae=0.872m  lr=1.15e-03  
+  Epoch  50/90  train=0.6981  val=0.1896  val_mae=0.888m  lr=8.87e-04  
+  Epoch  60/90  train=0.6160  val=0.1680  val_mae=0.829m  lr=5.69e-04  
+  Epoch  70/90  train=0.5618  val=0.1676  val_mae=0.831m  lr=2.70e-04  
+  Epoch  80/90  train=0.6009  val=0.1514  val_mae=0.784m  lr=6.42e-05  
+  Epoch  89/90  train=0.6069  val=0.1550  val_mae=0.792m  lr=5.39e-09  
+  Done in 265.7s — best val MAE: 0.775m (epoch 59)
+
+  Post-fit diagnostics
+  ----------------------------------------------------------------------
+    all             MAE=0.775m  RMSE=0.840m
+    only:wifi       MAE=0.811m  RMSE=0.866m
+    only:imu        MAE=3.563m  RMSE=4.728m
+  ----------------------------------------------------------------------
+SUMMARY: {"dataset": "simulation_2mod", "time_enc_mode": "posindex", "seed": 42, "epochs": 90, "modalities": ["wifi", "imu"], "val_mae_m": 0.7751996517181396, "test_mae_m": 0.7747005224227905, "elapsed_s": 266.1308653354645, "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_simulation_2mod_posindex_s42\\fusion_20260618_123607"}
+  -> val=0.775m test=0.775m (4.8min)
+[11/24] START 2026-06-18T12:40:34 dataset=simulation_2mod mode=posindex seed=7
+[run] dataset=simulation_2mod time_enc_mode=posindex seed=7 epochs=90 mods=['wifi', 'imu']
+  Epoch   0/90  train=4.7035  val=2.4224  val_mae=8.487m  lr=5.62e-05  *
+  Epoch  10/90  train=0.9012  val=0.3011  val_mae=1.258m  lr=4.97e-04  
+  Epoch  20/90  train=0.7896  val=0.2564  val_mae=1.140m  lr=1.15e-03  
+  Epoch  30/90  train=0.6961  val=0.2300  val_mae=1.050m  lr=1.29e-03  
+  Epoch  40/90  train=0.8183  val=0.1769  val_mae=0.871m  lr=1.15e-03  
+  Epoch  50/90  train=0.6722  val=0.1730  val_mae=0.849m  lr=8.87e-04  
+  Epoch  60/90  train=0.6490  val=0.1741  val_mae=0.840m  lr=5.69e-04  
+  Epoch  70/90  train=0.6514  val=0.1593  val_mae=0.795m  lr=2.70e-04  *
+  Epoch  80/90  train=0.5692  val=0.1512  val_mae=0.772m  lr=6.42e-05  *
+  Epoch  89/90  train=0.5845  val=0.1518  val_mae=0.778m  lr=5.39e-09  
+  Done in 266.5s — best val MAE: 0.772m (epoch 80)
+
+  Post-fit diagnostics
+  ----------------------------------------------------------------------
+    all             MAE=0.772m  RMSE=0.851m
+    only:wifi       MAE=0.778m  RMSE=0.855m
+    only:imu        MAE=2.659m  RMSE=3.740m
+  ----------------------------------------------------------------------
+SUMMARY: {"dataset": "simulation_2mod", "time_enc_mode": "posindex", "seed": 7, "epochs": 90, "modalities": ["wifi", "imu"], "val_mae_m": 0.7716457843780518, "test_mae_m": 0.7663282752037048, "elapsed_s": 266.9694468975067, "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_simulation_2mod_posindex_s7\\fusion_20260618_124051"}
+  -> val=0.772m test=0.766m (4.8min)
+[12/24] START 2026-06-18T12:45:19 dataset=simulation_2mod mode=posindex seed=123
+[run] dataset=simulation_2mod time_enc_mode=posindex seed=123 epochs=90 mods=['wifi', 'imu']
+  Epoch   0/90  train=4.5395  val=2.2596  val_mae=7.925m  lr=5.62e-05  *
+  Epoch  10/90  train=0.8740  val=0.2928  val_mae=1.247m  lr=4.97e-04  
+  Epoch  20/90  train=0.7364  val=0.2544  val_mae=1.140m  lr=1.15e-03  
+  Epoch  30/90  train=0.6854  val=0.1978  val_mae=0.932m  lr=1.29e-03  
+  Epoch  40/90  train=0.6940  val=0.1860  val_mae=0.901m  lr=1.15e-03  
+  Epoch  50/90  train=0.6680  val=0.2048  val_mae=0.961m  lr=8.87e-04  
+  Epoch  60/90  train=0.5445  val=0.1644  val_mae=0.826m  lr=5.69e-04  
+  Epoch  70/90  train=0.5848  val=0.1470  val_mae=0.774m  lr=2.70e-04  
+  Epoch  80/90  train=0.5560  val=0.1482  val_mae=0.775m  lr=6.42e-05  
+  Epoch  89/90  train=0.5995  val=0.1517  val_mae=0.784m  lr=5.39e-09  
+  Done in 266.7s — best val MAE: 0.733m (epoch 72)
+
+  Post-fit diagnostics
+  ----------------------------------------------------------------------
+    all             MAE=0.733m  RMSE=0.785m
+    only:wifi       MAE=0.760m  RMSE=0.814m
+    only:imu        MAE=3.025m  RMSE=4.182m
+  ----------------------------------------------------------------------
+SUMMARY: {"dataset": "simulation_2mod", "time_enc_mode": "posindex", "seed": 123, "epochs": 90, "modalities": ["wifi", "imu"], "val_mae_m": 0.7328922748565674, "test_mae_m": 0.7942298650741577, "elapsed_s": 267.0998651981354, "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_simulation_2mod_posindex_s123\\fusion_20260618_124537"}
+  -> val=0.733m test=0.794m (4.8min)
+[13/24] START 2026-06-18T12:50:05 dataset=msiln_site1_b1 mode=learned_continuous seed=42
+[run] dataset=msiln_site1_b1 time_enc_mode=learned_continuous seed=42 epochs=90 mods=['wifi', 'imu']
+X:\navlori-fusion\.venv\Lib\site-packages\torch\nn\modules\transformer.py:385: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+  FAILED rc=4294967295 (69.3min)
+[14/24] START 2026-06-18T13:59:25 dataset=msiln_site1_b1 mode=learned_continuous seed=7

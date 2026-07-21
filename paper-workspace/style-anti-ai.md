@@ -106,6 +106,16 @@ For each draft paragraph, the agent runs this grep-style pass:
 Log any violations into paper-workspace/style-violations.md so we can see
 patterns over time.
 
+## Reader-facing only (no project-internal housekeeping)
+
+Exclude project-internal implementation and bug-fix details from the paper:
+excluded/empty collections (e.g. a failed trajectory dropped at collection),
+internal renames, code-source fixes, config plumbing, and "canonical training
+set"-style phrasing that only matters to the codebase. Include only
+reader-facing scientific content and genuine caveats (e.g. synthesized WiFi
+being optimistic, a cross-session protocol). State splits as final counts, not
+as a narration of what was excluded.
+
 ## What this file is NOT
 
 - Not a license to write ungrammatical or ostentatiously different prose.

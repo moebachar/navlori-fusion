@@ -1,0 +1,200 @@
+Fichier: Poster Séminaire Toulouse-revisé par Yuehua DING.pptx
+
+========== SLIDE (texte ; [#RRGGBB]=coloré) ==========
+  [#1A1A1A]CONTEXTE & OBJECTIF
+  [#1A1A1A]Un pipeline complet, du capteur à la position
+  [#1A1A1A]ACQUISITION & DONNÉES
+  [#1A1A1A]ENCODAGE PER-MODALITÉ
+  [#1A1A1A]MÉTHODE — SET-TRANSFORMER CONTINU EN TEMPS
+  [#1A1A1A]COMPARAISON DES ARCHITECTURES DE FUSION
+  [#1A1A1A]ROBUSTESSE & INCERTITUDE
+  [#1A1A1A]CONSTATS
+  [#000000]Système Intelligent de Navigation et Localisation Robotique en Environnement Industriel
+  [#4A4A4A]Fusion multimodale asynchrone par un set-transformer continu en temps
+  [#4A4A4A]Mohamed BACHAR — Équipe Ingénierie & Outils Numériques - Encadrants : Ilyass ABOUELAZIZ, Yuehua DING  · Thématique : Compréhension de Scènes et Interactions Humains-Systèmes
+  [#1A1A1A]La robotique mobile en milieu industriel bute sur la localisation. Les approches monomodales (vision seule, LiDAR seul) échouent dans les zones répétitives (ambiguïté), sous occlusion, et face au problème du kidnapping. Les capteurs disponibles sont hétérogènes et asynchrones [#1A1A1A]Objectif : [#1A1A1A]un système unique de localisation qui fusionne ces flux par apprentissage profond, reste robuste aux capteurs manquants ou périmés, et alimente la navigation autonome du robot TIAGO++
+  [#1A1A1A]Collecte en simulation Webots (TIAGO++) : 18 trajectoires, 4 modalités [#1A1A1A]asynchonisées[#1A1A1A] (WiFi, IMU, odométrie, caméra RGB-D). Une phase de [#1A1A1A]replay[#1A1A1A] rejoue des trajectoires de jeux réels dans Webots pour y ajouter caméra et odométrie. 6 jeux réels (WiFi/IMU) sont convertis vers un format unique : inter-sessions, inter-campagnes, multi-étages.
+  [#1A1A1A]Jeu de données
+  [#1A1A1A]WiFi
+  [#1A1A1A]IMU
+  [#1A1A1A]Odom
+  [#1A1A1A]Caméra
+  [#1A1A1A]Rôle
+  [#1A1A1A]Webots (simulation)
+  [#3DA35D]✓
+  [#3DA35D]✓
+  [#3DA35D]✓
+  [#3DA35D]✓
+  [#1A1A1A]labo contrôlé, ablations
+  [#1A1A1A]MSILN site1/B1 (réel)
+  [#3DA35D]✓
+  [#3DA35D]✓
+  [#1A1A1A]inter-session — résultat phare
+  [#1A1A1A]IMUWiFine ét. 4 (réel)
+  [#3DA35D]✓
+  [#3DA35D]✓
+  [#1A1A1A]inter-campagne
+  [#1A1A1A]IPIN 2024 (réel)
+  [#3DA35D]✓
+  [#3DA35D]✓
+  [#1A1A1A]petit-entraînement
+  [#1A1A1A]UJIIndoorLoc (réel)
+  [#3DA35D]✓
+  [#1A1A1A]validation WiFi (520 AP)
+  [#1A1A1A]RoNIN canonique (réel)
+  [#3DA35D]✓
+  [#1A1A1A]validation IMU (32 séq.)
+  [#4A4A4A]TIAGO++ en environnement industriel
+  [#1A1A1A]Chaque modalité a son encodeur, ramené à un jeton commun de dimension 128 : [#1A1A1A]WiFi-Net[#1A1A1A] (assignation douce sur 64 ancres apprises), [#1A1A1A]IMU-CNN[#1A1A1A] (convolutions temporelles), [#1A1A1A]Odom-CNN[#1A1A1A], et un encodeur visuel de mouvement ([#1A1A1A]DPVO[#1A1A1A]). Chaque encodeur est validé seul contre l'état de l'art publié (validation per-leg).
+  [#1A1A1A]Modalité
+  [#1A1A1A]Jeu
+  [#1A1A1A]Notre encodeur
+  [#1A1A1A]État de l'art
+  [#1A1A1A]WiFi
+  [#1A1A1A]UJIIndoorLoc
+  [#1A1A1A]WiFi-Net 8,69 m
+  [#1A1A1A]wlan_localization 15,17 m
+  [#1A1A1A]IMU
+  [#1A1A1A]RoNIN canonique
+  [#1A1A1A]IMU-CNN 9,96 m (ATE)
+  [#1A1A1A]ResNet1D 5,14 m
+  [#1A1A1A]Caméra
+  [#1A1A1A]TartanAir
+  [#1A1A1A]DPVO-Motion 0,29 m
+  [#1A1A1A]TartanVO 0,012 m
+  [#1A1A1A]Odométrie
+  [#1A1A1A]Webots
+  [#1A1A1A]Odom-CNN
+  [#1A1A1A]—
+  [#1A1A1A]Une seule architecture fusionne tout. [#1A1A1A]φ(Δt)[#1A1A1A] admet tout les fréquences dans le même modèle, sans rééchantillonnage. Un unique bloc d'auto-attention réalise la fusion entre modalités et temporelle (K instants) en une fois. Un jeton-requête lit (x, y)
+  [#1A1A1A]Trois architectures de fusion comparées. Le [#1A1A1A]set-transformer[#1A1A1A] unifie la fusion ; un agrégateur [#1A1A1A]CNN1D[#1A1A1A] plus simple atteint la meilleure précision sur données fraîches; un résultat honnête qui oriente les travaux futurs.
+  [#1A1A1A]Quand le WiFi se périme, l'erreur croît doucement, puis le modèle se replie sur l'IMU (dead reckoning) lorsque le WiFi disparaît. La fusion ≈ WiFi seul sur données fraîches, tandis que l'IMU seul dérive : chaque modalité joue son rôle
+  [#1A1A1A]Un modèle d'attention unique sur ensemble fusionne des capteurs hétérogènes et asynchrones 
+  [#1A1A1A]L'encodage continu du temps rend le modèle indépendant des cadences 
+  [#1A1A1A]La robustesse devient apprise, pas câblée : un seul mécanisme (dropout de modalité + d'instant) couvre capteurs manquants et périmés → dégradation gracieuse.
+  [#1A1A1A]Validé sur le réel : la fusion généralise en [#1A1A1A]inter-sessions[#1A1A1A] (−62 % vs état de l'art au test), là où les [#1A1A1A]baselines[#1A1A1A] apprises s'effondrent.
+  [#1A1A1A]Le verrou n'est pas la fusion mais la généralisation [#1A1A1A]inter-sessions[#1A1A1A] des encodeurs d'ancrage ; la trajectoire prédite reste sur-lissée (levier au niveau de la fonction de coût).
+  [#1A1A1A]Références
+  [#1A1A1A][1] Set Transformer — J. Lee, Y. Lee, J. Kim, A. [#1A1A1A]Kosiorek[#1A1A1A], S. Choi, Y. W. Teh, « Set Transformer: A Framework for Attention-[#1A1A1A]based[#1A1A1A] Permutation-Invariant Neural Networks », ICML, 2019. 
+  [#1A1A1A][2] A. Vaswani et al., « Attention [#1A1A1A]is[#1A1A1A] All You Need », [#1A1A1A]NeurIPS[#1A1A1A], 2017.
+  [#1A1A1A][3] [#1A1A1A]mTAN[#1A1A1A] — S. N. Shukla, B. M. Marlin, « Multi-Time Attention Networks for [#1A1A1A]Irregularly[#1A1A1A] [#1A1A1A]Sampled[#1A1A1A] Time [#1A1A1A]Series[#1A1A1A] », ICLR, 2021. 
+  [#1A1A1A][4] [#1A1A1A]ModDrop[#1A1A1A] — N. [#1A1A1A]Neverova[#1A1A1A], C. Wolf, G. Taylor, F. [#1A1A1A]Nebout[#1A1A1A], « [#1A1A1A]ModDrop[#1A1A1A]: Adaptive [#1A1A1A]Multi-Modal[#1A1A1A] [#1A1A1A]Gesture[#1A1A1A] Recognition », IEEE TPAMI, vol. 38, 2016
+  [#1A1A1A][5] [#1A1A1A]iMoT[#1A1A1A] — S. M. Nguyen, L. D. [#1A1A1A]Tran[#1A1A1A], D. V. Le, P. J. M. [#1A1A1A]Havinga[#1A1A1A], « [#1A1A1A]iMoT[#1A1A1A]: [#1A1A1A]Inertial[#1A1A1A] Motion Transformer for [#1A1A1A]Inertial[#1A1A1A] Navigation », AAAI, 2025. 
+  [#1A1A1A][6] WIO-EKF — P. Zhou, H. Wang, R. Gravina, F. Sun, « WIO-EKF: Extended [#1A1A1A]Kalman[#1A1A1A] [#1A1A1A]Filtering-Based[#1A1A1A] Wi-Fi and [#1A1A1A]Inertial[#1A1A1A] [#1A1A1A]Odometry[#1A1A1A] Fusion Method for Indoor [#1A1A1A]Localization[#1A1A1A] », IEEE IoT-J, vol. 11(13), 2024. 
+  [#1A1A1A][7] [#1A1A1A]RoNIN[#1A1A1A] — H. Yan, S. [#1A1A1A]Herath[#1A1A1A], Y. [#1A1A1A]Furukawa[#1A1A1A], « [#1A1A1A]RoNIN[#1A1A1A]: [#1A1A1A]Robust[#1A1A1A] Neural [#1A1A1A]Inertial[#1A1A1A] Navigation in the Wild », IEEE ICRA, 2020
+  [#1A1A1A][8] [#1A1A1A]UJIIndoorLoc[#1A1A1A] — J. Torres-[#1A1A1A]Sospedra[#1A1A1A] et al., « [#1A1A1A]UJIIndoorLoc[#1A1A1A]: A New Multi-Building and Multi-[#1A1A1A]Floor[#1A1A1A] [#1A1A1A]Database[#1A1A1A] for WLAN [#1A1A1A]Fingerprint-Based[#1A1A1A] Indoor [#1A1A1A]Localization[#1A1A1A] », IPIN, 2014
+  [#4A4A4A]F3 — Encodage par modalité (entrée → opération → jeton 128-d)
+  [#2E5EAA]WiFi-Net[#1A1A1A]  ·  scan RSSI → softmax sur 64 ancres → jeton (128-d)
+  [#2E7D32]Odom-CNN[#1A1A1A]  ·  fenêtre 16×7 → convolutions → jeton (128-d)
+  IMU-CNN[#1A1A1A]  · fenêtre 32×9 → 3 convolutions (32→64→128) → jeton (128-d)
+  [#1A1A1A]VERROUS SCIENTIFIQUES & [#1A1A1A]THÉMATIQUES DE RECHERCHE
+  [#C97A1A]Axe Localisation
+  [#1A1A1A]Désynchronisation et calibration multimodale
+  [#1A1A1A]Robustesse à la péremption du [#1A1A1A]WiFi[#1A1A1A] et aux pannes capteur 
+  [#1A1A1A]Cartographie continue et association incrémentale d’ancres WiFi en ligne
+  [#1A1A1A]Quantification d’incertitude calibrée et conformal prediction adaptative au contexte
+  [#2E5EAA]Axe Navigation
+  [#1A1A1A]Planification sous incertitude et fusion proprioception/extéroception pour environnements partiellement connus
+  [#1A1A1A]Apprentissage en ligne de politiques de contrôle adaptées aux environnements dynamiques et partagés
+  [#1A1A1A]WiFi[#1A1A1A] RSSI
+  [#7F7F7F]~1 Hz · [#7F7F7F]absolute
+  [#1A1A1A]IMU
+  [#7F7F7F]~31 Hz · motion
+  [#1A1A1A]Wheel [#1A1A1A]odometry
+  [#7F7F7F]~15 Hz · motion
+  [#1A1A1A]Camera
+  [#7F7F7F]~5 Hz · visual
+  p(τ) = (x, y)
+  at any time τ
+  [#B53A3A]Vision[#1A1A1A]  · paire d'images → flot de patchs → jeton (128-d)
+  [#1A1A1A]RÉSULTATS
+  [#1A1A1A]Fusion bout-en-bout : sub-0,5 m en simulation (4 modalités) ; sur données réelles inter-sessions (MSILN), −62 % d'erreur au test face à l'état de l'art open-source.
+  Webots (MAE)
+  IMUWiFine fl.4 (MAE)
+  MSILN inter-session (MAE)
+  RoNIN canonique (ATE)
+  TartanAir (ATE)
+  UJIIndoorLoc (MAE, val)
+  wlan_localization
+  n/a
+  8.50
+  28.31
+  n/a
+  n/a
+  15.17
+  RoNIN ResNet1D
+  n/a
+  26.84
+  n/a
+  5.14
+  n/a
+  n/a
+  TartanVO
+  n/a
+  n/a
+  n/a
+  n/a
+  0.01
+  n/a
+  WiFi-Net
+  n/a
+  n/a
+  n/a
+  n/a
+  n/a
+  8.69
+  IMUCNN
+  n/a
+  n/a
+  n/a
+  9.96
+  n/a
+  n/a
+  DPVOMotion
+  n/a
+  n/a
+  n/a
+  n/a
+  0.29
+  n/a
+  Set-Transformer
+  0.42
+  n/a
+  14.02
+  n/a
+  n/a
+  n/a
+  CNN1D
+  0.32
+  7.09
+  n/a
+  7.59
+  n/a
+  8.72
+  LSTM-attn
+  0.34
+  7.20
+  n/a
+  7.50
+  n/a
+  8.43
+  [#4A4A4A]TIAGO++ en environnement [#4A4A4A]Webots
+  [#1A1A1A]PROJECTION
+  [#1A1A1A]Fusion 4 modalités : intégrer la caméra (odométrie visuelle DPVO) et l'odométrie au même tronc.
+  [#1A1A1A]Vers la navigation autonome (TIAGO++) : récupération post-kidnapping, planification de trajectoire, évitement d'obstacles.
+  [#1A1A1A]BIM comme a priori spatial pour contraindre la position.
+  [#1A1A1A]Validation progressive : campus CESI → site industriel réel.
+  [#1A1A1A]Mots-clés
+  [#1A1A1A]Localisation · Navigation · Intelligence Artificielle · Apprentissage profond · Fusion de données · Robotique
+  [#1A1A1A]Partenaires & financement [#1A1A1A]: CESI Est & Région Grand Est
+
+--- histogramme couleurs ---
+  #1A1A1A : 199 runs
+  #3DA35D : 12 runs
+  #4A4A4A : 6 runs
+  #7F7F7F : 5 runs
+  #2E5EAA : 2 runs
+  #000000 : 1 runs
+  #2E7D32 : 1 runs
+  #C97A1A : 1 runs
+  #B53A3A : 1 runs

@@ -1,0 +1,5 @@
+dataset,variant,imu_param_count,val_mae_m,test_mae_m
+simulation_2mod,baseline,~50000,0.4091,0.4445
+simulation_2mod,larger,159104,0.3946,0.4877
+msiln_site1_b1,baseline,~50000,15.4372,13.6000
+msiln_site1_b1,larger,158336,15.4029,12.9763

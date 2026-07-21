@@ -70,7 +70,7 @@ token = encoder(raw_sample) + modality_embedding[modality]
                             + time_encoding(Δt = t_sample − t_query)
 ```
 
-- `encoder` = per-modality encoder (Anchor2Vec for WiFi, IMUCNN for
+- `encoder` = per-modality encoder (WiFi-Net for WiFi, IMUCNN for
   IMU). Both are pre-trained or jointly trained.
 - `modality_embedding` = learnable per-modality vector (`M × D` table).
 - `time_encoding(Δt)` = sinusoidal positional encoding evaluated on
@@ -121,7 +121,7 @@ load-bearing data property).
 
 | modality | sensor rate | role | encoder | SOTA reference |
 |---|---|---|---|---|
-| WiFi RSSI | ~1 Hz (1 detection per scan per AP) | absolute anchor; sparse high-info | **Anchor2Vec** (~0.075 M params) | wlan_localization (sharan-naribole, MIT) |
+| WiFi RSSI | ~1 Hz (1 detection per scan per AP) | absolute anchor; sparse high-info | **WiFi-Net** (~0.075 M params) | wlan_localization (sharan-naribole, MIT) |
 | IMU 6-channel | ~30 Hz (gyro + accel × xyz) | dense motion / dead-reckoning | **IMUCNN** (~0.05 M params) | RoNIN ResNet1D (Sachini, MIT) |
 
 **Out of scope (→ journal):**
@@ -135,7 +135,7 @@ load-bearing data property).
   world cross-session validation possible in the conference scope.
   Saved for journal's 4-modality story.
 - **WiFiSetTransformer** alternate WiFi encoder: parked per
-  RESULT_01 (UJI verdict was `replace` — Anchor2Vec wins). Not
+  RESULT_01 (UJI verdict was `replace` — WiFi-Net wins). Not
   in scope.
 
 ---
@@ -166,7 +166,7 @@ load-bearing data property).
 
 - **UJIIndoorLoc (real, per-leg):** standard canonical WiFi-
   fingerprinting benchmark. Used only for the WiFi-encoder per-
-  leg comparison. Anchor2Vec val mean Euclidean **8.69 m** vs
+  leg comparison. WiFi-Net val MAE **8.69 m** vs
   wlan_localization **15.17 m** = **43 % improvement** (RESULT_01).
 
 - **RoNIN canonical (real, per-leg):** standard inertial-
@@ -197,7 +197,7 @@ load-bearing data property).
 | 1. Introduction | indoor localization context, sensor heterogeneity problem (async rates / missing modalities / staleness), our contribution claim, paper roadmap | 1 | new prose |
 | 2. Related Work | WiFi fingerprinting (wlanloc, CNNLoc, eAaT+, Locaris); inertial navigation (RoNIN); multi-modal fusion (set-transformer / cross-attention); async sensor fusion | 1 | new |
 | 3. Method | (a) per-modality tokenization; (b) continuous time encoding; (c) self-attention block; (d) PositionQuery readout; (e) training (modality+instant dropout) | 2 | RESULT_06+ + architecture spec |
-| 4. Per-leg encoder validation | Anchor2Vec on UJI (vs wlanloc); IMUCNN on RoNIN canonical (vs ResNet1D); honest in-domain framing for IMU | 1 | RESULT_01 + RESULT_07/23 |
+| 4. Per-leg encoder validation | WiFi-Net on UJI (vs wlanloc); IMUCNN on RoNIN canonical (vs ResNet1D); honest in-domain framing for IMU | 1 | RESULT_01 + RESULT_07/23 |
 | 5. End-to-end fusion experiments | (a) Webots 2-mod K=4 baseline; (b) **MSILN cross-session headline**; (c) staleness sweep on Webots (cliff → slope); (d) modality-dropout robustness on Webots | 2.5 | RESULT_06 + RESULT_37 + RESULT_11/14/18 |
 | 6. Ablations | K-axis sweep (K=1/2/4/8 on Webots); modality-dropout rate sweep; latency probe | 1 | RESULT_11/12/13/14/18 |
 | 7. Discussion & Limitations | smoothness debt (architecture-invariant, loss-function lever future); C2 in-domain honest framing; aggregator-family note (CNN1D for journal) | 1 | RESULT_05/18/23 |
@@ -213,22 +213,27 @@ Every number in the paper either comes from a live notebook cell
 (default FAST_MODE=True load + eval) or from a saved checkpoint
 already in `runs/`. Source of truth:
 
+**Metric policy:** the paper reports only **MAE** (mean Euclidean
+position error, meters) and **raw ATE** (absolute trajectory
+error, meters). Umeyama-aligned ATE appears only in the
+limitations discussion (§7.2) as honest contextual framing for
+the IMU canonical gap. No RMSE, no Pearson r, no median.
+
 ### Per-leg encoder validation
 
-| comparison | our encoder | SOTA | margin | source |
-|---|---|---|---|---|
-| WiFi on UJI val mean Euclidean | Anchor2Vec **8.69 m** | wlan_localization 15.17 m | **−43 %** | RESULT_01 / live cell in notebook §2.1 |
-| IMU on RoNIN canonical raw ATE | IMUCNN **9.96 m** | ResNet1D 5.14 m | +94 % (out-of-domain) | RESULT_07 / notebook §2.2 |
-| IMU on RoNIN canonical Umeyama ATE | IMUCNN **7.88 m** | ResNet1D 5.14 m | +53 % | RESULT_07 |
+| comparison | metric | Ours | SOTA | margin | source |
+|---|---|---|---|---|---|
+| WiFi on UJI val | MAE | WiFi-Net **8.69 m** | wlan_localization 15.17 m | **−43 %** | RESULT_01 / live cell in notebook §2.1 |
+| IMU on RoNIN canonical | raw ATE | IMUCNN 9.96 m | **ResNet1D 5.14 m** | +94 % | RESULT_07 / notebook §2.2 |
 
 ### End-to-end fusion
 
-| dataset | metric | transformer | reference | margin |
+| dataset | metric | transformer (Ours) | reference | margin |
 |---|---|---|---|---|
-| Webots sim 2-mod K=4 val | mean Euclidean | **0.469 m** | n/a (no public 4-mod-equivalent SOTA on Webots) | RESULT_06 |
-| Webots sim 2-mod K=4 test | mean Euclidean | **0.517 m** | criterion-(b) 0.5 m bar | within 4 % of bar |
-| **MSILN site1/B1 cross-session val** | mean Euclidean | **15.22 m** | wlanloc 21.26 m | **−28 %** |
-| **MSILN site1/B1 cross-session test** ⭐ | mean Euclidean | **10.89 m** | wlanloc 28.31 m | **−62 %** |
+| Webots sim 2-mod K=4 val | MAE | **0.469 m** | n/a (no public 2-mod-equivalent SOTA on Webots) | RESULT_06 |
+| Webots sim 2-mod K=4 test | MAE | **0.517 m** | criterion-(b) 0.5 m bar | within 4 % of bar |
+| **MSILN site1/B1 cross-session val** | MAE | **15.22 m** | wlanloc 21.26 m | **−28 %** |
+| **MSILN site1/B1 cross-session test** ⭐ | MAE | **10.89 m** | wlanloc 28.31 m | **−62 %** |
 
 ### Ablations / robustness
 
@@ -251,19 +256,24 @@ yet; the conference reviewers will.
 
 ### 7.1 Smoothness debt is architecture-invariant
 
-Across 4 fusion architectures (transformer, CNN1D, LSTM-attn,
-MoTTransformer) × 5+ datasets, per-trajectory smoothness median
-Pearson r between ‖Δpred‖ and ‖Δgt‖ stays ≤ 0.10 — never clears
-the rubric's > 0.20 gate. **Hypothesis falsified**: the
-smoothness debt is loss-function-bound, not architecturally
-tractable. Named future work: auxiliary velocity loss (B-1) or
-EMA token smoothing (B-2) per RESULT_05's locked B-lever follow-up.
+The fusion's predicted trajectory is visibly over-smoothed
+compared to ground truth — predicted motion magnitude is
+systematically below GT, especially at turns. Internal
+exploration across multiple fusion architectures and datasets
+(quantified in the archive notebook with a per-trajectory
+motion-magnitude Pearson r, kept out-of-scope here per the
+MAE/ATE-only metric policy) confirms this is architecture-
+invariant: a loss-function-level intervention is needed, not an
+architectural one. Named future work: auxiliary velocity loss
+(B-1) or EMA token smoothing (B-2) per RESULT_05's locked
+B-lever follow-up.
 
-**Paper framing:** "Our fusion achieves competitive absolute-position
-accuracy but inherits an architecture-invariant smoothness debt
-(per-trajectory motion-magnitude r < 0.10). We hypothesize this
-is loss-function-bound and identify auxiliary velocity loss as a
-candidate fix for future work."
+**Paper framing:** "Our fusion achieves competitive absolute-
+position accuracy but inherits an over-smoothing limitation that
+is architecture-invariant in our exploration. We identify a
+loss-function-level intervention (auxiliary velocity loss) as a
+candidate fix for the journal version. A visual GT-vs-pred
+trajectory overlay is included in the supplementary."
 
 ### 7.2 IMU encoder canonical-RoNIN gap (C2 not fully discharged)
 
@@ -273,13 +283,14 @@ IMUCNN raw ATE on canonical unseen-subjects is +94 % outside the
 (RESULT_23) — Umeyama-aligned within gate, but raw weighted ≥
 aligned per the locked amended rubric.
 
-**Paper framing:** "Our IMU encoder is competitive in-domain
-(Umeyama-aligned ATE within 1.5× SOTA); cross-subject
-generalization on canonical RoNIN unseen-subjects shows a
-honestly-reported raw-ATE gap (+94 %). This is the expected
-in-domain vs cross-subject trade-off for a 95×-smaller encoder
-(IMUCNN 0.05 M vs ResNet1D 4.6 M params); cross-subject
-generalization at this parameter budget is open future work."
+**Paper framing:** "Our IMU encoder reports raw ATE 9.96 m vs
+ResNet1D's 5.14 m (+94 %); Umeyama-aligned ATE (rigid-body offset
+removed) narrows the gap to 7.88 m (+53 %), still outside the
+SOTA gate. This is the expected in-domain vs cross-subject trade-
+off for a 95×-smaller encoder (IMUCNN 0.05 M vs ResNet1D 4.6 M
+params); cross-subject generalization at this parameter budget
+is open future work. Both raw and Umeyama-aligned numbers are
+reported in §6 of the paper-results notebook (no cherry-picking)."
 
 ### 7.3 MSILN test gate-1 partial (path-130 composition)
 
@@ -387,8 +398,9 @@ The conference paper can be written directly from these:
    PLAN_05's queued candidate) — if successful, the smoothness
    debt becomes "we solved it" instead of "we identified it".
    High-value-if-it-works; falsifiable in 30 min.
-5. **MSILN re-run with Anchor2Vec encoder + transformer** —
-   RESULT_37's MSILN result actually used Anchor2Vec; this
+5. **MSILN re-run with WiFi-Net encoder + transformer** —
+   RESULT_37's MSILN result actually used WiFi-Net (Anchor2Vec
+   at the time of the iteration; renamed in PLAN_39); this
    number is paper-ready. No re-run needed (the SUMMARY note
    about WiFiSetTransformer was about RESULT_15's PLAN_15 deployed
    config, not the RESULT_37 retrain).
@@ -432,6 +444,8 @@ Things that could push back this scope:
 | 2026-05-30 | Conference scope = 4 datasets (Webots + MSILN + UJI + RoNIN) | Webots = lab; MSILN = headline; UJI + RoNIN = per-leg validation. Camera/Odom out. | this doc |
 | 2026-05-30 | Contribution angle = continuous-time async unified set-transformer | Maps cleanly to the architecture's actual mechanism (time_encoding + modality_embedding + dropout); load-bearing claim is real-world cross-session generalization. | this doc |
 | 2026-05-30 | Honest limitations stay in §7 | Smoothness debt + C2 partial + MSILN gate-1 partial all named; reviewers will see them anyway; honest framing is more defensible than concealment. | this doc |
+| 2026-06-01 | WiFi encoder renamed Anchor2Vec → **WiFi-Net** project-wide | User directive (PLAN_39); cleaner external-facing name; the "Anchor2Vec" name is internal-history not user-facing. Historical archives (RESULT/PLAN files for N≤38, archive/run1/) untouched. | PLAN_39 §0a |
+| 2026-06-01 | Metrics minimized to **MAE + raw ATE** only | User directive (PLAN_39); RMSE / median / linear-vs-kNN-probe / Pearson r removed from paper-facing tables. Umeyama-aligned ATE survives only in §7.2 limitations as honest contextual framing. Smoothness debt becomes a visual GT-vs-pred overlay, not a Pearson r number. | PLAN_39 §3a |
 
 ---
 

@@ -1,0 +1,42 @@
+\section{\uppercase{Problem Statement}}\label{sec:problem}
+
+\noindent
+The objective of self-localization is for an agent to estimate its own position from heterogeneous data, asynchronously sampled by different sensors. For heterogeneous data fusion, every sensor reading is represented in a homogeneous form, as follows:
+\[(s_i,\, m_i,\, t_i,\, a_i)\]
+where $s_i$ is the raw sample, with samples
+drawn from different spaces,
+\begin{equation}\label{eq:spaces}
+  s_i \in
+  \begin{cases}
+    \mathbb{R}^{n_{\mathrm{ap}}}, & \text{if~} m_i=\text{wifi},\\[2pt]
+    \mathbb{R}^{T\times F},      & \text{if~} m_i=\text{imu},
+  \end{cases}
+\end{equation}
+an RSSI vector over $n_{\mathrm{ap}}$ access points for WiFi, and a $T$-step
+window of $F$ inertial channels for the IMU. $m_i \in \mathcal{M}$ with $\mathcal{M}=\{\text{wifi},\text{imu}\}$ represents its modality
+(sensor type), $t_i$ is the acquisition time, and $a_i \in \{0,1\}$ is an availability flag ('1' stands for 'available'). 
+
+A WiFi scan gives an absolute place reference but arrives sparsely, whereas
+an IMU reports dense relative motion at a significantly higher rate. As the IMU reporting rate may largely exceed the WiFi sampling rate, one can hardly have samples of both modalities at a given instant. A common time grid would discard the fast stream or pad the slow
+one. The input is therefore an unordered set of observations, not a
+synchronized sequence.
+
+Upon a localization query at time instant $t_q$, the model groups its $N$ recent observations in a set $\mathcal{O}'$, as follows:
+\begin{equation}\label{eq:obsset-gen}
+  \mathcal{O}' = \big\{\, (s_i,\, m_i,\, t_i,\, a_i) \,\big\}_{i=1}^{N}.
+\end{equation}
+The general problem is finding a method $f$ capable of mapping the observations $\mathcal{O}'$ to a planar position $(\hat{x},\hat{y})$, which is mathematically formulated as follows:
+\begin{equation}\label{eq:objective-gen}
+  \begin{aligned}
+    \min_{f}\ \ & \big\lVert (\hat{x},\hat{y}) - (x,y) \big\rVert^2 \\
+    \text{s.t.}\ \ & (\hat{x},\hat{y}) = f\big(\mathcal{O}',\, t_q\big),
+  \end{aligned}
+\end{equation}
+where $(\hat{x},\hat{y})$ is the prediction and $(x,y)$ the ground truth.
+
+Two conditions make the problem hard. First, deployment is across sessions:
+$f$ is fit on one set of recording sessions and applied to others, the
+setting that carries our main claim. Second, the input is incomplete, since
+at a query a modality may be missing, with no available sample, or stale,
+with only an old one. The method of Section~\ref{sec:method} must absorb
+both of these.

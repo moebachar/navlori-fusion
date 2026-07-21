@@ -1,0 +1,386 @@
+[
+  {
+    "dataset": "simulation_2mod",
+    "time_enc_mode": "learned_continuous",
+    "seed": 42,
+    "epochs": 40,
+    "modalities": [
+      "wifi",
+      "imu"
+    ],
+    "val_mae_m": 0.4091206192970276,
+    "test_mae_m": 0.44448602199554443,
+    "elapsed_s": 71.13273501396179,
+    "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_simulation_2mod_learned_continuous_s42\\fusion_20260618_140846",
+    "status": "ok",
+    "elapsed_min": 1.48
+  },
+  {
+    "dataset": "simulation_2mod",
+    "time_enc_mode": "learned_continuous",
+    "seed": 7,
+    "epochs": 40,
+    "modalities": [
+      "wifi",
+      "imu"
+    ],
+    "val_mae_m": 0.35926946997642517,
+    "test_mae_m": 0.4053605794906616,
+    "elapsed_s": 71.3074312210083,
+    "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_simulation_2mod_learned_continuous_s7\\fusion_20260618_141014",
+    "status": "ok",
+    "elapsed_min": 1.47
+  },
+  {
+    "dataset": "simulation_2mod",
+    "time_enc_mode": "learned_continuous",
+    "seed": 123,
+    "epochs": 40,
+    "modalities": [
+      "wifi",
+      "imu"
+    ],
+    "val_mae_m": 0.46623438596725464,
+    "test_mae_m": 0.4926774799823761,
+    "elapsed_s": 71.07742071151733,
+    "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_simulation_2mod_learned_continuous_s123\\fusion_20260618_141143",
+    "status": "ok",
+    "elapsed_min": 1.47
+  },
+  {
+    "dataset": "simulation_2mod",
+    "time_enc_mode": "none",
+    "seed": 42,
+    "epochs": 40,
+    "modalities": [
+      "wifi",
+      "imu"
+    ],
+    "val_mae_m": 0.5762511491775513,
+    "test_mae_m": 0.5642520189285278,
+    "elapsed_s": 69.1700177192688,
+    "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_simulation_2mod_none_s42\\fusion_20260618_141311",
+    "status": "ok",
+    "elapsed_min": 1.44
+  },
+  {
+    "dataset": "simulation_2mod",
+    "time_enc_mode": "none",
+    "seed": 7,
+    "epochs": 40,
+    "modalities": [
+      "wifi",
+      "imu"
+    ],
+    "val_mae_m": 0.5660694241523743,
+    "test_mae_m": 0.6107280254364014,
+    "elapsed_s": 68.25167918205261,
+    "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_simulation_2mod_none_s7\\fusion_20260618_141437",
+    "status": "ok",
+    "elapsed_min": 1.42
+  },
+  {
+    "dataset": "simulation_2mod",
+    "time_enc_mode": "none",
+    "seed": 123,
+    "epochs": 40,
+    "modalities": [
+      "wifi",
+      "imu"
+    ],
+    "val_mae_m": 0.5378727912902832,
+    "test_mae_m": 0.5810303092002869,
+    "elapsed_s": 68.25789332389832,
+    "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_simulation_2mod_none_s123\\fusion_20260618_141602",
+    "status": "ok",
+    "elapsed_min": 1.42
+  },
+  {
+    "dataset": "simulation_2mod",
+    "time_enc_mode": "binned",
+    "seed": 42,
+    "epochs": 40,
+    "modalities": [
+      "wifi",
+      "imu"
+    ],
+    "val_mae_m": 0.4474058747291565,
+    "test_mae_m": 0.43723878264427185,
+    "elapsed_s": 69.877450466156,
+    "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_simulation_2mod_binned_s42\\fusion_20260618_141727",
+    "status": "ok",
+    "elapsed_min": 1.45
+  },
+  {
+    "dataset": "simulation_2mod",
+    "time_enc_mode": "binned",
+    "seed": 7,
+    "epochs": 40,
+    "modalities": [
+      "wifi",
+      "imu"
+    ],
+    "val_mae_m": 0.3941989243030548,
+    "test_mae_m": 0.45571619272232056,
+    "elapsed_s": 70.87249445915222,
+    "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_simulation_2mod_binned_s7\\fusion_20260618_141854",
+    "status": "ok",
+    "elapsed_min": 1.47
+  },
+  {
+    "dataset": "simulation_2mod",
+    "time_enc_mode": "binned",
+    "seed": 123,
+    "epochs": 40,
+    "modalities": [
+      "wifi",
+      "imu"
+    ],
+    "val_mae_m": 0.4669607877731323,
+    "test_mae_m": 0.5009992718696594,
+    "elapsed_s": 69.72083330154419,
+    "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_simulation_2mod_binned_s123\\fusion_20260618_142022",
+    "status": "ok",
+    "elapsed_min": 1.44
+  },
+  {
+    "dataset": "simulation_2mod",
+    "time_enc_mode": "posindex",
+    "seed": 42,
+    "epochs": 40,
+    "modalities": [
+      "wifi",
+      "imu"
+    ],
+    "val_mae_m": 0.5199739336967468,
+    "test_mae_m": 0.511061429977417,
+    "elapsed_s": 70.5359525680542,
+    "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_simulation_2mod_posindex_s42\\fusion_20260618_142148",
+    "status": "ok",
+    "elapsed_min": 1.46
+  },
+  {
+    "dataset": "simulation_2mod",
+    "time_enc_mode": "posindex",
+    "seed": 7,
+    "epochs": 40,
+    "modalities": [
+      "wifi",
+      "imu"
+    ],
+    "val_mae_m": 0.5073462724685669,
+    "test_mae_m": 0.5515478849411011,
+    "elapsed_s": 70.04997992515564,
+    "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_simulation_2mod_posindex_s7\\fusion_20260618_142316",
+    "status": "ok",
+    "elapsed_min": 1.45
+  },
+  {
+    "dataset": "simulation_2mod",
+    "time_enc_mode": "posindex",
+    "seed": 123,
+    "epochs": 40,
+    "modalities": [
+      "wifi",
+      "imu"
+    ],
+    "val_mae_m": 0.5414880514144897,
+    "test_mae_m": 0.5963988900184631,
+    "elapsed_s": 69.60871529579163,
+    "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_simulation_2mod_posindex_s123\\fusion_20260618_142443",
+    "status": "ok",
+    "elapsed_min": 1.45
+  },
+  {
+    "dataset": "msiln_site1_b1",
+    "time_enc_mode": "learned_continuous",
+    "seed": 42,
+    "epochs": 40,
+    "modalities": [
+      "wifi",
+      "imu"
+    ],
+    "val_mae_m": 15.43716049194336,
+    "test_mae_m": 13.600025177001953,
+    "elapsed_s": 3712.8553829193115,
+    "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_msiln_site1_b1_learned_continuous_s42\\fusion_20260618_142700",
+    "status": "ok",
+    "elapsed_min": 63.16
+  },
+  {
+    "dataset": "msiln_site1_b1",
+    "time_enc_mode": "learned_continuous",
+    "seed": 7,
+    "epochs": 40,
+    "modalities": [
+      "wifi",
+      "imu"
+    ],
+    "val_mae_m": 15.496603965759277,
+    "test_mae_m": 7.8972086906433105,
+    "elapsed_s": 3714.863137483597,
+    "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_msiln_site1_b1_learned_continuous_s7\\fusion_20260618_153013",
+    "status": "ok",
+    "elapsed_min": 63.33
+  },
+  {
+    "dataset": "msiln_site1_b1",
+    "time_enc_mode": "learned_continuous",
+    "seed": 123,
+    "epochs": 40,
+    "modalities": [
+      "wifi",
+      "imu"
+    ],
+    "val_mae_m": 15.037534713745117,
+    "test_mae_m": 13.084830284118652,
+    "elapsed_s": 3712.7123234272003,
+    "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_msiln_site1_b1_learned_continuous_s123\\fusion_20260618_163358",
+    "status": "ok",
+    "elapsed_min": 63.64
+  },
+  {
+    "dataset": "msiln_site1_b1",
+    "time_enc_mode": "none",
+    "seed": 42,
+    "epochs": 40,
+    "modalities": [
+      "wifi",
+      "imu"
+    ],
+    "val_mae_m": 15.505434036254883,
+    "test_mae_m": 13.049690246582031,
+    "elapsed_s": 3718.6312549114227,
+    "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_msiln_site1_b1_none_s42\\fusion_20260618_173709",
+    "status": "ok",
+    "elapsed_min": 63.27
+  },
+  {
+    "dataset": "msiln_site1_b1",
+    "time_enc_mode": "none",
+    "seed": 7,
+    "epochs": 40,
+    "modalities": [
+      "wifi",
+      "imu"
+    ],
+    "val_mae_m": 15.998339653015137,
+    "test_mae_m": 15.992740631103516,
+    "elapsed_s": 3720.241911172867,
+    "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_msiln_site1_b1_none_s7\\fusion_20260618_184025",
+    "status": "ok",
+    "elapsed_min": 63.35
+  },
+  {
+    "dataset": "msiln_site1_b1",
+    "time_enc_mode": "none",
+    "seed": 123,
+    "epochs": 40,
+    "modalities": [
+      "wifi",
+      "imu"
+    ],
+    "val_mae_m": 14.601120948791504,
+    "test_mae_m": 10.302812576293945,
+    "elapsed_s": 3719.5098083019257,
+    "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_msiln_site1_b1_none_s123\\fusion_20260618_194345",
+    "status": "ok",
+    "elapsed_min": 63.28
+  },
+  {
+    "dataset": "msiln_site1_b1",
+    "time_enc_mode": "binned",
+    "seed": 42,
+    "epochs": 40,
+    "modalities": [
+      "wifi",
+      "imu"
+    ],
+    "val_mae_m": 18.564807891845703,
+    "test_mae_m": 9.32334041595459,
+    "elapsed_s": 3714.353613138199,
+    "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_msiln_site1_b1_binned_s42\\fusion_20260618_204701",
+    "status": "ok",
+    "elapsed_min": 63.19
+  },
+  {
+    "dataset": "msiln_site1_b1",
+    "time_enc_mode": "binned",
+    "seed": 7,
+    "epochs": 40,
+    "modalities": [
+      "wifi",
+      "imu"
+    ],
+    "val_mae_m": 15.123003005981445,
+    "test_mae_m": 10.466687202453613,
+    "elapsed_s": 3716.5798604488373,
+    "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_msiln_site1_b1_binned_s7\\fusion_20260618_215017",
+    "status": "ok",
+    "elapsed_min": 63.4
+  },
+  {
+    "dataset": "msiln_site1_b1",
+    "time_enc_mode": "binned",
+    "seed": 123,
+    "epochs": 40,
+    "modalities": [
+      "wifi",
+      "imu"
+    ],
+    "val_mae_m": 16.485546112060547,
+    "test_mae_m": 10.74553394317627,
+    "elapsed_s": 3708.4984340667725,
+    "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_msiln_site1_b1_binned_s123\\fusion_20260618_225407",
+    "status": "ok",
+    "elapsed_min": 63.65
+  },
+  {
+    "dataset": "msiln_site1_b1",
+    "time_enc_mode": "posindex",
+    "seed": 42,
+    "epochs": 40,
+    "modalities": [
+      "wifi",
+      "imu"
+    ],
+    "val_mae_m": 17.192434310913086,
+    "test_mae_m": 10.714008331298828,
+    "elapsed_s": 3712.5157113075256,
+    "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_msiln_site1_b1_posindex_s42\\fusion_20260618_235746",
+    "status": "ok",
+    "elapsed_min": 63.79
+  },
+  {
+    "dataset": "msiln_site1_b1",
+    "time_enc_mode": "posindex",
+    "seed": 7,
+    "epochs": 40,
+    "modalities": [
+      "wifi",
+      "imu"
+    ],
+    "val_mae_m": 15.196202278137207,
+    "test_mae_m": 13.246034622192383,
+    "elapsed_s": 3710.405684232712,
+    "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_msiln_site1_b1_posindex_s7\\fusion_20260619_010128",
+    "status": "ok",
+    "elapsed_min": 63.63
+  },
+  {
+    "dataset": "msiln_site1_b1",
+    "time_enc_mode": "posindex",
+    "seed": 123,
+    "epochs": 40,
+    "modalities": [
+      "wifi",
+      "imu"
+    ],
+    "val_mae_m": 16.00027084350586,
+    "test_mae_m": 13.510498046875,
+    "elapsed_s": 3710.8175525665283,
+    "run_dir": "X:\\navlori-fusion\\runs\\revision\\m1_msiln_site1_b1_posindex_s123\\fusion_20260619_020508",
+    "status": "ok",
+    "elapsed_min": 63.61
+  }
+]

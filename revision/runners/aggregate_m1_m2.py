@@ -1,0 +1,181 @@
+"""Aggregate the M1+M2 manifest into mean +/- std tables.
+
+Reads runs/revision/m1_*/summary.json (via the manifest) and emits:
+
+  revision/artifacts/m1_m2_table.md   - markdown table (drop into paper-ready notes)
+  revision/artifacts/m1_m2_table.tex  - LaTeX tabular for the paper
+  revision/artifacts/m1_m2_table.csv  - raw numbers for re-imports
+
+Safe to run while the batch is still running; only complete (dataset, mode)
+cells with ALL seeds present are rendered, and the resulting tables note
+which rows are still pending.
+"""
+from __future__ import annotations
+
+import csv
+import json
+import math
+from collections import defaultdict
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[2]
+MANIFEST = REPO / "revision" / "ablation_m1_timeenc" / "manifest.json"
+OUT_DIR = REPO / "revision" / "artifacts"
+OUT_DIR.mkdir(parents=True, exist_ok=True)
+
+DATASETS = ["simulation_2mod", "msiln_site1_b1"]
+MODES = ["learned_continuous", "none", "binned", "posindex"]
+DATASET_DISPLAY = {
+    "simulation_2mod": "Webots",
+    "msiln_site1_b1": "MSILN site1/B1",
+}
+MODE_DISPLAY = {
+    "learned_continuous": "Learned continuous (ours)",
+    "none": "No time encoding",
+    "binned": "Binned (log-quantized)",
+    "posindex": "Positional index (rank)",
+}
+
+
+def mean_std(xs: list[float]) -> tuple[float, float]:
+    if not xs:
+        return float("nan"), float("nan")
+    n = len(xs)
+    mu = sum(xs) / n
+    if n < 2:
+        return mu, 0.0
+    var = sum((x - mu) ** 2 for x in xs) / (n - 1)
+    return mu, math.sqrt(var)
+
+
+def main() -> None:
+    if not MANIFEST.exists():
+        print(f"[aggregate] no manifest yet at {MANIFEST}")
+        return
+    data = json.loads(MANIFEST.read_text())
+    ok = [r for r in data if r.get("status") == "ok"]
+    print(f"[aggregate] {len(ok)} OK runs in manifest")
+
+    # Group results by (dataset, mode) -> list of (seed, val, test)
+    grouped: dict[tuple[str, str], list[dict]] = defaultdict(list)
+    for r in ok:
+        key = (r["dataset"], r["time_enc_mode"])
+        grouped[key].append({
+            "seed": r["seed"],
+            "val_mae_m": r["val_mae_m"],
+            "test_mae_m": r["test_mae_m"],
+        })
+
+    rows: list[dict] = []
+    for dataset in DATASETS:
+        for mode in MODES:
+            entries = grouped.get((dataset, mode), [])
+            seeds = sorted(e["seed"] for e in entries)
+            vals = [e["val_mae_m"] for e in entries]
+            tests = [e["test_mae_m"] for e in entries]
+            v_mu, v_sd = mean_std(vals)
+            t_mu, t_sd = mean_std(tests)
+            rows.append({
+                "dataset": dataset,
+                "mode": mode,
+                "n_seeds": len(entries),
+                "seeds": seeds,
+                "val_mean": v_mu,
+                "val_std": v_sd,
+                "test_mean": t_mu,
+                "test_std": t_sd,
+            })
+
+    # ---- CSV ----------------------------------------------------------------
+    csv_p = OUT_DIR / "m1_m2_table.csv"
+    with csv_p.open("w", newline="") as f:
+        w = csv.DictWriter(
+            f, fieldnames=["dataset", "mode", "n_seeds", "seeds",
+                            "val_mean", "val_std", "test_mean", "test_std"])
+        w.writeheader()
+        for r in rows:
+            w.writerow({**r, "seeds": ",".join(map(str, r["seeds"]))})
+    print(f"[aggregate] wrote {csv_p}")
+
+    # ---- Markdown -----------------------------------------------------------
+    md: list[str] = []
+    md.append("# M1 + M2 results: time-encoding ablation x seed variance")
+    md.append("")
+    md.append("Each cell is `val MAE (m) | test MAE (m)` reported as `mean +/- std`")
+    md.append("over the seeds listed in the next column. Cells with `n_seeds < 3`")
+    md.append("are still pending (the batch is sequential).")
+    md.append("")
+    for dataset in DATASETS:
+        md.append(f"## {DATASET_DISPLAY[dataset]}")
+        md.append("")
+        md.append("| Time encoding | n seeds | val MAE (m) | test MAE (m) |")
+        md.append("|---|---:|---:|---:|")
+        for mode in MODES:
+            r = next(rr for rr in rows
+                      if rr["dataset"] == dataset and rr["mode"] == mode)
+            if r["n_seeds"] == 0:
+                cell_v = "pending"
+                cell_t = "pending"
+            else:
+                pm = "+/-"
+                cell_v = f"{r['val_mean']:.3f} {pm} {r['val_std']:.3f}"
+                cell_t = f"{r['test_mean']:.3f} {pm} {r['test_std']:.3f}"
+            md.append(f"| {MODE_DISPLAY[mode]} | {r['n_seeds']} | "
+                       f"{cell_v} | {cell_t} |")
+        md.append("")
+    md_p = OUT_DIR / "m1_m2_table.md"
+    md_p.write_text("\n".join(md))
+    print(f"[aggregate] wrote {md_p}")
+
+    # ---- LaTeX (booktabs) ---------------------------------------------------
+    tex: list[str] = []
+    tex.append(r"% M1 (time-encoding ablation) x M2 (seed variance) table.")
+    tex.append(r"% Auto-generated by revision/runners/aggregate_m1_m2.py.")
+    tex.append(r"\begin{tabular}{llcc}")
+    tex.append(r"\toprule")
+    tex.append(r"Dataset & Time encoding & val MAE (m) & test MAE (m) \\")
+    tex.append(r"\midrule")
+    for dataset in DATASETS:
+        d_label = DATASET_DISPLAY[dataset].replace("_", r"\_")
+        for i, mode in enumerate(MODES):
+            r = next(rr for rr in rows
+                      if rr["dataset"] == dataset and rr["mode"] == mode)
+            if r["n_seeds"] == 0:
+                cell_v = r"-- (pending)"
+                cell_t = r"-- (pending)"
+            else:
+                cell_v = (f"${r['val_mean']:.3f}"
+                           rf" \pm {r['val_std']:.3f}$")
+                cell_t = (f"${r['test_mean']:.3f}"
+                           rf" \pm {r['test_std']:.3f}$")
+            d_cell = d_label if i == 0 else ""
+            mode_label = MODE_DISPLAY[mode].replace("_", r"\_")
+            tex.append(f"{d_cell} & {mode_label} & {cell_v} & {cell_t} \\\\")
+        tex.append(r"\midrule")
+    # Remove the trailing \midrule
+    if tex and tex[-1] == r"\midrule":
+        tex.pop()
+    tex.append(r"\bottomrule")
+    tex.append(r"\end{tabular}")
+    tex_p = OUT_DIR / "m1_m2_table.tex"
+    tex_p.write_text("\n".join(tex))
+    print(f"[aggregate] wrote {tex_p}")
+
+    # Headline summary
+    summary: list[str] = []
+    for dataset in DATASETS:
+        for mode in MODES:
+            r = next(rr for rr in rows
+                      if rr["dataset"] == dataset and rr["mode"] == mode)
+            if r["n_seeds"] > 0:
+                summary.append(
+                    f"{DATASET_DISPLAY[dataset]:>16s}  {mode:>22s}  "
+                    f"n={r['n_seeds']}  val={r['val_mean']:.3f}+/-{r['val_std']:.3f}  "
+                    f"test={r['test_mean']:.3f}+/-{r['test_std']:.3f}"
+                )
+    print("\nHeadline summary:")
+    print("\n".join(summary))
+
+
+if __name__ == "__main__":
+    main()

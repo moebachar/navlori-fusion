@@ -237,7 +237,7 @@ Robotics (ICINCO 2024), SciTePress.
 - **Relevance:** Trains a triplet CNN on indoor panoramic images to learn
   descriptors, then localizes by **nearest-neighbour retrieval** in
   descriptor space — methodologically parallel to our learned-embedding +
-  kNN positioning (Anchor2Vec). Even though camera is a journal modality,
+  kNN positioning (WiFi-Net). Even though camera is a journal modality,
   the *method* (metric-learned embedding + NN localization) is squarely in
   scope for Related Work.
 - **Scope:** `[in-scope:paper-1]`  ·  **Zotero:** `[not-in-zotero]`

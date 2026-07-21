@@ -137,7 +137,7 @@ All 6 papers structurally analysed follow the same IMRaD skeleton:
   (A* vs TEB); LCM **0** external baselines (evaluates itself across 5
   datasets). **Median ≈ 1–2 external comparison methods.**
 - **Implication for us:** comparing our transformer against
-  wlan_localization (+ WiFi-kNN) on MSILN, and Anchor2Vec vs
+  wlan_localization (+ WiFi-kNN) on MSILN, and WiFi-Net vs
   wlan_localization on UJI, and IMUCNN vs RoNIN ResNet1D — i.e. **one
   named SOTA per leg** — already *meets or exceeds* the venue's typical
   comparison density. ICINCO reviewers do ask "needs comparative

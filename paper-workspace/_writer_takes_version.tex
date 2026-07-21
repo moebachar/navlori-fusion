@@ -1,0 +1,177 @@
+\section{\uppercase{Results}}
+
+\subsection{Per-Modality Encoder Evaluation}
+
+\noindent
+Before the two streams are fused, each encoder is scored against the standard
+benchmark of its field, so that any fusion result rests on encoders already
+tested in isolation. Table~\ref{tab:perleg} collects both comparisons.
+
+On UJIIndoorLoc~\cite{torressospedra2014ujiindoorloc}, WiFi-Net reaches an MAE
+of $8.58$~m on the validation scans, against $15.17$~m for wlan\_localization~%
+\cite{wlanloc}, a reduction of $43.4\%$ under Eq.~\eqref{eq:mae}.
+% src: experiments-results-brief.md 2.1; task grounded number 8.58 m / -43.4%
+The benchmark fixes $520$ access points and carries no trajectory structure, so
+the comparison isolates the fingerprint-to-position mapping with no temporal
+context to lean on. Under that constraint WiFi-Net more than halves the
+reference error.
+
+The inertial leg is the harder case. On RoNIN canonical~\cite{yan2019ronin},
+IMUCNN attains a raw ATE of $9.72$~m on the $32$ held-out sequences, against
+$5.14$~m for ResNet1D~\cite{yan2019ronin} under Eq.~\eqref{eq:ate}, so the
+lighter encoder trails the reference by roughly $89\%$.
+% src: task grounded number raw ATE 9.72 m vs 5.14 m, ~+89% gap
+The two encoders are not the same size: IMUCNN carries about $0.05$~M
+parameters against ResNet1D's $4.6$~M, a factor of roughly $95$. The gap
+reflects an in-domain-competitive encoder paying a cross-subject generalization
+cost at a far smaller parameter budget, rather than a failure of the encoder on
+held-out motion. Figure~\ref{fig:ronin_traj} shows the qualitative consequence
+on one held-out sequence.
+
+\begin{table*}[tb]
+\caption{Per-modality encoder evaluation, each encoder scored on the standard
+  benchmark of its field (MAE on UJIIndoorLoc, raw ATE on RoNIN canonical).
+  Bold marks the lower error in each row.}\label{tab:perleg}
+\centering
+\begin{tabular}{|l|l|c|c|c|}\hline
+Benchmark (split) & Metric & wlan\_localization / ResNet1D & Ours & $\Delta$ \\ \hline
+UJIIndoorLoc (val) & MAE & 15.17 & \textbf{8.58} & $-43.4\%$ \\ \hline
+RoNIN canonical & raw ATE & \textbf{5.14} & 9.72 & $+89\%$ \\ \hline
+\end{tabular}
+\end{table*}
+
+\begin{figure}[!hb]\centering
+  \includegraphics[width=0.95\columnwidth]{figures/fig_ronin_traj.pdf}
+  \caption{RoNIN canonical held-out sequence: ground truth, ResNet1D, and
+    IMUCNN (ours). The lighter inertial encoder follows the route but
+    accumulates more drift than ResNet1D over the leg.}\label{fig:ronin_traj}
+  % [[VERIFY: export figure without in-plot title]]
+\end{figure}
+
+\subsection{End-to-End Fusion}
+
+\noindent
+With both encoders evaluated, the set-transformer fuses them into a single
+position estimate. The cross-session real-world collection carries the main
+claim; the controlled simulation is reported first as a sanity check.
+Table~\ref{tab:fusion} collects the fusion results against the named baselines.
+
+MSILN site1/B1 is the cross-session test: training, validation and test come
+from sessions recorded on separate days. On the held-out test session the
+set-transformer reaches $10.89$~m MAE under Eq.~\eqref{eq:mae}, against
+$28.31$~m for wlan\_localization, an improvement of $61.5\%$.
+% src: task grounded numbers MSILN test 10.89 m vs wlanloc 28.31 m, -61.5%
+On the validation session the proposed method reports $15.22$~m against
+$21.26$~m for wlan\_localization, a smaller margin of $28.4\%$.
+% src: task grounded numbers MSILN val 15.22 m vs wlanloc 21.26 m, -28.4%
+Where the WiFi baseline nearly doubles its error from validation to test, the
+fusion error falls, because the dense inertial stream holds position against the
+sparse WiFi anchor across the session boundary. The proposed method therefore
+improves over the open-source WiFi baseline under genuine cross-session
+fingerprint drift, which is the setting it is built for. Figure~\ref{fig:msiln_cdf}
+reports the full per-sample error distribution on the test session.
+
+This margin should be read with one caveat. A WiFi-kNN comparator is comparable
+to the proposed method on this test split, because a single WiFi-dense path
+contributes roughly $28\%$ of the test mass and is easy for nearest-neighbour
+fingerprinting (Section~\ref{sec:limitations}).
+% src: scope.md 7.3 path-130 ~28% of test mass
+The cross-session improvement is therefore reported against the open-source
+wlan\_localization baseline, not as a claim of dominance over every WiFi method.
+
+In the Webots simulation, the two-modality model at $K=4$ reaches about
+$0.375$~m MAE on test.
+% src: task grounded number Webots 2-mod K=4 ~0.375 m
+% [[VERIFY: Webots canonical run -- val/test exact figure unresolved, 0.375 vs 0.517]]
+No public two-modality method targets this simulation, and the WiFi field is
+synthesized by Gaussian-process regression rather than measured, so the
+sub-metre figure is an optimistic controlled-simulation check rather than a
+real-deployment result. It is reported only to confirm that the pipeline
+recovers position when the WiFi field is clean.
+
+\begin{table*}[tb]
+\caption{End-to-end fusion: position MAE (m) under Eq.~\eqref{eq:mae}. The
+  simulation has no public two-modality reference and uses a synthesized WiFi
+  field, so its sub-metre figure is a controlled-simulation check, not a
+  real-deployment result. The MSILN comparison is cross-session against the
+  open-source WiFi baseline. Bold marks the lowest error in each row.}%
+  \label{tab:fusion}
+\centering
+\begin{tabular}{|l|c|c|c|}\hline
+Dataset (split) & wlan\_localization & Ours & $\Delta$ \\ \hline
+Webots sim (test) & -- & \textbf{$\sim$0.375} & -- \\ \hline
+MSILN site1/B1 (val) & 21.26 & \textbf{15.22} & $-28.4\%$ \\ \hline
+MSILN site1/B1 (test) & 28.31 & \textbf{10.89} & $-61.5\%$ \\ \hline
+\end{tabular}
+\end{table*}
+
+\begin{figure}[!hb]\centering
+  \includegraphics[width=0.95\columnwidth]{figures/fig_msiln_cdf.pdf}
+  \caption{Per-sample position error on the MSILN site1/B1 cross-session test
+    session: cumulative distribution for the proposed method against
+    wlan\_localization. The proposed method places most samples within a
+    shorter error range, while the WiFi baseline carries a long tail under
+    cross-session drift.}\label{fig:msiln_cdf}
+  % [[VERIFY: export figure without in-plot title]]
+\end{figure}
+
+The IMUWiFine LSTM~\cite{nurpeiissov2022imuwifine}, a learned WiFi--IMU fusion,
+is the natural learned-fusion comparator for the cross-session setting. No
+grounded number for the proposed method against it on IMUWiFine floor~4 is
+available at the time of writing, so that comparison is deferred.
+% [[VERIFY: our method vs IMUWiFine-LSTM (nurpeiissov2022imuwifine) on IMUWiFine fl.4 numbers needed]]
+
+\subsection{Robustness}
+
+\noindent
+The robustness experiments run on the Webots simulation, where every signal is
+controlled and individual sensors can be suppressed or aged on demand. The
+sub-metre scale of these numbers carries the synthesized-WiFi caveat noted
+above; the evidence here is the shape of the degradation, not its absolute
+level.
+
+\textbf{Modality ablation.} Suppressing a modality at test time exposes what
+each stream contributes. With WiFi only the test MAE is about $0.495$~m; with
+IMU only it is about $3.77$~m; with both it is about $0.375$~m.
+% src: task grounded numbers wifi-only ~0.495, imu-only ~3.77, both ~0.375
+The WiFi token supplies the absolute anchor, so dropping IMU costs little, while
+IMU alone drifts without an absolute reference. The model degrades gracefully
+rather than failing when one stream is absent.
+
+\textbf{Staleness.} Aging the WiFi token while the IMU stream stays fresh maps
+the cost of asynchronous, delayed measurements. The test error rises smoothly
+with WiFi lag at a slope of about $0.029$~m/s, rather than collapsing once the
+anchor goes stale.
+% src: task grounded number staleness slope ~0.029 m/s
+Small lags cost little, so what would be a cliff under a fixed-rate design
+becomes a slope across moderate delays.
+
+\textbf{Latency.} On the Quadro P4000 the model runs at about $5.1$~ms per
+sample at batch size $1$ and about $0.17$~ms per sample at batch size $32$,
+fast enough for real-time use.
+% src: task grounded numbers latency ~5.1 ms (b=1), ~0.17 ms (b=32)
+
+\subsection{Limitations}\label{sec:limitations}
+
+\noindent
+The inertial encoder trails the reference on its own benchmark. On RoNIN
+canonical IMUCNN reports a raw ATE of $9.72$~m against ResNet1D's $5.14$~m
+($+89\%$); removing a rigid-body offset by Umeyama alignment narrows the gap to
+roughly $7.6$--$7.9$~m but does not close it.
+% src: task -- Umeyama-aligned ATE ~7.6-7.9 m belongs only to limitations
+Even with alignment the gap remains, and it reflects a $95\times$-smaller
+encoder paying a cross-subject generalization cost. Closing it at this parameter
+budget is open work.
+
+The fused trajectory is over-smoothed relative to ground truth, with predicted
+motion magnitude falling below the true magnitude at turns. The temporal
+attention learns to smooth, and at this loss setting it smooths too much.
+Despite this, absolute-position accuracy stays competitive on the cross-session
+test, and an auxiliary velocity loss is identified as a candidate fix.
+
+The MSILN test split is not uniform. One path contributes roughly $28\%$ of the
+test mass and is WiFi-dense, so its WiFi-favourable composition shapes the
+aggregate test figure and explains why a WiFi-kNN comparator is comparable on
+this split. The cross-session improvement reported above holds against the
+open-source WiFi baseline, but the test figure should be read alongside the
+validation figure, not in isolation.

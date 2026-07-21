@@ -1,0 +1,36 @@
+\section{\uppercase{Introduction}}
+
+\noindent Many agents that move through buildings must know where they are. A pedestrian
+following turn-by-turn directions on a smartphone, a mobile robot running
+warehouse logistics or facility inspection, and a tracked asset reporting its
+location all depend on a position estimate. Outdoors that estimate comes from
+GPS, but satellite signals scarcely penetrate walls. Consequently, an indoor device must
+infer its position from the sensors it already carries. The inference is
+error prone because no effective global reference is available indoors: the
+measurements are noisy, and the environment shifts as people and objects move.
+Accuracy is bounded further by the sensing hardware and by the site survey that
+calibrates it. An estimate that holds under one set of conditions can degrade
+sharply once any of them changes, so reliable indoor self-localization remains an
+open problem.
+
+Two sensors are carried by nearly all of these devices: a WiFi radio and an
+inertial measurement unit (IMU). A WiFi scan gives a sparse absolute reference to
+known access points. The IMU reports dense relative motion at a significantly higher rate.
+The two streams are complementary, yet heterogeneous and sampled asynchronously.
+No common clock aligns their arrivals, and either stream may become unavailable or arrive
+stale during operation. Fusing these imperfect, asynchronous signals into one
+position estimate is the core problem this work targets.
+
+In this paper, we propose a continuous-time transformer (Figure~\ref{fig:pipeline})
+that fuses asynchronous WiFi and IMU observations into a single $(x, y)$ estimate
+within one model that remains accurate when a sensor is missing or stale. The
+approach is not tied to a particular platform. It needs only WiFi scans and
+inertial windows, the same inputs a phone, a robot, or a wearable already produces,
+so it applies to any device that carries these two sensors. We validate it on real
+cross-session data.
+
+The remainder of this paper is organized as follows: Section~\ref{sec:related}
+reviews related work, Section~\ref{sec:problem} states the problem,
+Section~\ref{sec:method} develops the method, Section~\ref{sec:experiments}
+describes the experimental setup, Section~\ref{sec:results} reports the results,
+and Section~\ref{sec:conclusion} concludes.
