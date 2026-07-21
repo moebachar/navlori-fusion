@@ -8,6 +8,13 @@ async_collection/
 *.hdf5
 ronin_frdr/
 hospital_sample*/
+tartanair_hospital/
+imuwifine_floor4/
+msiln_site1_b1/
+ronin_a000/
+ronin_a000_intra/
+ipin2024_floor*/
+uji_indoorloc/
 !.gitkeep
 !.gitignore
 /async_collection

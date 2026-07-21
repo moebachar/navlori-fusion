@@ -35,8 +35,30 @@ Thumbs.db
 
 # DVC local cache
 /dvc_store/
-\n# ViT backbone feature cache\n.vit_cache/
 
+# ViT backbone feature cache
+.vit_cache/
+
+# Secrets / local service credentials
+.env
+
+# Local tool state
+.jarvis/
+.pytest_cache/
+
+# arXiv code-release package (2.9 GB, becomes its own repo later)
+release/
+
+# Debug render outputs
+_debug_pngs/
+
+# Webots world backups + floor-orientation test renders
+src/simulation/worlds/*.bak*
+src/simulation/worlds/*_flip*.png
+src/simulation/worlds/*_rot180.png
+
+# Experiment outputs (16 legacy JSONs stay tracked; new outputs are local-only)
+runs/
 runs/**/*.pt
 
 .claude/*
