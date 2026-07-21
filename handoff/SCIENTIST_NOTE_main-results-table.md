@@ -21,8 +21,8 @@ Numbers in hand (reuse, don't re-run):
 - TartanAir hospital P000: TartanVO **0.518 m full / 0.012 m last-20 % slice** (RESULT_08).
 - Webots sim: incumbent FusionTransformer **0.417 m test** (RESULT_13/14).
 - Webots sim: CNN1D **0.339 m test**, LSTM-attn **0.340 m test** (RESULT_17).
-- Webots sim per-leg: Anchor2Vec **8.69 m val Euclid** on UJI (RESULT_01), IMUCNN 9.961 m raw ATE / 7.876 m Umeyama on canonical RoNIN (RESULT_07), DPVOMotionEncoder 0.293 m on TartanAir last-20% (RESULT_08).
-- MSILN cross-session (NOT in this main table schema — paper handles MSILN as criterion (c) separately): 16.60 / 14.02 m K=4 2-mod B=128 (RESULT_15). Note: that run used `WiFiSetTransformer`, not Anchor2Vec — divergence flagged.
+- Webots sim per-leg: WiFi-Net **8.69 m val Euclid** on UJI (RESULT_01), IMUCNN 9.961 m raw ATE / 7.876 m Umeyama on canonical RoNIN (RESULT_07), DPVOMotionEncoder 0.293 m on TartanAir last-20% (RESULT_08).
+- MSILN cross-session (NOT in this main table schema — paper handles MSILN as criterion (c) separately): 16.60 / 14.02 m K=4 2-mod B=128 (RESULT_15). Note: that run used `WiFiSetTransformer`, not WiFi-Net — divergence flagged.
 
 Numbers MISSING (must be measured in PLAN_19 → PLAN_22):
 1. **CNN1D + LSTM-attn on IMUWiFine** + per-leg SOTA repro on
@@ -58,7 +58,7 @@ Numbers MISSING (must be measured in PLAN_19 → PLAN_22):
   reuse.
 - **PLAN_22** — UJI: CNN1D + LSTM-attn at K=1 (degenerate temporal).
   wlan_localization 15.17 m number already in hand (RESULT_01);
-  reuse. Anchor2Vec 8.69 m number already in hand (RESULT_01);
+  reuse. WiFi-Net 8.69 m number already in hand (RESULT_01);
   reuse.
 - **PLAN_23** — SUMMARY draft + main results table assembly.
   Cross-dataset table populated; paper's claims (a)/(b)/(c)/(d)/(e)
@@ -74,7 +74,7 @@ PLAN_23 SUMMARY draft = ~30 min. Total ~4.5 hours after PLAN_18
 closes. Stop at 18:00 local; PLAN_18 expected ~09:00; total
 runway to 18:00 = ~9 hours; 4.5 hours of work fits with buffer for
 the MSILN re-run (RESULT_15 used the wrong WiFi encoder — could
-be quick to redo with Anchor2Vec) and conformal coverage if time
+be quick to redo with WiFi-Net) and conformal coverage if time
 allows.
 
 ## Iteration-order rationale

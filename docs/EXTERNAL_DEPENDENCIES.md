@@ -16,8 +16,10 @@ git submodule update --init --recursive
 pip install -r requirements.txt
 ```
 
-After submodule init, the four SOTA repos are in
-`external_methods/{wlan_localization,ronin,tartanvo,dpvo}/`.
+After submodule init, the six vendored repos are in
+`external_methods/{wlan_localization,ronin,tartanvo,dpvo,imuwifine,indoor_location_competition_20}/`.
+(`imuwifine` and `indoor_location_competition_20` were added 2026-06-04,
+RESULT_40, for the MSILN fusion baselines — see §5/§6 below.)
 
 ## Submodule inventory
 
@@ -118,21 +120,33 @@ python setup.py build_ext --inplace
 (Requires CUDA toolkit + GCC + an Eigen install. See upstream
 README.)
 
-## Data-only references (NOT submodules)
+## 5. `external_methods/indoor_location_competition_20` — MSILN dataset tooling
 
-### `indoor-location-competition-20` (MSILN starter)
+*(Promoted from data-only reference to submodule on 2026-06-04, RESULT_40 —
+the earlier "not a submodule, 2.1 GB" stance was reversed once the MSILN
+baselines needed its `compute_f`/`io_f` utilities at import time.)*
 
 | field | value |
 |-------|-------|
 | upstream | https://github.com/location-competition/indoor-location-competition-20 |
+| pinned commit | see `git submodule status` |
 | license | (refer to upstream) |
-| use | starter scripts + small example data for the Microsoft Indoor Localization 2.0 dataset |
-| **NOT a submodule because** | the repo bundles ~2.1 GB of data; we use the converter pattern only |
-| referenced by | `scripts/convert_msiln.py` (`--raw-root` default points at a local clone path) |
+| what we use | `compute_f`/`io_f` utilities + starter structure for the Microsoft Indoor Localization 2.0 (MSILN) dataset |
+| our loader | `src.pipeline.baselines._msiln_loader`, `src.pipeline.data.msiln` |
+| referenced by | `scripts/convert_msiln.py`, RESULT_15/40, `configs/data/msiln_site1_b1.yaml` |
 
-To use: `git clone https://github.com/location-competition/indoor-location-competition-20`
-to any local path, then pass `--raw-root <that path>` to
-`scripts/convert_msiln.py`.
+## 6. `external_methods/imuwifine` — WiFi+IMU learned-fusion baseline
+
+*(Added 2026-06-04, RESULT_40.)*
+
+| field | value |
+|-------|-------|
+| upstream | https://github.com/IS2AI/IMUWiFine |
+| pinned commit | see `git submodule status` |
+| license | **NONE published (all rights reserved)** — only clean-room re-implementations are executed (`src/pipeline/baselines/imuwifine.py`); the submodule is reference-only. Keep-vs-drop decision pending (RESULT_40 item 2). |
+| what we use | architecture/protocol reference for the clean-room LSTM baseline on MSILN; IMUWiFine floor-4 dataset provenance |
+| our loader | `src.pipeline.baselines.imuwifine` (clean-room, no upstream imports) |
+| referenced by | RESULT_40, paper §6.3 (IMUWiFine fl.4) |
 
 ## Compat shims summary
 

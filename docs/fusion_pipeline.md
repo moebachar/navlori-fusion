@@ -100,12 +100,12 @@ That uniformity is what lets one transformer handle all modalities.
 
 **Worked example.** `IMUCNN` takes `(32, 9)`, runs three 1-D convolutions
 (32→64→128 channels), averages over time, and projects to 128 → output
-`(128,)`. `Anchor2Vec` takes the 117-d WiFi scan, compares it to 64 learned
+`(128,)`. `WiFi-Net` takes the 117-d WiFi scan, compares it to 64 learned
 "anchor" fingerprints, and mixes their embeddings → output `(128,)`.
 
 | Modality | Encoder | What it does |
 |---|---|---|
-| WiFi | `Anchor2Vec` | RSSI → similarity to 64 learned anchors → 128-d |
+| WiFi | `WiFi-Net` | RSSI → similarity to 64 learned anchors → 128-d |
 | IMU | `IMUCNN` | 1-D CNN over the 32-step window → 128-d |
 | Odom | `OdomCNN` | 1-D CNN over the 16-step window → 128-d |
 | Camera | `DPVOMotionEncoder` | frozen DPVO trunk + patch tracking → 128-d motion token |

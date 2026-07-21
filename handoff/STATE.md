@@ -1,5 +1,15 @@
 # Run 2 — Coordination State
 
+> **SUPERSEDED (2026-07-21).** This file is frozen run-2 history (last
+> substantive update 2026-06-01). Two corrections for readers: (1) the
+> venue became **ICINCO 2026** — submitted 2026-06-26, double-blind,
+> notification 2026-07-31 (all "PerCom 2026" mentions below are the old
+> plan); (2) RESULT_40 (2026-06-04) superseded the MSILN headline: WiFi-kNN
+> (6.62 m) and a clean-room IMUWiFine LSTM (7.43 m) beat the fusion
+> transformer (10.89 m) on the MSILN test split, and the paper contribution
+> was reframed to async-robustness without rate-resampling. Current state
+> lives in `paper-workspace/PAPER_STATE.md` + the project memory.
+
 Started: Started: 2026-05-25 <12:30> local
 Stop at: 2026-05-26 18:00 local
 Branch: overnight-autonomous-run2-2026-05-25
@@ -11,11 +21,11 @@ the autopsy.
 
 ## Status
 
-- `CURRENT_ITERATION:` 38  (PLAN_38 issued — user 2026-05-27 ~07:20: split SOTA col into per-method columns + run-every-method-where-modality-applies; closes the "n/a (not tested)" cells leaving only "n/a (modality unavailable)")
-- `LAST_PLAN:` PLAN_38_per-method-columns-and-modality-driven-fills.md (Two coupled changes: (1) Table C column split — 1 collapsed SOTA col → 4 per-method SOTA cols (wlanloc / RoNIN ResNet1D / TartanVO / trivial integration). (2) 10 NEW evals filling cells the user noted "we have the modality but didn't test": 5 on Webots (wlanloc + ResNet1D + Anchor2Vec + IMUCNN + DPVOMotion encoder-only); 3 on MSILN (ResNet1D + Anchor2Vec + IMUCNN encoder-only); 2 on IMUWiFine (Anchor2Vec + IMUCNN encoder-only). ~60 min new training + ~30 min plumbing. PLAN_39 queued for the 5 remaining fusion-arch cells from PLAN_37's timeout cut.)
-- `LAST_RESULT:` RESULT_37_fill-all-fusion-cells-and-add-imuwifine.md (PARTIAL ship: NEW `_PlainTransformer` aggregator + `train_uji_arch` + `train_ronin_canonical_arch` helpers + 8 new notebook cells + Table C extended to 9×8 + caveat footnote. **Bootstrap timed out at the §3.3 MSILN 3-arch loop after >3 h** — only the MSILN transformer ckpt was saved before the timeout (cnn1d + lstm_attn cut). §3.4 IMUWiFine ×3 never reached. Recovery patch makes §3.3 + §3.4 honest-skip-with-n/a if a ckpt is missing under FAST_MODE=True. Saved ckpts: UJI transformer (val 8.88 m), RoNIN canonical transformer (raw ATE 10.65 m / Umeyama 5.98 m), MSILN site1/B1 transformer (val 15.22 m / test 10.89 m — beats wlanloc SOTA test 28.31 m by 62 %). Ship smoke FAST_MODE=True: 0 errors / 35 figures / 3 Styler tables / 4.3 MB / ~3 min. Open Q in RESULT_37: 3-option menu for populating the 5 missing ckpts.)
-- `GOAL_REACHED:` true for run-2 scientific work; publication notebook PARTIAL on Table C — 5 of 24 fusion-arch × non-Webots-dataset cells still n/a (will be filled by follow-up training; the plumbing supports auto-pickup on next FAST_MODE=True smoke)
-- `STOP_REASON:` PLAN_37 ship-as-partial (Items B + half of A complete). Open Q for user: choose option 1 (background re-train standalone scripts), option 2 (split §3.3/§3.4 per-arch and re-bootstrap), or option 3 (accept partial Table C and proceed to paper draft) — see RESULT_37 recommendation.
+- `CURRENT_ITERATION:` 39  (PLAN_39 issued — user 2026-06-01: phase shift to conference publication. Three coupled tasks: (1) **Project-wide `Anchor2Vec → WiFiNet` rename** (live code + active docs + active notebooks; frozen RESULT/PLAN archives untouched). (2) **New `notebooks/paper_results.ipynb`** scoped to scope.md (WiFi+IMU only, set-transformer only, 4 datasets, scriptless — only `src/`, `external_methods/`, `data/` imports). (3) **Metrics minimized to MAE + raw ATE only**; Umeyama-aligned ATE survives only in §6 limitations; smoothness debt becomes visual GT-vs-pred overlay (no Pearson r). Archive notebook `run2_walkthrough.ipynb` stays as-is — both notebooks coexist.)
+- `LAST_PLAN:` PLAN_39_paper-results-notebook.md (Engineer's first task: §0a rename audit; second task: §1-§8 notebook build. Metric policy §3a binding. Honest-framing cells §6 of the new notebook are VISIBLE not footnoted: smoothness visual, IMU canonical gap reports both raw +94 % and Umeyama +53 %, MSILN path-130 per-path breakdown.)
+- `LAST_RESULT:` RESULT_37_fill-all-fusion-cells-and-add-imuwifine.md (still last result; PLAN_38 was queued at the end of run-2 but superseded by PLAN_39's phase shift. Saved ckpts from RESULT_37 — UJI transformer val 8.88 m, RoNIN canonical transformer raw ATE 10.65 m / Umeyama 5.98 m, MSILN site1/B1 transformer val 15.22 m / test 10.89 m — are the paper-shipping headlines used by PLAN_39's §4 fusion cells.)
+- `GOAL_REACHED:` run-2 scientific work complete; **paper publication scope locked** via `paper-workspace/scope.md` (2026-05-30 author iteration + 2026-06-01 rename + metric updates). Conference paper (PerCom 2026, ~11 Sept deadline) is now the work direction.
+- `STOP_REASON:` PLAN_39 in flight. Open Qs for user on completion of PLAN_39: (1) sign-off on the 6 open items in scope.md §13 (final title, author list, B-1/B-2 sprint decision, etc.); (2) decide whether PLAN_38 (per-method column split) gets resurrected as a journal-supplementary task or dropped.
 
 ## Post-run-2 consolidation roadmap (PLAN_26 → PLAN_30)
 

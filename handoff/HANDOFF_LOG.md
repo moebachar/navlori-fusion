@@ -189,7 +189,7 @@ Best baseline = wifi_knn @ 0.685m | fusion 1.337m | gap +0.652m  [FAIL]
 
 ## Action 5 — Pretrained Stage A encoder loading
 
-**Why.** Audit finding B5: the fusion model was instantiating fresh `IMUCNN()`, `OdomCNN()`, `Anchor2Vec()` and training from random init. The `runs/imu_*/encoder.pt` checkpoints existed but were never used by fusion. So "Stage A is trained" was technically true but operationally dead. Action 2 makes Stage A actually learn something useful (motion for IMU/Odom); we need a way to plug that learning into fusion.
+**Why.** Audit finding B5: the fusion model was instantiating fresh `IMUCNN()`, `OdomCNN()`, `WiFi-Net()` and training from random init. The `runs/imu_*/encoder.pt` checkpoints existed but were never used by fusion. So "Stage A is trained" was technically true but operationally dead. Action 2 makes Stage A actually learn something useful (motion for IMU/Odom); we need a way to plug that learning into fusion.
 
 **Built.**
 

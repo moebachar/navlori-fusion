@@ -1,4 +1,14 @@
-# Run 2 — Final Summary (PerCom 2026 paper deliverable)
+# Run 2 — Final Summary (conference paper deliverable)
+
+> **SUPERSEDED IN TWO PLACES (2026-07-21).** (1) Venue: the paper went to
+> **ICINCO 2026** (submitted 2026-06-26, double-blind), not PerCom.
+> (2) The MSILN "clean SOTA beat" headline in §1/§4.4 was overturned by
+> RESULT_40 (2026-06-04): on the MSILN test split, WiFi-kNN (6.62 m) and a
+> clean-room IMUWiFine LSTM (7.43 m) beat the fusion transformer (10.89 m)
+> — one WiFi-dense path (130) carries ~28 % of the test mass. The paper's
+> contribution was reframed to the async-robustness mechanism
+> (continuous-time set-transformer, no rate-resampling), not absolute MAE.
+> Everything else below remains an accurate record of run-2.
 
 > **Goal**: A 4-modality fusion architecture (WiFi + IMU + Odom + Camera)
 > for indoor localization, validated via per-leg comparison against
@@ -25,7 +35,7 @@
 |                                        | RoNIN ResNet1D 37.21 / 31.70   |                      |                     |                        |                      |                       |               |
 | **RoNIN canonical**, unseen-subj test, IMU only | ResNet1D **5.14 raw** / 5.14 Umey / RTE 4.38 | IMUCNN 9.96 raw / 7.88 Umey | n/a | **7.59 raw / 5.95 Umey** / RTE 12.69 ⁽³⁾ | 7.50 raw / 6.12 Umey / RTE 12.61 | n/a | RESULT_23 |
 | **TartanAir hosp. P000**, last-20 % test, Camera only | TartanVO 0.518 full / **0.012** last-20% | DPVOMotion 0.293 last-20% Mode α (paper-soft) | n/a | n/a ⁽⁴⁾ | n/a ⁽⁴⁾ | n/a ⁽⁴⁾ | RESULT_08 |
-| **UJIIndoorLoc**, val, WiFi only       | wlanloc **15.17**              | Anchor2Vec **8.69**  | n/a                 | 8.72 ⁽⁵⁾               | **8.43** ⁽⁵⁾         | n/a                   | RESULT_01/24  |
+| **UJIIndoorLoc**, val, WiFi only       | wlanloc **15.17**              | WiFi-Net **8.69**  | n/a                 | 8.72 ⁽⁵⁾               | **8.43** ⁽⁵⁾         | n/a                   | RESULT_01/24  |
 | **MSILN site1/B1**, val/test, WiFi+IMU cross-session | wlanloc 21.26 / 28.31; WiFi-kNN 17.66 / 9.47 | n/a | n/a | n/a ⁽⁶⁾ | n/a ⁽⁶⁾ | n/a | RESULT_15: deployed config (WiFiSetTransformer + IMUCNN) val **16.60** / test 14.02 |
 
 ### Table notes
@@ -50,11 +60,11 @@
 5. **UJI K=1 + M=1 row** is the *degenerate* case for the temporal/
    cross-modal fusion architectures: at K=1 the aggregators
    structurally collapse to encoder + head. All three our-
-   architectures land within ±3 % of Anchor2Vec 8.69 m, beating
+   architectures land within ±3 % of WiFi-Net 8.69 m, beating
    wlanloc SOTA 15.17 m by 43-45 % (RESULT_24).
 6. **MSILN row** as run (RESULT_15) used the deployed config
    (WiFiSetTransformer + IMUCNN, run-1 incumbent fusion). Re-
-   running with the CNN1D winner + Anchor2Vec (the audit-winning
+   running with the CNN1D winner + WiFi-Net (the audit-winning
    WiFi encoder) is queued as a Phase-C extension; could close
    gate (c)-1 which RESULT_15 missed.
 
@@ -64,9 +74,9 @@
 
 | criterion | description | status | numbers / source |
 |-----------|-------------|:-------|------------------|
-| **(a)** per-leg SOTA within 20 % | per-modality vs published SOTA on same dataset / metric | **partial** | C1 ✓ (WiFi UJI: Anchor2Vec 8.69 m **BEATS** wlanloc 15.17 by 43 %, RESULT_01); C2 not discharged (IMU RoNIN canonical raw +47 % outside gate, Umeyama +15.7 % inside; per amended-rubric correction #3 *raw wins* → C2 `keep (in-domain only)`, RESULT_07/23); Camera paper-soft (TartanAir last-20 % +2300 % gap to TartanVO, RESULT_08); Odom internal-audit only (no public SOTA, RESULT_04) |
+| **(a)** per-leg SOTA within 20 % | per-modality vs published SOTA on same dataset / metric | **partial** | C1 ✓ (WiFi UJI: WiFi-Net 8.69 m **BEATS** wlanloc 15.17 by 43 %, RESULT_01); C2 not discharged (IMU RoNIN canonical raw +47 % outside gate, Umeyama +15.7 % inside; per amended-rubric correction #3 *raw wins* → C2 `keep (in-domain only)`, RESULT_07/23); Camera paper-soft (TartanAir last-20 % +2300 % gap to TartanVO, RESULT_08); Odom internal-audit only (no public SOTA, RESULT_04) |
 | **(b)** 4-mod Webots test ≤ 0.5 m | full-stack test MAE | **✓ CLEARED** | CNN1D test **0.339 m** (cleared by 32 %; incumbent 0.417 = 16.6 % margin; CNN1D 1/3 params of incumbent, RESULT_17) |
-| **(c)** MSILN cross-session: kNN +1.5 m AND open-source SOTA +0.5 m | both gates on same data | **partial** | gate (c)-2 ✓ (wlanloc beaten by 4.66 m val / 14.29 m test margin); gate (c)-1 partial (val 17.66 → 16.60 = 1.06 m, just under 1.5 m; test 9.47 → 14.02 fails due to path-130 composition, RESULT_15); engineer flag: re-run with CNN1D + Anchor2Vec could close both |
+| **(c)** MSILN cross-session: kNN +1.5 m AND open-source SOTA +0.5 m | both gates on same data | **partial** | gate (c)-2 ✓ (wlanloc beaten by 4.66 m val / 14.29 m test margin); gate (c)-1 partial (val 17.66 → 16.60 = 1.06 m, just under 1.5 m; test 9.47 → 14.02 fails due to path-130 composition, RESULT_15); engineer flag: re-run with CNN1D + WiFi-Net could close both |
 | **(d)** per-path distribution + smoothness r > 0.20 | per-path MAE + per-trajectory Pearson r between Δpred and Δgt | **smoothness UNMET** | per-path reported in every applicable RESULT; smoothness median r ≤ 0.10 across 4 architectures × 5+ datasets (CNN1D Webots r=0.009 / RESULT_18; LSTM-attn IPIN r=0.089 = run-2 max / RESULT_22; MoTTransformer ALiBi r=0.019 / RESULT_21; falsifies architectural-lever-for-smoothness hypothesis → loss-function-bound, B-1/B-2 lever named for follow-up) |
 | **(e)** latency < 100 ms/sample on Quadro P4000 | wall-clock inference | **✓✓ CLEARED** | CNN1D b=1 **4.73 ms/sample** (21× under gate); b=32 **0.15 ms/sample** (660× under); 100-trial median, RESULT_18 |
 
@@ -76,7 +86,7 @@
 
 | claim | description | status |
 |-------|-------------|:-------|
-| **C1** WiFi encoder competitive on UJI vs wlanloc | RESULT_01 Anchor2Vec 8.69 vs wlanloc 15.17 ; UJI K=1 row of main table (RESULT_24) confirms |
+| **C1** WiFi encoder competitive on UJI vs wlanloc | RESULT_01 WiFi-Net 8.69 vs wlanloc 15.17 ; UJI K=1 row of main table (RESULT_24) confirms |
 | **C2** IMU encoder competitive vs ResNet1D on canonical RoNIN unseen-subjects | NOT discharged: raw +94 % (IMUCNN) / +47 % (CNN1D aggregator) outside 20 % gate. **Re-labeled `keep (in-domain only)` per amended rubric correction #3**. Aggregator extension does help by 24 % (RESULT_23). |
 | **C3** 4-modality fusion on Webots ≤ 0.5 m | ✓ CNN1D test 0.339 m clears by 32 % (RESULT_17) |
 | **C4** Cross-session WiFi on MSILN beats baselines | partial ✓ vs SOTA wlanloc; partial vs WiFi-kNN due to test-set composition (RESULT_15) |
@@ -174,8 +184,8 @@ MAE.
 ### 4.5 Cross-dataset transferability via dataset-specific training
 
 The "our WiFi encoder beats wlanloc by 5 %" finding (CNN1D
-`only:wifi` IPIN val 19.45 vs wlanloc 20.53; UJI Anchor2Vec 8.69
-vs wlanloc 15.17 = 43 % beat) shows that Anchor2Vec is competitive
+`only:wifi` IPIN val 19.45 vs wlanloc 20.53; UJI WiFi-Net 8.69
+vs wlanloc 15.17 = 43 % beat) shows that WiFi-Net is competitive
 with the SOTA per-leg. Fusion's value is the 4-modality story on
 Webots (criterion (b) cleared by 32 %), not universal cross-
 dataset dominance. The paper should be honest: **fusion is the
@@ -204,7 +214,7 @@ aren't**.
    inverted); (b) "Mixed C4 outcome: clean SOTA beat, partial
    WiFi-kNN gate due to per-path composition." (a) is more
    compelling; (b) is more honest. NB: PLAN_15 used WiFiSetTransformer
-   not Anchor2Vec — re-running with the audit-winner could push
+   not WiFi-Net — re-running with the audit-winner could push
    both into ✓ (queued as next step #2 below).
 
 4. **Smoothness debt** — paper-discussion-section honest "we
@@ -233,7 +243,7 @@ aren't**.
 | # | step | est. compute | value |
 |---|------|--------------|-------|
 | 1 | **PLAN_25b**: B-1 auxiliary velocity loss OR B-2 EMA token smoothing on CNN1D winner; test whether smoothness r > 0.20 gate clears | ~30 min | Quick win if the loss-function lever works. Would close both smoothness debt (Webots) and RTE-to-ATE asymmetry (RoNIN). |
-| 2 | **MSILN re-run with CNN1D + Anchor2Vec**: RESULT_15 used WiFiSetTransformer + IMUCNN; the audit-winner combo might close gate (c)-1 | ~3 h (full MSILN retrain) | Closes the run-1 headline failure cleanly. |
+| 2 | **MSILN re-run with CNN1D + WiFi-Net**: RESULT_15 used WiFiSetTransformer + IMUCNN; the audit-winner combo might close gate (c)-1 | ~3 h (full MSILN retrain) | Closes the run-1 headline failure cleanly. |
 | 3 | **Camera external-SOTA full validation**: DPVO build on Linux/WSL2 + KITTI/TartanAir full benchmark; head trained on the public benchmark (not the Webots-OoD one from RESULT_08) | ~1 day | Pushes Camera from "paper-soft" to clean per-leg validation. |
 | 4 | **Conformal coverage on CNN1D**: `src/pipeline/uncertainty/conformal.py` (restored RESULT_06); criterion (d) extension | ~30 min | Adds uncertainty quantification claim (90 % coverage at α=0.1). |
 | 5 | **Pre-submission cleanup**: figure regeneration from saved `runs/overnight/run2_iter_*/test_paths/`; reproducibility check; `scripts/_train_webots_4mod_arch.py` and `bakeoff.py` are the entry points | ~3 h | Mechanical; needed before paper submission. |

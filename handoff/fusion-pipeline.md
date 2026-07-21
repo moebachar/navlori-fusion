@@ -75,7 +75,7 @@ RAW ASYNC SENSORS (multi-rate)
   │
   ▼
 Stage-A encoders (warm-start; heavy parts frozen + cached)
-  WiFi → Anchor2Vec ─┐
+  WiFi → WiFi-Net ─┐
   IMU  → IMUCNN     ─┤
   Odom → OdomCNN    ─┤  each → 128-d embedding
   Cam  → DPVOMotion ─┘  (frozen trunk + correlation → 64×132 patch tokens cached;
@@ -151,7 +151,7 @@ configs/
 src/pipeline/
   data/dataset.py             # FusionDataset — async windows, caches, normalisation
   data/datamodule.py          # train/val/test splits, shared stats (no leakage)
-  encoders/                   # Anchor2Vec / IMUCNN / OdomCNN / DPVOMotionEncoder
+  encoders/                   # WiFi-Net / IMUCNN / OdomCNN / DPVOMotionEncoder
   fusion/transformer.py       # FusionTransformer + ContinuousTimeEncoding
   fusion/builder.py           # load_config / build_datamodule / build_model / build_trainer
   training/fusion_trainer.py  # FusionTrainer — dropout, temporal index, eval_all_subsets, eval_staleness

@@ -16,7 +16,7 @@ if you want the history, but do not let its conclusions anchor you.
   simulation (TIAGO++ robot). Real-world datasets are typically 2-modality
   (smartphone WiFi+IMU).
 - **Encoders** (committed under `src/pipeline/encoders/`):
-  WiFi → `Anchor2Vec`; WiFi alt → `WiFiSetTransformer` (built in run 1);
+  WiFi → `WiFi-Net`; WiFi alt → `WiFiSetTransformer` (built in run 1);
   IMU → `IMUCNN`; Odom → `OdomCNN`; Camera → `DPVOMotionEncoder` (DPVO trunk
   + head).
 - **Fusion** (committed under `src/pipeline/fusion/`): single set-transformer
@@ -109,7 +109,7 @@ Odom has no public SOTA; the audit is internal (kNN, linear probe).
 
 | iter | encoder | SOTA repo | benchmark |
 |---|---|---|---|
-| 01 | WiFi (`Anchor2Vec` and/or `WiFiSetTransformer`) | `sharan-naribole/wlan_localization` + `Sachini/niloc` (Locaris) | UJIIndoorLoc |
+| 01 | WiFi (`WiFi-Net` and/or `WiFiSetTransformer`) | `sharan-naribole/wlan_localization` + `Sachini/niloc` (Locaris) | UJIIndoorLoc |
 | 02 | IMU (`IMUCNN`) | `Sachini/ronin` (ResNet1D) | RoNIN unseen-subjects |
 | 03 | Camera (`DPVOMotionEncoder`) | DPVO published numbers | Webots sim (no public real-data fits) |
 | 04 | Odom (`OdomCNN`) | — (internal: kNN, linear probe) | Webots sim |

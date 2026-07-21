@@ -24,7 +24,7 @@ from src.pipeline.evaluation import MainResultsTable
 print(MainResultsTable.from_archive().to_markdown())
 ```
 
-| dataset            | modalities         | wlan_localization | RoNIN ResNet1D  | TartanVO     | Anchor2Vec | DPVOMotion  | IMUCNN      | incumbent       | cnn1d (winner)        | lstm_attn          |
+| dataset            | modalities         | wlan_localization | RoNIN ResNet1D  | TartanVO     | WiFi-Net | DPVOMotion  | IMUCNN      | incumbent       | cnn1d (winner)        | lstm_attn          |
 |--------------------|--------------------|-------------------|-----------------|--------------|------------|-------------|-------------|-----------------|-----------------------|--------------------|
 | Webots sim         | WiFi+IMU+Cam+Odom  | n/a               | n/a             | n/a          | n/a        | n/a         | n/a         | 0.394 v/0.417 t | **0.282 v / 0.339 t** | 0.301 v / 0.340 t  |
 | IMUWiFine fl.4 (1) | WiFi+IMU           | 4.17 v / 8.50 t   | 26.84 v / n.a.  | n/a          | n/a        | n/a         | n/a         | n/a             | 1.40 v / 7.09 t       | **1.26 v** / 7.20 t|
@@ -51,7 +51,7 @@ PLAN_26-28 (`src.pipeline.baselines`, `src.pipeline.data`,
 
 | script | reproduces | numbers |
 |--------|-----------|---------|
-| `scripts/eval_uji.py` | RESULT_01 | wlanloc 15.17 m + Anchor2Vec 8.69 m on UJI val |
+| `scripts/eval_uji.py` | RESULT_01 | wlanloc 15.17 m + WiFi-Net 8.69 m on UJI val |
 | `scripts/eval_ronin_canonical.py` | RESULT_07 | ResNet1D pretrained 5.140 m on canonical unseen |
 | `scripts/eval_tartanair_hospital.py` | RESULT_08 | TartanVO 0.012 m + DPVOMotion 0.293 m last-20% |
 | `scripts/_eval_wlanloc_imuwifine.py` | RESULT_19 | wlanloc on IMUWiFine fl.4 (val 4.17 / test 8.50) |
@@ -76,7 +76,7 @@ See [`handoff/SUMMARY.md`](../handoff/SUMMARY.md) §4 (5 paragraphs):
 4. **Three distinct fusion regimes** emerged: CNN1D cooperative,
    LSTM-attn dead-reckoning, MoTTransformer WiFi-anchored. Same
    encoders + protocol; only the aggregator differs.
-5. **Cross-dataset transferability**: Anchor2Vec beats wlanloc on
+5. **Cross-dataset transferability**: WiFi-Net beats wlanloc on
    UJI + IPIN per-leg. Fusion's value is the 4-modality story on
    Webots, not universal cross-dataset dominance.
 
@@ -97,7 +97,7 @@ Per SUMMARY.md §6:
 1. **PLAN_25b**: B-1 auxiliary velocity loss / B-2 EMA token
    smoothing on CNN1D winner — close smoothness debt + RoNIN RTE
    asymmetry in one experiment (~30 min).
-2. **MSILN re-run with CNN1D + Anchor2Vec** (~3 h) — may close
+2. **MSILN re-run with CNN1D + WiFi-Net** (~3 h) — may close
    gate (c)-1.
 3. **Camera external-SOTA full validation** (~1 day) — paper-soft → clean.
 4. **Conformal coverage on CNN1D** (~30 min).

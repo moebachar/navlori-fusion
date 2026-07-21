@@ -10,22 +10,26 @@ TIAGO++ robot, CESI LINEACT. Author: Mohamed Bachar.
 
 Indoor position prediction (x, y) using 4-modality fusion: **WiFi RSSI + Vision + IMU + Odometry**.
 
-### Architecture (5-stage pipeline)
+### Architecture (as built)
 
-| Stage | Name | Description |
-|-------|------|-------------|
-| **A** | Encode | Per-modality encoders: Anchor2Vec (WiFi), ViT (Vision), 1D-CNN (IMU), Linear (Odom) |
-| **B** | Align | Temporal alignment of async streams: mTAN / GRU-D |
-| **C** | Fuse | Cross-modal fusion: 6-pair cross-attention |
-| **D** | Filter | State estimation: KalmanNet with attention-conditioned gain |
-| **E** | Uncertainty | Conformal Prediction for calibrated intervals |
+| Stage | Module | Description |
+|-------|--------|-------------|
+| **A** | `src/pipeline/encoders/` | Per-modality encoders → 128-d tokens: WiFi-Net, IMUCNN, OdomCNN, ACEVision / DPVOMotion (vision) |
+| **B+C** | `src/pipeline/fusion/` | **One** continuous-time set-transformer: self-attention = cross-modal fusion, K instants = temporal fusion, cross-attention query = readout. CNN1D / LSTM-attn bake-off candidates in `bakeoff.py`. |
+| **D** | *(subsumed)* | Temporal self-attention learns the smoothing a filter would; `src/pipeline/filters/` is a stub for future work |
+| **E** | `src/pipeline/uncertainty/` | Split-conformal `(x, y) ± r` intervals (α=0.1) |
+| ext | `src/pipeline/baselines/` | Centralised loaders for the 6 SOTA submodules under `external_methods/` |
+| data | `src/pipeline/data/` | `load_dataset(name)` factory across all datasets (Webots, MSILN, UJI, RoNIN, IMUWiFine, IPIN) |
+| viz | `src/pipeline/visualization/` | Paper-figure plotters |
 
 ### Contributions
 
-- **C0**: Multi-modal async dataset (this simulation)
-- **C1**: 4-modal Transformer encoder
-- **C2**: Continuous-time alignment
-- **C3**: Hybrid neural-Kalman filter
+- **C0**: Multi-modal async simulation dataset (Webots, TIAGO++)
+- **C1**: Continuous-time set-transformer fusion of asynchronous WiFi+IMU (ICINCO 2026 submission)
+- **C2**: Async robustness via modality dropout + per-instant dropout (no rate-resampling)
+- **C3**: Conformal position intervals
+
+Full pipeline walkthrough: [docs/fusion_pipeline.md](docs/fusion_pipeline.md).
 
 ---
 
@@ -49,14 +53,19 @@ navlori-fusion/
 │   │       └── tiago_unified_collector/ # Legacy collector (reference)
 │   ├── pipeline/                   # ML pipeline
 │   │   ├── encoders/               # Stage A: per-modality encoders
-│   │   ├── temporal/               # Stage B: temporal alignment
-│   │   ├── fusion/                 # Stage C: cross-modal fusion
-│   │   ├── filters/                # Stage D: state estimation
+│   │   ├── fusion/                 # Stage B+C: set-transformer + bake-off + builder
+│   │   ├── baselines/              # Loaders for the 6 SOTA submodules
+│   │   ├── data/                   # Dataset factory (all datasets)
+│   │   ├── evaluation/             # 6-metric harness + MainResultsTable
+│   │   ├── training/               # EncoderTrainer / FusionTrainer
+│   │   ├── visualization/          # Paper-figure plotters
 │   │   ├── uncertainty/            # Stage E: conformal prediction
+│   │   ├── filters/                # Stage D stub (subsumed by temporal attention)
 │   │   ├── utils/
 │   │   └── pipeline.py
 │   └── services/
 │       └── grafana/                # Dashboard configs + provisioning
+├── external_methods/               # 6 SOTA baseline git submodules
 ├── configs/                        # Hydra YAML configs
 │   ├── config.yaml                 # Root config
 │   ├── stage_a/                    # Encoder configs
@@ -65,12 +74,17 @@ navlori-fusion/
 │   ├── training/                   # Training configs
 │   └── experiment/                 # Full experiment compositions
 ├── notebooks/
+│   ├── run2_walkthrough.ipynb      # Full experiment-campaign walkthrough (live numbers)
+│   ├── paper_results.ipynb         # Paper-scoped results (WiFi+IMU, set-transformer)
+│   ├── reproduce_paper.ipynb       # Public reproducibility notebook
+│   ├── encoder_workbench.ipynb     # Stage-A encoder exploration
 │   └── data_exploration.ipynb      # Data analysis + visualizations
 ├── scripts/
 │   ├── services.ps1                # Start/stop InfluxDB + Grafana
 │   ├── launch_webots.ps1           # Launch Webots in interactive session
-│   ├── train.py
-│   └── evaluate.py
+│   ├── convert_*.py                # External-dataset converters
+│   ├── eval_*.py                   # Per-dataset / per-baseline evaluation
+│   └── optuna_fusion.py            # Hyperparameter search
 ├── data/                           # DVC-tracked data directory
 │   └── async_collection/           # Collected sensor data (per path)
 ├── tests/
@@ -85,8 +99,7 @@ navlori-fusion/
 ### 1. Clone and create environment
 
 ```powershell
-cd C:\Users\Administrateur
-git clone git@github.com:moebachar/navlori-fusion.git
+git clone https://github.com/moebachar/navlori-fusion.git
 cd navlori-fusion
 git submodule update --init --recursive
 python -m venv .venv
@@ -94,9 +107,10 @@ python -m venv .venv
 pip install -e ".[dev]"
 ```
 
-The `git submodule update --init --recursive` step pulls the four
+The `git submodule update --init --recursive` step pulls the six
 SOTA baseline repositories (wlan_localization, ronin, tartanvo,
-dpvo) under `external_methods/`. See
+dpvo, imuwifine, indoor_location_competition_20) under
+`external_methods/`. See
 [docs/EXTERNAL_DEPENDENCIES.md](docs/EXTERNAL_DEPENDENCIES.md) for
 the per-submodule setup notes (TartanVO weights, RoNIN pretrained
 ResNet1D, DPVO Windows-build limitation).
@@ -128,11 +142,12 @@ These binaries are gitignored. First-time InfluxDB setup:
 # Start InfluxDB
 .\src\services\influxdb\influxd.exe
 
-# In another terminal, set up org/bucket/token:
+# In another terminal, set up org/bucket/token (pick your own secrets,
+# then mirror them in the local .env file — never commit them):
 .\src\services\influxdb\influx.exe setup `
   --org navlori --bucket async_data `
-  --username navlori --password navlori2026 `
-  --token navlori-influx-token-2026 --force
+  --username <user> --password <password> `
+  --token <token> --force
 ```
 
 ### 5. Configure Webots
