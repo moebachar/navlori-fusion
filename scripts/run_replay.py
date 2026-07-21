@@ -26,11 +26,74 @@ CONTROLLER_DIR = REPO_ROOT / "src" / "simulation" / "controllers" / "replay_coll
 CONFIG_PATH = CONTROLLER_DIR / "replay_config.json"
 
 
-# ── world-file controller patch ──
-TIAGO_RE = re.compile(
-    r'(DEF TIAGO Tiago\+\+ \{[^}]*?\bcontroller )"([^"]*)"',
-    re.DOTALL,
-)
+# ── world-file robot patch ──
+TIAGO_HEAD_RE = re.compile(r"DEF TIAGO Tiago\+\+ \{")
+RIG_CTRL_RE = re.compile(r'(DEF REPLAY_RIG Robot \{[^}]*?\bcontroller )"([^"]*)"',
+                         re.DOTALL)
+
+# Minimal kinematic replay rig. Deliberately contains NO Physics node and no
+# boundingObject: a physics-less Robot is moved purely by supervisor field
+# writes -- the constraint solver never touches it, so nothing can explode,
+# drift, or detach (all of which the articulated Tiago++ PROTO did when
+# pose-anchored). Camera matches the TIAGO head camera: 640x480, ~60 deg
+# horizontal FOV, 1.19 m height, looking along +x (Webots FLU).
+RIG_TEMPLATE = """DEF REPLAY_RIG Robot {{
+  translation {x:.4f} {y:.4f} 0
+  rotation 0 0 1 {yaw:.5f}
+  name "replay_rig"
+  controller "replay_collector"
+  supervisor TRUE
+  children [
+    Pose {{
+      translation 0 0 0.20
+      children [
+        Shape {{
+          appearance PBRAppearance {{ baseColor 0.25 0.25 0.28 roughness 0.6 metalness 0.3 }}
+          geometry Cylinder {{ radius 0.27 height 0.30 }}
+        }}
+      ]
+    }}
+    Pose {{
+      translation 0 0 0.75
+      children [
+        Shape {{
+          appearance PBRAppearance {{ baseColor 0.88 0.88 0.90 roughness 0.55 metalness 0.1 }}
+          geometry Capsule {{ radius 0.16 height 0.70 }}
+        }}
+      ]
+    }}
+    Pose {{
+      translation 0 0 1.16
+      children [
+        Shape {{
+          appearance PBRAppearance {{ baseColor 0.30 0.30 0.33 roughness 0.5 metalness 0.2 }}
+          geometry Sphere {{ radius 0.11 }}
+        }}
+      ]
+    }}
+    Camera {{
+      translation 0.08 0 1.19
+      name "head_front_camera"
+      fieldOfView 1.0472
+      width 640
+      height 480
+      far 50
+    }}
+  ]
+}}
+"""
+
+
+def _block_end(text: str, brace_open_idx: int) -> int:
+    depth = 0
+    for i in range(brace_open_idx, len(text)):
+        if text[i] == "{":
+            depth += 1
+        elif text[i] == "}":
+            depth -= 1
+            if depth == 0:
+                return i + 1
+    raise ValueError("unbalanced braces")
 
 
 def parse_path_ids(spec: str) -> list[int]:
@@ -48,20 +111,37 @@ def parse_path_ids(spec: str) -> list[int]:
     return sorted(set(out))
 
 
-def patch_world_controller(world: Path, target: str, dry_run: bool) -> tuple[bool, str]:
+def ensure_replay_rig(world: Path, dry_run: bool) -> tuple[bool, str]:
+    """Replace the world's Tiago++ node with the kinematic REPLAY_RIG
+    (keeping its start translation/rotation). Idempotent: if the rig is
+    already present, just confirm its controller."""
     text = world.read_text(encoding="utf-8")
-    m = TIAGO_RE.search(text)
+
+    if "DEF REPLAY_RIG Robot" in text:
+        m = RIG_CTRL_RE.search(text)
+        if m and m.group(2) == "replay_collector":
+            return True, "REPLAY_RIG already present, controller ok"
+        return False, "REPLAY_RIG present but controller field not readable"
+
+    m = TIAGO_HEAD_RE.search(text)
     if not m:
-        return False, "no `DEF TIAGO Tiago++ { ... controller \"...\" ... }` found"
-    current = m.group(2)
-    if current == target:
-        return True, f"already set to '{target}'"
-    new_text = (text[:m.start()] + m.group(1) + f'"{target}"' + text[m.end():])
+        return False, "neither REPLAY_RIG nor DEF TIAGO Tiago++ found"
+    end = _block_end(text, m.end() - 1)
+    block = text[m.start():end]
+    mt = re.search(r"translation\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)", block)
+    mr = re.search(r"rotation\s+0\s+0\s+1\s+(-?[\d.]+)", block)
+    if not mt:
+        return False, "TIAGO block has no parsable translation"
+    rig = RIG_TEMPLATE.format(x=float(mt.group(1)), y=float(mt.group(2)),
+                              yaw=float(mr.group(1)) if mr else 0.0)
+    new_text = text[:m.start()] + rig + text[end:]
+    # the Tiago++ PROTO is no longer used -- drop its EXTERNPROTO download
+    new_text = re.sub(r'EXTERNPROTO "[^"]*Tiago\+\+\.proto"\n', "", new_text)
     if not dry_run:
-        bak = world.with_suffix(world.suffix + ".bak-replay")
+        bak = world.with_suffix(world.suffix + ".bak-tiago")
         shutil.copy2(world, bak)
         world.write_text(new_text, encoding="utf-8")
-    return True, f"controller: '{current}' -> '{target}'"
+    return True, "replaced Tiago++ with kinematic REPLAY_RIG (backup .bak-tiago)"
 
 
 def main():
@@ -121,6 +201,7 @@ def main():
             "max_yaw_rate_rad_s": 3.07,
         },
         "pose_anchor": not args.no_pose_anchor,
+        "hover_m": 0.01,
     }
 
     print(f"[run_replay] writing {CONFIG_PATH}")
@@ -129,8 +210,8 @@ def main():
     else:
         CONFIG_PATH.write_text(json.dumps(cfg, indent=2), encoding="utf-8")
 
-    print(f"[run_replay] patching {world.name} -> controller \"replay_collector\"")
-    ok, msg = patch_world_controller(world, "replay_collector", args.dry_run)
+    print(f"[run_replay] ensuring kinematic REPLAY_RIG in {world.name}")
+    ok, msg = ensure_replay_rig(world, args.dry_run)
     if not ok:
         sys.exit(f"  ERROR: {msg}")
     print(f"  {msg}")

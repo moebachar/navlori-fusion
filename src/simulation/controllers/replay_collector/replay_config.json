@@ -21,5 +21,6 @@
     "max_speed_m_s": 0.62,
     "max_yaw_rate_rad_s": 3.07
   },
-  "pose_anchor": true
+  "pose_anchor": true,
+  "hover_m": 0.01
 }

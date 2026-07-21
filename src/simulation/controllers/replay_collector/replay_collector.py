@@ -109,13 +109,18 @@ def init_camera(robot, name, timestep):
 
 
 def tuck_arms(robot, timestep):
-    print("\n[Arms] Tucking arms...")
+    found = False
     for name, pos in ARM_TUCK_POSITIONS.items():
         m = robot.getDevice(name)
         if m is None:
             continue
         m.setVelocity(0.07 if name == "torso_lift_joint" else 1.0)
         m.setPosition(pos)
+        found = True
+    if not found:
+        print("\n[Arms] no arm motors (kinematic rig) -- skipping tuck")
+        return
+    print("\n[Arms] Tucking arms...")
     for _ in range(80):
         robot.step(timestep)
     print("[Arms] Done.")
@@ -131,13 +136,22 @@ def set_wheels(lm, rm, v, omega):
 def supervisor_set_pose(node, x, y, yaw, keep_z=None):
     """Anchor the robot to (x, y, yaw) -- per-step delta is small so this
     LOOKS like driving, not teleporting. keep_z preserves the current
-    floor-clearance (don't override Z or the robot may sink/jump)."""
+    floor-clearance (don't override Z or the robot may sink/jump).
+
+    EVERY anchor must be followed by resetPhysics(): the robot is ~30
+    jointed bodies, and teleporting the base while the children keep their
+    momentum makes the joints yank them back 31x/s until the solver tears
+    the robot apart (wheels visibly separate) and ejects it. setVelocity()
+    is NOT enough -- it only zeroes the base; resetPhysics() zeroes every
+    body in the subtree.
+    """
     tf = node.getField("translation")
     rf = node.getField("rotation")
     cur = tf.getSFVec3f()
     z = keep_z if keep_z is not None else cur[2]
     tf.setSFVec3f([x, y, z])
     rf.setSFRotation([0.0, 0.0, 1.0, yaw])
+    node.resetPhysics()
 
 
 def get_pose(node):
@@ -241,10 +255,14 @@ def run_path(robot, node, timestep, cfg, path_id, sensors, motors, output_dir):
     cam_cols = ["frame_id", "rgb_path", "depth_path",
                  "cam_x", "cam_y", "cam_z"]
 
+    flight_cols = ["spline_x", "spline_y", "spline_yaw",
+                   "meas_x", "meas_y", "meas_z", "meas_yaw",
+                   "pre_anchor_err_m", "cmd_v", "cmd_omega"]
     csvs = {
         "ground_truth": ModalityCSV(str(path_dir_out / "ground_truth.csv"), gt_cols),
         "odometry":     ModalityCSV(str(path_dir_out / "odometry.csv"), odom_cols),
         "camera":       ModalityCSV(str(path_dir_out / "camera.csv"), cam_cols),
+        "flight":       ModalityCSV(str(path_dir_out / "flight_log.csv"), flight_cols),
     }
     for c in csvs.values():
         c.open()
@@ -268,9 +286,15 @@ def run_path(robot, node, timestep, cfg, path_id, sensors, motors, output_dir):
     # ── Initial pose: spline at t_start (exactly the first GT WP) ──
     s0 = traj.evaluate(rp.t_start)
     _, _, z_keep, _ = get_pose(node)
+    # Hover the anchored robot just above the floor: a pose-anchored replay
+    # must have NO contact forces — wheel-floor contact makes the physics
+    # solver reconcile contradictory constraints every step and inject
+    # energy until the robot is ejected. Gravity pulls it back at most
+    # ~0.5 * 9.81 * dt^2 ≈ 5 mm within one 32 ms step, so a 10 mm gap is
+    # never closed; the next anchor resets z anyway.
+    z_keep += float(cfg.get("hover_m", 0.01))
     supervisor_set_pose(node, s0.x, s0.y, s0.yaw, keep_z=z_keep)
-    node.resetPhysics()
-    # let physics settle (touches floor, arm tuck stays)
+    # a few warm-up steps so sensors/cameras deliver before logging starts
     for _ in range(5):
         robot.step(timestep)
 
@@ -295,6 +319,7 @@ def run_path(robot, node, timestep, cfg, path_id, sensors, motors, output_dir):
     next_gt = rp.t_start
     next_odom = rp.t_start
     next_cam = rp.t_start
+    next_flight = rp.t_start
     frame_count = 0
 
     # Map (original) waypoint timestamps -> waypoint_idx so we can mark
@@ -325,8 +350,9 @@ def run_path(robot, node, timestep, cfg, path_id, sensors, motors, output_dir):
                 sf = traj.evaluate(rp.t_end)
                 if pose_anchor:
                     supervisor_set_pose(node, sf.x, sf.y, sf.yaw, keep_z=z_keep)
-                lm.setVelocity(0.0)
-                rm.setVelocity(0.0)
+                if lm is not None:
+                    lm.setVelocity(0.0)
+                    rm.setVelocity(0.0)
                 print(f"  [done] path_t={path_t:.3f} >= t_end={rp.t_end:.3f}, "
                        f"flushing {extra_steps_after_finish} extra steps")
                 finished = True
@@ -337,13 +363,41 @@ def run_path(robot, node, timestep, cfg, path_id, sensors, motors, output_dir):
         # ── Spline state at current path_t ──
         st = traj.evaluate(path_t)
 
+        # ── Measure the pose BEFORE re-anchoring: this is where physics left
+        #     the robot after the last step, so the distance to the spline is
+        #     the true per-step anchor error (post-anchor it is 0 by
+        #     construction and hides any physics fight) ──
+        rx, ry, rz_meas, ryaw = get_pose(node)
+        pre_err = math.hypot(rx - st.x, ry - st.y)
+
         # ── Apply pose anchor + drive command ──
         if pose_anchor:
             supervisor_set_pose(node, st.x, st.y, st.yaw, keep_z=z_keep)
-
-        rx, ry, _, ryaw = get_pose(node)
         cmd = tracker.step(path_t, rx, ry, ryaw)
-        set_wheels(lm, rm, cmd.v, cmd.omega)
+        if lm is not None:
+            if pose_anchor:
+                # Wheels spin kinematically consistent with the anchored
+                # motion; tracker feedback would saturate at heading kinks.
+                set_wheels(lm, rm, st.speed, st.omega)
+            else:
+                set_wheels(lm, rm, cmd.v, cmd.omega)
+
+        # ── Flight recorder (diagnostic; small, 4 Hz) ──
+        if not finished and path_t >= next_flight:
+            csvs["flight"].write({
+                "sim_time":         round(path_t, 4),
+                "spline_x":         round(st.x, 4),
+                "spline_y":         round(st.y, 4),
+                "spline_yaw":       round(st.yaw, 4),
+                "meas_x":           round(rx, 4),
+                "meas_y":           round(ry, 4),
+                "meas_z":           round(rz_meas, 4),
+                "meas_yaw":         round(ryaw, 4),
+                "pre_anchor_err_m": round(pre_err, 5),
+                "cmd_v":            round(st.speed if pose_anchor else cmd.v, 4),
+                "cmd_omega":        round(st.omega if pose_anchor else cmd.omega, 4),
+            })
+            next_flight += 0.25
 
         # ── Odometry synthesis: integrate every sim step from the MEASURED
         #     pose delta (what encoders record; commanded v/omega diverge
@@ -369,9 +423,9 @@ def run_path(robot, node, timestep, cfg, path_id, sensors, motors, output_dir):
                 "path_id":        path_id,
                 "waypoint_idx":   -1,
                 "is_original":    0,
-                # measured robot pose vs commanded spline pose -- the number
-                # that proves (or disproves) the anchor chain end-to-end
-                "anchor_err_m":   round(math.hypot(rx - st.x, ry - st.y), 5),
+                # pre-anchor measured pose vs commanded spline pose -- the
+                # number that proves (or disproves) the anchor chain
+                "anchor_err_m":   round(pre_err, 5),
             }
             csvs["ground_truth"].write(gt_row)
             next_gt += gt_period
@@ -403,9 +457,9 @@ def run_path(robot, node, timestep, cfg, path_id, sensors, motors, output_dir):
         # ── Progress print ──
         if path_t - last_print >= 1.0:
             print(f"  [{path_t:6.2f}/{rp.t_end:6.2f}s] "
-                   f"pos=({st.x:+6.2f},{st.y:+6.2f}) "
-                   f"v={cmd.v:.2f} w={cmd.omega:+.2f} "
-                   f"frames={frame_count}")
+                   f"spline=({st.x:+6.2f},{st.y:+6.2f}) "
+                   f"meas=({rx:+6.2f},{ry:+6.2f},z{rz_meas:+.2f}) "
+                   f"err={pre_err:.3f} frames={frame_count}", flush=True)
             last_print = path_t
 
         step_count += 1
@@ -429,8 +483,9 @@ def run_path(robot, node, timestep, cfg, path_id, sensors, motors, output_dir):
         csvs["ground_truth"].write(gt_row)
 
     # ── Close + tally ──
-    lm.setVelocity(0.0)
-    rm.setVelocity(0.0)
+    if lm is not None:
+        lm.setVelocity(0.0)
+        rm.setVelocity(0.0)
     print(f"\n  path {path_id} totals (wall {pytime.time() - t0_wall:.1f}s):")
     for c in csvs.values():
         c.close()
@@ -480,12 +535,17 @@ def _sort_csv_by_sim_time(path: str):
 # ============================================================================
 def main():
     cfg = load_config()
+    code_mtime = pytime.strftime(
+        "%Y-%m-%d %H:%M:%S",
+        pytime.localtime(os.path.getmtime(os.path.abspath(__file__))))
     print("=" * 64)
     print("  NavLoRI Replay Collector")
+    print("  code    = ", os.path.abspath(__file__))
+    print("  code mtime =", code_mtime, " (stale-reload check)")
     print("  dataset = ", cfg["dataset_dir"])
     print("  output  = ", cfg["output_dir"])
     print("  paths   = ", cfg["path_ids"])
-    print("=" * 64)
+    print("=" * 64, flush=True)
 
     robot = Supervisor()
     node = robot.getSelf()
@@ -493,6 +553,34 @@ def main():
         print("ERROR: set 'supervisor TRUE' on the TIAGO++ node in the world.")
         return
     timestep = int(robot.getBasicTimeStep())
+
+    # ── World guard: replaying dataset coordinates inside the wrong
+    #     building puts the robot in open space / off the map. Refuse. ──
+    world_stem = Path(robot.getWorldPath()).stem
+    expected = cfg.get("world_dataset_id", "")
+    if expected and world_stem != expected:
+        print("!" * 64)
+        print("  WRONG WORLD OPEN -- REFUSING TO RUN")
+        print(f"  open world      : {world_stem}.wbt")
+        print(f"  config expects  : {expected}.wbt")
+        print(f"  -> in Webots: File > Open World > "
+              f"src/simulation/worlds/{expected}.wbt")
+        print("!" * 64, flush=True)
+        return
+
+    # ── Kinematic replay needs no dynamics: zero gravity so the hovering,
+    #     pose-anchored robot has no free-fall to strain its joints between
+    #     anchors. Position-controlled motors (arm tuck, wheels) work fine
+    #     without gravity. ──
+    root_children = robot.getRoot().getField("children")
+    for i in range(root_children.getCount()):
+        n = root_children.getMFNode(i)
+        if n is not None and n.getTypeName() == "WorldInfo":
+            gf = n.getField("gravity")
+            if gf is not None:
+                gf.setSFFloat(0.0)
+                print("[physics] WorldInfo.gravity set to 0 (kinematic replay)")
+            break
 
     # ── Sensors ──
     print("\n[Sensors]")
@@ -514,14 +602,15 @@ def main():
     sensors["camera"] = cam
     sensors["depth"] = depth
 
-    # ── Motors ──
+    # ── Motors (absent on the kinematic rig -- everything is optional) ──
     print("\n[Motors]")
     lm = init_motor(robot, "wheel_left_joint")
     rm = init_motor(robot, "wheel_right_joint")
     if lm is None or rm is None:
-        print("ERROR: wheel motors not found")
-        return
-    print("  [OK] wheel motors initialised")
+        lm = rm = None
+        print("  [info] no wheel motors (kinematic rig) -- wheel spin disabled")
+    else:
+        print("  [OK] wheel motors initialised")
 
     # ── Arms tucked (matches async_collector dataset visuals) ──
     tuck_arms(robot, timestep)
@@ -541,6 +630,14 @@ def main():
         except Exception as e:  # noqa: BLE001
             print(f"[ERROR] path {pid}: {type(e).__name__}: {e}")
             import traceback; traceback.print_exc()
+            # A crashed run must not leave the wheels spinning: the robot
+            # would drive blindly off the map while the sim keeps running.
+            if lm is not None:
+                lm.setVelocity(0.0)
+                rm.setVelocity(0.0)
+            with open(output_dir / "controller_crash.log", "a", encoding="utf-8") as f:
+                f.write(f"=== path {pid} @ {pytime.strftime('%Y-%m-%dT%H:%M:%S')}\n"
+                        f"{traceback.format_exc()}\n")
             continue
 
     # ── Top-level summary ──

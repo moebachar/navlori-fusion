@@ -83,15 +83,26 @@ def main() -> int:
 
     all_ok = True
 
-    # ── Gate 1: anchor error ──
+    # ── Gate 1: anchor error, lag-corrected ──
+    # anchor_err_m is measured BEFORE re-anchoring, so it inherently contains
+    # one timestep of motion (speed * dt). The true anchor deviation is the
+    # residual after subtracting that expected lag.
+    DT = 0.032
     gt_rows = read_csv(rep / "ground_truth.csv")
-    errs = [float(r["anchor_err_m"]) for r in gt_rows
-            if r.get("anchor_err_m") not in (None, "",) and r.get("is_original") in ("0", "False")]
-    if errs:
-        mx, mean = max(errs), sum(errs) / len(errs)
+    raw, corrected = [], []
+    for r in gt_rows:
+        if r.get("anchor_err_m") in (None, "") or r.get("is_original") not in ("0", "False"):
+            continue
+        e = float(r["anchor_err_m"])
+        v = traj.evaluate(float(r["sim_time"])).speed
+        raw.append(e)
+        corrected.append(abs(e - v * DT))
+    if corrected:
+        mx = max(corrected)
         all_ok &= gate("anchor", mx < args.max_anchor,
-                       f"max={mx*100:.2f}cm mean={mean*100:.3f}cm over {len(errs)} rows "
-                       f"(limit {args.max_anchor*100:.0f}cm)")
+                       f"lag-corrected max={mx*1000:.2f}mm over {len(corrected)} rows "
+                       f"(raw max={max(raw)*100:.2f}cm incl. one-step motion; "
+                       f"limit {args.max_anchor*1000:.0f}mm)")
     else:
         all_ok &= gate("anchor", False, "no anchor_err_m values found in ground_truth.csv")
 
@@ -118,9 +129,14 @@ def main() -> int:
             print("  [warn] PIL/numpy unavailable — skipping black-frame check")
     all_ok &= gate("camera-count", count_ok,
                    f"{n} frames vs expected {expected:.0f} (+/-{args.cam_tol*100:.0f}%)")
-    all_ok &= gate("camera-content", not black,
-                   "all sampled frames non-black" if not black
-                   else f"{len(black)} bad frames, e.g. {black[0]}")
+    # A single uniform frame is legitimate (camera passing flush to a wall);
+    # a dead render pipeline makes MOST frames uniform. Fail above 20 %.
+    n_sampled = max(1, len(cam_rows[::max(1, n // args.n_sample_frames)]))
+    frac_bad = len(black) / n_sampled
+    all_ok &= gate("camera-content", frac_bad <= 0.20,
+                   f"{len(black)}/{n_sampled} sampled frames uniform/missing "
+                   f"({frac_bad*100:.0f}%, limit 20%)"
+                   + (f", e.g. {black[0]}" if black else ""))
 
     # ── Gate 3: odometry drift vs spline ──
     odom_rows = read_csv(rep / "odometry.csv")
