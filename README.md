@@ -50,7 +50,7 @@ navlori-fusion/
 │   │       │   ├── viz_paths.py         # Path visualization generator
 │   │       │   └── viz/                 # Generated path images
 │   │       ├── wifi_supervisor/    # WiFi RSSI predictor (GPR-based)
-│   │       └── tiago_unified_collector/ # Legacy collector (reference)
+│   │       └── replay_collector/   # Replay phase: retrace real-dataset paths
 │   ├── pipeline/                   # ML pipeline
 │   │   ├── encoders/               # Stage A: per-modality encoders
 │   │   ├── fusion/                 # Stage B+C: set-transformer + bake-off + builder
@@ -59,10 +59,7 @@ navlori-fusion/
 │   │   ├── evaluation/             # 6-metric harness + MainResultsTable
 │   │   ├── training/               # EncoderTrainer / FusionTrainer
 │   │   ├── visualization/          # Paper-figure plotters
-│   │   ├── uncertainty/            # Stage E: conformal prediction
-│   │   ├── filters/                # Stage D stub (subsumed by temporal attention)
-│   │   ├── utils/
-│   │   └── pipeline.py
+│   │   └── uncertainty/            # Stage E: conformal prediction
 │   └── services/
 │       └── grafana/                # Dashboard configs + provisioning
 ├── external_methods/               # 6 SOTA baseline git submodules
