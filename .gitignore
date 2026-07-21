@@ -49,6 +49,12 @@ Thumbs.db
 # arXiv code-release package (2.9 GB, becomes its own repo later)
 release/
 
+# Paper materials — tracked on branch paper-icinco-2026 only, not on main
+# (paper/ is additionally its own git repo synced with Overleaf)
+paper/
+paper-workspace/
+revision/
+
 # Debug render outputs
 _debug_pngs/
 

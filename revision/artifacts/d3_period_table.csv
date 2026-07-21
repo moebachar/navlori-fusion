@@ -1,7 +1,0 @@
-dataset,variant,min_period,max_period,val_mae_m,test_mae_m
-simulation_2mod,narrow,0.5,10.0,0.3912,0.4509
-simulation_2mod,wide,0.01,600.0,0.3802,0.4476
-simulation_2mod,shifted,0.1,30.0,0.4041,0.4182
-msiln_site1_b1,narrow,0.5,10.0,15.5086,17.2164
-msiln_site1_b1,wide,0.01,600.0,15.2815,10.3335
-msiln_site1_b1,shifted,0.1,30.0,16.5706,11.3971
