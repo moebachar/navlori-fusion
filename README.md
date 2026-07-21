@@ -78,6 +78,8 @@ navlori-fusion/
 │   ├── launch_webots.ps1           # Launch Webots in interactive session
 │   ├── convert_*.py                # External-dataset converters
 │   ├── eval_*.py                   # Per-dataset / per-baseline evaluation
+│   ├── run_replay.py               # Stage a Webots replay (config + world patch)
+│   ├── verify_replay.py            # Gate a finished replay vs its source dataset
 │   └── optuna_fusion.py            # Hyperparameter search
 ├── data/                           # 7 datasets, all DVC-pinned (store: X:\navlori-data)
 │   ├── async_collection/           # Webots sim collection (per path)

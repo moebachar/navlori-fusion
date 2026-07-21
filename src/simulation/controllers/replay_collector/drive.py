@@ -174,6 +174,13 @@ class OdometrySynthesizer:
                  # (typical for cheap encoders on indoor mobile bases).
                  sigma_left: float = 0.004,
                  sigma_right: float = 0.004,
+                 # Pose-delta mode noise: std of each wheel increment is
+                 # k_slip * |increment| + sigma_floor (distance-proportional
+                 # slip, so slow paths don't accumulate time-proportional
+                 # drift). k_slip=0.01 -> ~1% odometry drift, typical for
+                 # indoor wheel encoders.
+                 k_slip: float = 0.01,
+                 sigma_floor: float = 0.0002,
                  seed: int = 12345):
         import random
         self.rng = random.Random(seed)
@@ -181,6 +188,9 @@ class OdometrySynthesizer:
         self.wheel_r = wheel_r
         self.sigma_l = sigma_left
         self.sigma_r = sigma_right
+        self.k_slip = k_slip
+        self.sigma_floor = sigma_floor
+        self._last_pose: tuple[float, float, float] | None = None
         self.x = 0.0
         self.y = 0.0
         self.theta = 0.0
@@ -198,6 +208,7 @@ class OdometrySynthesizer:
         self.theta = theta0
         self.left_pos = 0.0
         self.right_pos = 0.0
+        self._last_pose = (x0, y0, theta0)
         self._initialised = True
 
     def step(self, v: float, omega: float, dt: float) -> dict:
@@ -242,6 +253,61 @@ class OdometrySynthesizer:
             "odom_angular_vel": round(ang / dt if dt > 0 else 0.0, 5),
             "wheel_left_vel": round(vl, 5),
             "wheel_right_vel": round(vr, 5),
+        }
+
+    def step_from_pose(self, x: float, y: float, yaw: float, dt: float) -> dict:
+        """Synthesize an odom row from the MEASURED pose delta.
+
+        For a pose-anchored robot the commanded (v, omega) never matches the
+        actual motion (the spline may demand kinematically-infeasible turns),
+        but wheel encoders on ideally-rolling wheels record the motion that
+        actually happened. So: invert the pose delta into per-wheel arc
+        increments, corrupt them with distance-proportional slip noise, and
+        forward-integrate — the odometry drifts from GT like real encoders,
+        without inheriting command-tracking artefacts.
+        """
+        if not self._initialised or self._last_pose is None:
+            self.reset(x, y, yaw)
+            return self.step_from_pose(x, y, yaw, dt)
+        lx, ly, lyaw = self._last_pose
+        dyaw = _wrap_pi(yaw - lyaw)
+        # A diff drive cannot translate laterally: project the world delta
+        # onto the mid-heading so interpolation jitter perpendicular to the
+        # wheels doesn't register as travelled distance.
+        theta_mid = lyaw + dyaw / 2.0
+        ds = ((x - lx) * math.cos(theta_mid) + (y - ly) * math.sin(theta_mid))
+        self._last_pose = (x, y, yaw)
+
+        # Ideal per-wheel arc increments (m) -> wheel rotations (rad).
+        dl = ds - dyaw * self.axle / 2.0
+        dr = ds + dyaw * self.axle / 2.0
+        dl_rot = dl / self.wheel_r
+        dr_rot = dr / self.wheel_r
+        dl_rot += self.rng.gauss(0.0, self.k_slip * abs(dl_rot) + self.sigma_floor)
+        dr_rot += self.rng.gauss(0.0, self.k_slip * abs(dr_rot) + self.sigma_floor)
+        self.left_pos += dl_rot
+        self.right_pos += dr_rot
+        self._last_vl = dl_rot / dt if dt > 0 else 0.0
+        self._last_vr = dr_rot / dt if dt > 0 else 0.0
+
+        # Forward kinematics on the noisy increments (same as step()).
+        dl_m = dl_rot * self.wheel_r
+        dr_m = dr_rot * self.wheel_r
+        lin = (dl_m + dr_m) / 2.0
+        ang = (dr_m - dl_m) / self.axle
+        theta_mid_est = self.theta + ang / 2.0
+        self.x += lin * math.cos(theta_mid_est)
+        self.y += lin * math.sin(theta_mid_est)
+        self.theta = _wrap_pi(self.theta + ang)
+
+        return {
+            "odom_x": round(self.x, 5),
+            "odom_y": round(self.y, 5),
+            "odom_theta_deg": round(math.degrees(self.theta), 3),
+            "odom_linear_vel": round(lin / dt if dt > 0 else 0.0, 5),
+            "odom_angular_vel": round(ang / dt if dt > 0 else 0.0, 5),
+            "wheel_left_vel": round(self._last_vl, 5),
+            "wheel_right_vel": round(self._last_vr, 5),
         }
 
 

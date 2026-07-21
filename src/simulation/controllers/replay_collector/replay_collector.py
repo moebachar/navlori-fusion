@@ -36,7 +36,6 @@ from pathlib import Path
 CONTROLLER_DIR = os.path.dirname(os.path.abspath(__file__))
 _VENV_CANDIDATES = [
     r"x:\navlori-fusion\.venv\Lib\site-packages",
-    r"C:\Users\Administrateur\navlori-fusion\.venv\Lib\site-packages",
 ]
 for _vsp in _VENV_CANDIDATES:
     if os.path.isdir(_vsp) and _vsp not in sys.path:
@@ -238,7 +237,7 @@ def run_path(robot, node, timestep, cfg, path_id, sensors, motors, output_dir):
                   "odom_linear_vel", "odom_angular_vel",
                   "wheel_left_vel", "wheel_right_vel"]
     gt_cols = ["gt_x", "gt_y", "gt_z", "gt_heading_rad", "gt_heading_deg",
-                "path_id", "waypoint_idx", "is_original"]
+                "path_id", "waypoint_idx", "is_original", "anchor_err_m"]
     cam_cols = ["frame_id", "rgb_path", "depth_path",
                  "cam_x", "cam_y", "cam_z"]
 
@@ -346,12 +345,16 @@ def run_path(robot, node, timestep, cfg, path_id, sensors, motors, output_dir):
         cmd = tracker.step(path_t, rx, ry, ryaw)
         set_wheels(lm, rm, cmd.v, cmd.omega)
 
-        # ── Odometry synthesis (one row at the configured rate) ──
-        if not finished and path_t >= next_odom:
-            row = odom.step(cmd.v, cmd.omega, dt_sim)
-            row["sim_time"] = round(path_t, 4)
-            csvs["odometry"].write(row)
-            next_odom += odom_period
+        # ── Odometry synthesis: integrate every sim step from the MEASURED
+        #     pose delta (what encoders record; commanded v/omega diverge
+        #     from actual motion under pose-anchoring); emit a row only when
+        #     the configured rate says one is due ──
+        if not finished:
+            row = odom.step_from_pose(rx, ry, ryaw, dt_sim)
+            if path_t >= next_odom:
+                row["sim_time"] = round(path_t, 4)
+                csvs["odometry"].write(row)
+                next_odom += odom_period
 
         # ── GT-dense (one row at the configured rate, plus exact rows at
         #     original waypoint times -- handled below) ──
@@ -365,7 +368,10 @@ def run_path(robot, node, timestep, cfg, path_id, sensors, motors, output_dir):
                 "gt_heading_deg": round(math.degrees(st.yaw), 3),
                 "path_id":        path_id,
                 "waypoint_idx":   -1,
-                "is_original":    False,
+                "is_original":    0,
+                # measured robot pose vs commanded spline pose -- the number
+                # that proves (or disproves) the anchor chain end-to-end
+                "anchor_err_m":   round(math.hypot(rx - st.x, ry - st.y), 5),
             }
             csvs["ground_truth"].write(gt_row)
             next_gt += gt_period
@@ -412,12 +418,13 @@ def run_path(robot, node, timestep, cfg, path_id, sensors, motors, output_dir):
             "sim_time":       round(w.t, 4),
             "gt_x":           round(w.x, 5),
             "gt_y":           round(w.y, 5),
-            "gt_z":           round(0.0, 5),
+            "gt_z":           round(z_keep, 5),
             "gt_heading_rad": round(traj.evaluate(w.t).yaw, 5),
             "gt_heading_deg": round(math.degrees(traj.evaluate(w.t).yaw), 3),
             "path_id":        path_id,
             "waypoint_idx":   i,
-            "is_original":    True,
+            "is_original":    1,
+            "anchor_err_m":   "",
         }
         csvs["ground_truth"].write(gt_row)
 

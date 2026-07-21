@@ -30,6 +30,18 @@ def main():
     print(f"  odom_theta = {o2.theta:.4f} rad (expected ~1.0)")
     print(f"  odom_x = {o2.x:.4f}, odom_y = {o2.y:.4f}  (expected ~0, 0)")
 
+    # Pose-delta mode (what replay_collector uses under pose-anchoring):
+    # feed the true pose of a 0.5 m/s straight walk, expect ~0.5 m + slip.
+    o3 = OdometrySynthesizer()
+    o3.reset(0.0, 0.0, 0.0)
+    for k in range(1, 32):
+        o3.step_from_pose(0.5 * k * 0.032, 0.0, 0.0, 0.032)
+    print(f"\nafter ~1s of pose-delta @ 0.5 m/s straight:")
+    print(f"  odom_x = {o3.x:.4f} m (expected ~0.50 +/- ~1% slip)")
+    print(f"  odom_y = {o3.y:.4f} m (expected ~0.00)")
+    assert abs(o3.x - 0.496) < 0.05, "pose-delta forward integration broke"
+    print("[OK] pose-delta mode within 5 cm of truth over 0.5 m")
+
 
 if __name__ == "__main__":
     main()

@@ -7,9 +7,9 @@ Then prints instructions for opening Webots.
 Usage (PowerShell, from repo root):
     .venv\\Scripts\\python.exe scripts\\run_replay.py \\
         --world  src/simulation/worlds/iln20_5d27099f_F2.wbt \\
-        --dataset data/ronin_a000_intra \\
+        --dataset data/iln20_5d27099f_F2 \\
         --paths  0 \\
-        --output data/ronin_a000_intra_replay
+        --output data/iln20_5d27099f_F2_replay
 """
 from __future__ import annotations
 
