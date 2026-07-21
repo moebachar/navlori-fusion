@@ -119,10 +119,10 @@ else:
                     # Predict positions with a quick KNN to show position scatter
                     from sklearn.neighbors import KNeighborsRegressor
                     X_tr, y_tr = dm.train_ds.get_tensors(selected_mod)
-                    from src.pipeline.encoders import Anchor2Vec, IMUCNN, OdomCNN
+                    from src.pipeline.encoders import WiFiNet, IMUCNN, OdomCNN
                     import torch
                     enc_map = {
-                        "wifi": Anchor2Vec(n_aps=32, embed_dim=128, n_anchors=64),
+                        "wifi": WiFiNet(n_aps=32, embed_dim=128, n_anchors=64),
                         "imu":  IMUCNN(in_features=9, embed_dim=128),
                         "odom": OdomCNN(in_features=7, embed_dim=128),
                     }

@@ -55,7 +55,7 @@ def stats() -> dict:
         "label_frame": "geographic (longitude/latitude in metres after centring)",
         "known_caveats": [
             "Per-scan data — NO temporal axis. K=1 + M=1 degenerate row of the main-results table (RESULT_24 α7).",
-            "wlan_localization global SOTA val mean Euclidean 15.17 m; Anchor2Vec 8.69 m (RESULT_01); CNN1D 8.72, LSTM-attn 8.43 (RESULT_24).",
+            "wlan_localization global SOTA val MAE 15.17 m; WiFi-Net 8.69 m (RESULT_01); CNN1D 8.72, LSTM-attn 8.43 (RESULT_24).",
             "No test split — `validationData.csv` is the benchmark. Per-scan distribution reported instead of per-trajectory smoothness.",
         ],
         "source_result": "RESULT_01 (per-leg WiFi audit), RESULT_24 (K=1 M=1 main-table row)",
@@ -71,7 +71,7 @@ def preprocessing_demo(modality: str, n_samples: int = 1) -> dict:
     df = pd.read_csv(root / "validationData.csv").head(n_samples)
     waps = [c for c in df.columns if c.startswith("WAP")]
     raw = df[waps].values.astype(np.float32)
-    # Anchor2Vec / wlan_localization preprocessing: 100 sentinel -> -100, then affine.
+    # WiFi-Net / wlan_localization preprocessing: 100 sentinel -> -100, then affine.
     cleaned = np.where(raw == 100.0, -100.0, raw).clip(-100, 0)
     preprocessed = (cleaned + 100.0) / 100.0
     return {

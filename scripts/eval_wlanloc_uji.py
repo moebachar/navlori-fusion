@@ -12,7 +12,7 @@ Two evaluation modes:
     building/floor on val (oracle classification). This tests just the
     position-regression quality, isolated from class-imbalance issues.
   * `global`: one global KNN regressor (no cascade). Apples-to-apples with
-    our Anchor2Vec (also pure regression, no floor cascade).
+    our WiFiNet (also pure regression, no floor cascade).
 """
 from __future__ import annotations
 
@@ -74,7 +74,7 @@ def main():
     print(f"    per-sample p25={np.percentile(err_o,25):.2f} p50={np.percentile(err_o,50):.2f} "
           f"p75={np.percentile(err_o,75):.2f} p90={np.percentile(err_o,90):.2f} max={err_o.max():.2f}")
 
-    # === mode B: one global model (apples-to-apples with Anchor2Vec pure regression) ===
+    # === mode B: one global model (apples-to-apples with WiFiNet pure regression) ===
     print("\n[global] one PositionRegressor model, all-buildings/floors (pure regression)")
     reg2 = PositionRegressor(k=3, metric="manhattan", weights="distance")
     t0 = time.time()

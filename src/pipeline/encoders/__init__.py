@@ -5,12 +5,12 @@ from .dpvo_motion import DPVOMotionEncoder
 from .imu import IMUCNN
 from .odom import OdomCNN
 from .vision import VisionViT
-from .wifi import Anchor2Vec
+from .wifi import WiFiNet
 from .wifi_set import WiFiSetTransformer
 
 __all__ = [
     "BaseEncoder",
-    "Anchor2Vec",
+    "WiFiNet",
     "DPVOMotionEncoder",
     "IMUCNN",
     "OdomCNN",

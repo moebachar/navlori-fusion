@@ -71,7 +71,7 @@ def preprocessing_demo(modality: str, n_samples: int = 1) -> dict:
         wifi = pd.read_csv(sample_path / "wifi.csv")
         rssi_cols = [c for c in wifi.columns if c.startswith("wifi_rssi_")]
         raw = wifi[rssi_cols].iloc[:n_samples].values.astype(np.float32)
-        # Anchor2Vec preprocessing: NaN -> -100 (no signal) then affine to [0,1].
+        # WiFi-Net preprocessing: NaN -> -100 (no signal) then affine to [0,1].
         clean = np.where(np.isnan(raw), -100.0, raw).clip(-100, 0)
         preprocessed = (clean + 100.0) / 100.0
         return {

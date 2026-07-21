@@ -1,5 +1,5 @@
 defaults:
-  - stage_a/wifi: anchor2vec
+  - stage_a/wifi: wifi_net
   - stage_a/vision: vit
   - stage_a/imu: cnn1d
   - stage_a/odom: linear

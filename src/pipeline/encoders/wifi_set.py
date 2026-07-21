@@ -15,7 +15,7 @@ top-`max_observed_per_scan` observed APs via ``torch.gather`` and runs
 attention only over the kept tokens (~127 mean / 256 cap → ~120×
 cheaper than dense).
 
-Input contract matches :class:`Anchor2Vec`:
+Input contract matches :class:`WiFiNet`:
     forward(x)         x.shape == (batch, window=1, n_aps) or (batch, n_aps)
     output             (batch, embed_dim)
     input_spec         {"modality": "wifi", "shape": (1, n_aps), "dtype": "float32"}

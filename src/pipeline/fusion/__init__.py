@@ -25,7 +25,6 @@ from typing import Any
 
 from .base import BaseFusion
 from .bakeoff import CANDIDATES
-from .mot_transformer import MoTTransformer
 from .transformer import ContinuousTimeEncoding, FusionTransformer
 
 DEFAULT_CONFIG = {
@@ -103,6 +102,6 @@ def build_arch(name: str, encoders: dict | None = None,
 
 __all__ = [
     "BaseFusion", "ContinuousTimeEncoding", "FusionTransformer",
-    "MoTTransformer", "CANDIDATES",
+    "CANDIDATES",
     "list_archs", "build_arch", "DEFAULT_CONFIG",
 ]

@@ -1,0 +1,7 @@
+# Stage A — WiFi Encoder: WiFi-Net
+encoder:
+  name: wifi_net
+  n_anchors: 64
+  embed_dim: 128
+  dropout: 0.1
+  n_aps: 117  # number of access points

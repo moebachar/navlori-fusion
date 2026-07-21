@@ -2,7 +2,7 @@
 
 Two numbers, side by side:
   - wlan_localization SOTA (global mode, k=3 manhattan) : **15.17 m**
-  - Anchor2Vec (ours, 120 ep Huber)                     :  **8.69 m**
+  - WiFiNet (ours, 120 ep Huber)                     :  **8.69 m**
 
 Both are val mean Euclidean error on ``validationData.csv`` (UJI has
 no test split). Replaces iteration-scoped
@@ -12,7 +12,7 @@ Built entirely on the consolidated APIs from PLAN_26-28:
 - ``src.pipeline.baselines`` for the vendored ``PositionRegressor``
   and ``DataPreprocessor``.
 - ``src.pipeline.data.uji`` for the UJI raw RSSI loader.
-- ``src.pipeline.encoders.Anchor2Vec`` for the WiFi encoder.
+- ``src.pipeline.encoders.WiFiNet`` for the WiFi encoder.
 
 Run: ``.venv/Scripts/python.exe scripts/eval_uji.py``
 """
@@ -33,7 +33,7 @@ if str(ROOT) not in sys.path:
 
 from src.pipeline.baselines import load_position_regressor, load_preprocessor  # noqa: E402
 from src.pipeline.data import load_dataset  # noqa: E402
-from src.pipeline.encoders import Anchor2Vec  # noqa: E402
+from src.pipeline.encoders import WiFiNet  # noqa: E402
 
 
 def run_wlanloc():
@@ -53,8 +53,8 @@ def run_wlanloc():
     return float(np.sqrt(((pred - Yva) ** 2).sum(1)).mean())
 
 
-def run_anchor2vec(epochs: int = 120, batch: int = 256, lr: float = 1e-3):
-    """Anchor2Vec encoder + Linear head, centred-target Huber loss."""
+def run_wifi_net(epochs: int = 120, batch: int = 256, lr: float = 1e-3):
+    """WiFiNet encoder + Linear head, centred-target Huber loss."""
     dev = "cuda" if torch.cuda.is_available() else "cpu"
     Xtr, Ytr_df = load_dataset("uji_indoorloc", split="train")
     Xva, Yva_df = load_dataset("uji_indoorloc", split="validation")
@@ -70,7 +70,7 @@ def run_anchor2vec(epochs: int = 120, batch: int = 256, lr: float = 1e-3):
     Ytr_t = torch.tensor(Ytr, device=dev)
     Xva_t = torch.tensor(Xva, device=dev).unsqueeze(1)
     Yva_t = torch.tensor(Yva, device=dev)
-    enc = Anchor2Vec(n_aps=Xtr.shape[1], embed_dim=128, n_anchors=64).to(dev)
+    enc = WiFiNet(n_aps=Xtr.shape[1], embed_dim=128, n_anchors=64).to(dev)
     head = nn.Linear(128, 2).to(dev)
     opt = torch.optim.AdamW(list(enc.parameters()) + list(head.parameters()),
                              lr=lr, weight_decay=1e-4)
@@ -95,9 +95,9 @@ def run_anchor2vec(epochs: int = 120, batch: int = 256, lr: float = 1e-3):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--anchor2vec-epochs", type=int, default=120)
+    ap.add_argument("--wifi_net-epochs", type=int, default=120)
     ap.add_argument("--skip-sota", action="store_true",
-                    help="Only train Anchor2Vec; skip the wlan_localization SOTA.")
+                    help="Only train WiFiNet; skip the wlan_localization SOTA.")
     args = ap.parse_args()
     print(f"=== UJI canonical reproduction (RESULT_01) ===", flush=True)
     if not args.skip_sota:
@@ -107,8 +107,8 @@ def main():
               f"   (RESULT_01 ref 15.17, drift {(sota-15.17)/15.17*100:+.1f}%)"
               f"   [{time.time()-t0:.1f}s]", flush=True)
     t0 = time.time()
-    ours = run_anchor2vec(epochs=args.anchor2vec_epochs)
-    print(f"  Anchor2Vec (ours, {args.anchor2vec_epochs} ep):         "
+    ours = run_wifi_net(epochs=args.wifi_net_epochs)
+    print(f"  WiFiNet (ours, {args.wifi_net_epochs} ep):         "
           f"{ours:.3f} m   (RESULT_01 ref 8.69, drift {(ours-8.69)/8.69*100:+.1f}%)"
           f"   [{time.time()-t0:.1f}s]", flush=True)
 

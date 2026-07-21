@@ -4,7 +4,7 @@ consolidation:
   - ``from src.pipeline.fusion import build_arch, list_archs`` works.
   - All 5 architectures construct without error from the default
     (Webots 4-mod) factory call.
-  - ``Anchor2Vec.demo_forward`` / ``IMUCNN.demo_forward`` /
+  - ``WiFiNet.demo_forward`` / ``IMUCNN.demo_forward`` /
     ``OdomCNN.demo_forward`` / ``DPVOMotionEncoder.demo_forward``
     return the expected keys on a synthetic input.
   - ``src.pipeline.training.load_trained`` loads the CNN1D winner
@@ -48,9 +48,9 @@ def smoke_factory():
 
 def smoke_encoder_demos():
     print("\n=== encoder demo_forward methods ===", flush=True)
-    from src.pipeline.encoders import Anchor2Vec, IMUCNN, OdomCNN
+    from src.pipeline.encoders import WiFiNet, IMUCNN, OdomCNN
     encs = {
-        "Anchor2Vec": (Anchor2Vec(n_aps=128, embed_dim=128),
+        "WiFiNet": (WiFiNet(n_aps=128, embed_dim=128),
                         np.random.randn(1, 128).astype(np.float32)),
         "IMUCNN":     (IMUCNN(in_features=9, embed_dim=128),
                         np.random.randn(32, 9).astype(np.float32)),

@@ -1,8 +1,9 @@
-"""WiFi RSSI encoder — Anchor2Vec (AaTs-inspired).
+"""WiFi RSSI encoder — WiFiNet (AaTs-inspired anchor projections).
 
-Reference: Yin et al., "All-embracing Transformer (AaTs)" — Anchor2Vec tokenization
-projects RSS fingerprints through k learned anchor embeddings into a d-dimensional
-token, avoiding the artificial 2D reshaping that CNNs require.
+Reference: Yin et al., "All-embracing Transformer (AaTs)" — the anchor-projection
+tokenization used here projects RSS fingerprints through k learned anchor
+embeddings into a d-dimensional token, avoiding the artificial 2D reshaping
+that CNNs require.
 
 Architecture:
     1. Anchor projection: RSSI (n_aps,) → similarity to k anchors → (k,)
@@ -11,6 +12,10 @@ Architecture:
 
 Input:  (batch, 1, n_aps) — single WiFi scan (window=1)
 Output: (batch, embed_dim)
+
+Note: PLAN_39 (2026-06-01) renamed this class to ``WiFiNet``. The state_dict
+layout is unchanged, so existing per-leg checkpoint files (under any prior
+name) load via ``WiFiNet(...).load_state_dict(torch.load(path))`` unchanged.
 """
 
 import torch
@@ -20,7 +25,7 @@ import torch.nn.functional as F
 from .base import BaseEncoder
 
 
-class Anchor2Vec(BaseEncoder):
+class WiFiNet(BaseEncoder):
     """WiFi RSSI encoder using learned anchor projections.
 
     Parameters
@@ -126,7 +131,7 @@ class Anchor2Vec(BaseEncoder):
             "intermediate": weights.detach().cpu().numpy(),
             "encoded": encoded.detach().cpu().numpy(),
             "description": (
-                f"Anchor2Vec: {x_sq.shape[1]} APs -> {self.n_anchors} learned anchors "
+                f"WiFi-Net: {x_sq.shape[1]} APs -> {self.n_anchors} learned anchors "
                 f"(softmax-attention weights are the intermediate) -> "
                 f"{self.embed_dim}-d token via weighted sum of anchor embeddings + MLP head."
             ),

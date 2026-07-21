@@ -1,4 +1,4 @@
-"""6-metric encoder harness on UJIIndoorLoc — Anchor2Vec vs WiFiSetTransformer.
+"""6-metric encoder harness on UJIIndoorLoc — WiFiNet vs WiFiSetTransformer.
 
 Iter-scoped helper for PLAN_01 Step 5. Trains each encoder on UJI (same
 dataloader / target centering / Huber head as ``eval_uji_wifi.py`` and
@@ -30,7 +30,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.pipeline.encoders import Anchor2Vec, WiFiSetTransformer  # noqa: E402
+from src.pipeline.encoders import WiFiNet, WiFiSetTransformer  # noqa: E402
 from src.pipeline.evaluation.encoder_eval import (  # noqa: E402
     alignment_uniformity,
     effective_dimensionality,
@@ -163,7 +163,7 @@ def main():
     results = {}
 
     for name, cls, kwargs, epochs, lr, batch in [
-        ("Anchor2Vec", Anchor2Vec,
+        ("WiFiNet", WiFiNet,
          dict(n_aps=n_aps, embed_dim=128, n_anchors=64), 120, 1e-3, 256),
         ("WiFiSetTransformer", WiFiSetTransformer,
          dict(n_aps=n_aps, embed_dim=128), 90, 1e-3, 128),
@@ -216,8 +216,8 @@ def main():
     print(f"\nwrote {out_path}", flush=True)
 
     # Print a quick comparison table.
-    print(f"\n{'metric':<35} {'Anchor2Vec':>15} {'WiFiSetTransformer':>22}")
-    a = results["Anchor2Vec"]
+    print(f"\n{'metric':<35} {'WiFiNet':>15} {'WiFiSetTransformer':>22}")
+    a = results["WiFiNet"]
     s = results["WiFiSetTransformer"]
     def row(label, av, sv, fmt="{:.3f}"):
         print(f"  {label:<35} {fmt.format(av):>15} {fmt.format(sv):>22}")

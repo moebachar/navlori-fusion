@@ -1,6 +1,6 @@
 """WiFiSetTransformer on UJIIndoorLoc — WiFi-leg SOTA comparison (iter-scoped).
 
-Mirrors ``scripts/eval_uji_wifi.py`` but swaps ``Anchor2Vec`` →
+Mirrors ``scripts/eval_uji_wifi.py`` but swaps ``WiFiNet`` →
 ``WiFiSetTransformer``. Same dataloader, same target centering, same
 metric (mean Euclidean over UJI's official ``validationData.csv``), same
 Huber regression head — only the encoder differs so the comparison is
@@ -148,7 +148,7 @@ def main():
 
     elapsed = time.time() - t_start
     print(f"\n  >>> WiFiSetTransformer on UJIIndoorLoc val: {best:.3f} m mean Euclidean (best epoch {best_epoch})")
-    print(f"      Anchor2Vec ref (docs): 8.55 m")
+    print(f"      WiFiNet ref (docs): 8.55 m")
     print(f"      wlan_localization (docs): 13.92 m global / 12.99 m cascade-oracle")
     print(f"      params: {n_params/1e6:.2f} M  | elapsed: {elapsed:.1f} s")
 

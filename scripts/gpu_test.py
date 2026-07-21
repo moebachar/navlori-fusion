@@ -4,7 +4,7 @@ sys.path.insert(0, ".")
 
 import torch
 from src.pipeline.data import FusionDataModule
-from src.pipeline.encoders import Anchor2Vec
+from src.pipeline.encoders import WiFiNet
 from src.pipeline.training import EncoderTrainer
 
 print(f"CUDA available: {torch.cuda.is_available()}")
@@ -25,7 +25,7 @@ dm = FusionDataModule(
 dm.setup()
 print(f"Train: {len(dm.train_ds)} samples, Val: {len(dm.val_ds)} samples")
 
-enc = Anchor2Vec(n_aps=32, embed_dim=128, n_anchors=64)
+enc = WiFiNet(n_aps=32, embed_dim=128, n_anchors=64)
 trainer = EncoderTrainer(enc, modality="wifi", dm=dm)
 print(f"Device: {trainer.device}")
 

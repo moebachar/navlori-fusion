@@ -9,7 +9,7 @@ clone-and-reproduce — the same training recipe as the offline
 
 API for each ``train_*`` helper::
 
-    encoder, head, history = train_anchor2vec(Xtr, Ytr, Xva, Yva, ...)
+    encoder, head, history = train_wifi_net(Xtr, Ytr, Xva, Yva, ...)
 
 ``encoder`` is the trained ``nn.Module`` from ``src.pipeline.encoders``;
 ``head`` is a ``nn.Linear(embed_dim, 2)``; ``history`` is a dict with
@@ -24,7 +24,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from src.pipeline.encoders import Anchor2Vec
+from src.pipeline.encoders import WiFiNet
 
 
 def _ensure_tensor(arr, dtype=torch.float32):
@@ -33,11 +33,11 @@ def _ensure_tensor(arr, dtype=torch.float32):
     return torch.tensor(np.asarray(arr), dtype=dtype)
 
 
-def anchor2vec_predict(enc: Anchor2Vec, head: nn.Linear,
+def wifi_net_predict(enc: WiFiNet, head: nn.Linear,
                         X: np.ndarray | torch.Tensor,
                         batch: int = 1024,
                         device: str | None = None) -> np.ndarray:
-    """Predict (x, y) for a batch of UJI scans through Anchor2Vec + head."""
+    """Predict (x, y) for a batch of UJI scans through WiFiNet + head."""
     device = device or ('cuda' if torch.cuda.is_available() else 'cpu')
     enc.eval(); head.eval()
     X_t = _ensure_tensor(X).to(device)
@@ -51,16 +51,16 @@ def anchor2vec_predict(enc: Anchor2Vec, head: nn.Linear,
     return np.concatenate(preds, axis=0)
 
 
-def anchor2vec_val_mae(enc: Anchor2Vec, head: nn.Linear,
+def wifi_net_val_mae(enc: WiFiNet, head: nn.Linear,
                         Xva, Yva, mu) -> float:
     """Compute mean Euclidean error in original (un-centered) target frame."""
-    pred = anchor2vec_predict(enc, head, Xva)
+    pred = wifi_net_predict(enc, head, Xva)
     Yva_arr = np.asarray(Yva)
     mu_arr = np.asarray(mu)
     return float(np.linalg.norm((pred + mu_arr) - (Yva_arr + mu_arr), axis=1).mean())
 
 
-def train_anchor2vec(
+def train_wifi_net(
     Xtr, Ytr, Xva, Yva,
     n_anchors: int = 64,
     embed_dim: int = 128,
@@ -72,8 +72,8 @@ def train_anchor2vec(
     seed: int = 42,
     device: str | None = None,
     verbose: bool = True,
-) -> Tuple[Anchor2Vec, nn.Linear, dict]:
-    """Inline Anchor2Vec training for the UJI per-leg WiFi audit.
+) -> Tuple[WiFiNet, nn.Linear, dict]:
+    """Inline WiFiNet training for the UJI per-leg WiFi audit.
 
     Replicates the RESULT_01 recipe. Returns the best-val checkpoint
     (encoder + head + history). ~3 minutes on Quadro P4000 at the
@@ -105,7 +105,7 @@ def train_anchor2vec(
     Xva_t = torch.tensor(Xva_arr, device=device).unsqueeze(1)
     Yva_t = torch.tensor(Yva_c, device=device)
 
-    enc = Anchor2Vec(n_aps=Xtr_arr.shape[1], embed_dim=embed_dim,
+    enc = WiFiNet(n_aps=Xtr_arr.shape[1], embed_dim=embed_dim,
                       n_anchors=n_anchors).to(device)
     head = nn.Linear(embed_dim, 2).to(device)
     opt = torch.optim.AdamW(list(enc.parameters()) + list(head.parameters()),
@@ -888,7 +888,7 @@ def train_uji_arch(arch: str, *,
                     seed: int = 42,
                     device: str | None = None,
                     verbose: bool = True):
-    """Anchor2Vec + per-arch aggregator (degenerate at K=1) on UJIIndoorLoc.
+    """WiFiNet + per-arch aggregator (degenerate at K=1) on UJIIndoorLoc.
 
     Mirrors ``scripts/_train_uji_arch.py`` (RESULT_24) but generalised over
     the three Table-C archs. Returns ``(model_dict, history)`` with
@@ -897,7 +897,7 @@ def train_uji_arch(arch: str, *,
     """
     from pathlib import Path
     import pandas as pd
-    from src.pipeline.encoders import Anchor2Vec
+    from src.pipeline.encoders import WiFiNet
 
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
     torch.manual_seed(seed); np.random.seed(seed)
@@ -922,7 +922,7 @@ def train_uji_arch(arch: str, *,
     class _UjiArch(nn.Module):
         def __init__(self):
             super().__init__()
-            self.enc = Anchor2Vec(n_aps=n_aps, embed_dim=embed_dim,
+            self.enc = WiFiNet(n_aps=n_aps, embed_dim=embed_dim,
                                    n_anchors=n_anchors)
             self.aggregator = _build_aggregator(arch, embed_dim=embed_dim)
             self.head = nn.Linear(embed_dim, 2)
@@ -943,7 +943,7 @@ def train_uji_arch(arch: str, *,
     model = _UjiArch().to(device)
     n_params = sum(p.numel() for p in model.parameters())
     if verbose:
-        print(f"  UJI {arch}+Anchor2Vec params: {n_params/1e6:.3f} M", flush=True)
+        print(f"  UJI {arch}+WiFiNet params: {n_params/1e6:.3f} M", flush=True)
 
     opt = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
     steps = max(1, len(Xtr) // batch_size)
@@ -1123,7 +1123,7 @@ def train_ronin_canonical_arch(arch: str, *,
 
 
 __all__ = [
-    "train_anchor2vec", "anchor2vec_predict", "anchor2vec_val_mae",
+    "train_wifi_net", "wifi_net_predict", "wifi_net_val_mae",
     "train_imucnn",
     "train_odomcnn", "load_webots_odom_pb", "compute_trivial_integration_floor",
     "train_dpvo_motion_head",

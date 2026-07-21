@@ -29,6 +29,13 @@ from .ronin import (
 )
 from .tartanvo import apply_tartanvo_shims, load_vo_module
 from .dpvo_trunk import BasicEncoder4, get_basic_encoder4_class, load_basic_encoder4
+from .imuwifine import (
+    IMUWiFineModel, train_imuwifine_msiln, load_imuwifine_msiln,
+    predict_imuwifine_msiln,
+)
+from .msiln_baselines import (
+    run_wifi_knn_msiln, run_pdr_from_start_msiln, run_wlanloc_msiln,
+)
 from ._paths import (
     PROJECT_ROOT, EXTERNAL_METHODS,
     WLANLOC_SRC, RONIN_SRC, RONIN_LISTS,
@@ -53,6 +60,11 @@ __all__ = [
     "apply_tartanvo_shims", "load_vo_module",
     # dpvo trunk
     "BasicEncoder4", "get_basic_encoder4_class", "load_basic_encoder4",
+    # imuwifine fusion baseline (clean-room, PLAN_40)
+    "IMUWiFineModel", "train_imuwifine_msiln", "load_imuwifine_msiln",
+    "predict_imuwifine_msiln",
+    # MSILN-specific non-learned baselines (PLAN_40)
+    "run_wifi_knn_msiln", "run_pdr_from_start_msiln", "run_wlanloc_msiln",
     # paths
     "PROJECT_ROOT", "EXTERNAL_METHODS",
     "WLANLOC_SRC", "RONIN_SRC", "RONIN_LISTS",

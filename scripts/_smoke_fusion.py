@@ -22,7 +22,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.pipeline.data.datamodule import FusionDataModule          # noqa: E402
-from src.pipeline.encoders import Anchor2Vec, IMUCNN, OdomCNN      # noqa: E402
+from src.pipeline.encoders import WiFiNet, IMUCNN, OdomCNN      # noqa: E402
 from src.pipeline.fusion.transformer import FusionTransformer      # noqa: E402
 from src.pipeline.training.fusion_trainer import FusionTrainer     # noqa: E402
 
@@ -41,7 +41,7 @@ def _build_encoders(dm, embed_dim=EMBED_DIM):
     return {
         "imu": IMUCNN(in_features=9, embed_dim=embed_dim),
         "odom": OdomCNN(in_features=5, embed_dim=embed_dim),
-        "wifi": Anchor2Vec(n_aps=n_aps, embed_dim=embed_dim),
+        "wifi": WiFiNet(n_aps=n_aps, embed_dim=embed_dim),
     }
 
 
@@ -53,7 +53,7 @@ def phase1():
     encoders = {
         "imu": IMUCNN(in_features=9, embed_dim=EMBED_DIM),
         "odom": OdomCNN(in_features=7, embed_dim=EMBED_DIM),
-        "wifi": Anchor2Vec(n_aps=117, embed_dim=EMBED_DIM),
+        "wifi": WiFiNet(n_aps=117, embed_dim=EMBED_DIM),
     }
     for readout in ("cls", "query"):
         model = FusionTransformer(encoders, embed_dim=EMBED_DIM, depth=2,

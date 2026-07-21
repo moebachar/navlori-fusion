@@ -11,7 +11,7 @@ RUNS_DIR = Path("runs")
 DATA_DIR = Path("data/async_collection")
 
 MODALITY_META = {
-    "wifi":   {"color": "#3B82F6", "icon": "📡", "label": "WiFi",     "encoder": "Anchor2Vec"},
+    "wifi":   {"color": "#3B82F6", "icon": "📡", "label": "WiFi",     "encoder": "WiFiNet"},
     "imu":    {"color": "#10B981", "icon": "🔄", "label": "IMU",      "encoder": "CNN-1D"},
     "odom":   {"color": "#F59E0B", "icon": "🛞", "label": "Odometry", "encoder": "CNN-1D"},
     "camera": {"color": "#EF4444", "icon": "📷", "label": "Vision",   "encoder": "ViT-B/16"},
@@ -106,7 +106,7 @@ def extract_embeddings_from_run(run_dir: str, dm, modality: str, n_max: int = 20
     """Load a saved encoder and extract embeddings from the val set."""
     import sys
     sys.path.insert(0, ".")
-    from src.pipeline.encoders import Anchor2Vec, IMUCNN, OdomCNN, VisionViT
+    from src.pipeline.encoders import WiFiNet, IMUCNN, OdomCNN, VisionViT
 
     run_path = Path(run_dir)
     meta_path = run_path / "meta.json"
@@ -115,7 +115,7 @@ def extract_embeddings_from_run(run_dir: str, dm, modality: str, n_max: int = 20
 
     # Reconstruct encoder based on modality
     enc_map = {
-        "wifi":   lambda: Anchor2Vec(n_aps=32, embed_dim=128, n_anchors=64),
+        "wifi":   lambda: WiFiNet(n_aps=32, embed_dim=128, n_anchors=64),
         "imu":    lambda: IMUCNN(in_features=9, embed_dim=128),
         "odom":   lambda: OdomCNN(in_features=7, embed_dim=128),
         "camera": lambda: VisionViT(embed_dim=128, freeze_backbone=True),

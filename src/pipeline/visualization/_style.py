@@ -25,7 +25,7 @@ COLOR_PALETTE = {
     "ronin_resnet1d":    "#d62728",
     "tartanvo":          "#8c564b",
     "dpvomotion":        "#17becf",
-    "anchor2vec":        "#bcbd22",
+    "wifi_net":          "#bcbd22",
     "imucnn":            "#7f7f7f",
 }
 

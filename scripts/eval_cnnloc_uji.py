@@ -7,7 +7,7 @@ Faithful implementation of CNNLoc (Song et al., IEEE Access 2019):
     ->Conv1d(33,k22)->flatten->Dense, regressing (longitude, latitude).
 
 Run with the SAME UJI protocol/metric as scripts/eval_uji_wifi.py (our
-Anchor2Vec) so the comparison is architecture-only: same fixed train/val
+WiFiNet) so the comparison is architecture-only: same fixed train/val
 split, same RSSI encoding, same centered targets, mean Euclidean error.
 Published CNNLoc band on UJI positioning: ~2.6-8.2 m (varies by protocol).
 
@@ -128,7 +128,7 @@ def main():
             print(f"  epoch {ep:3d}  val mean-euclidean={mae:.3f} m (best {best:.3f})", flush=True)
 
     print(f"\n  >>> CNNLoc on UJIIndoorLoc val: {best:.3f} m mean Euclidean")
-    print(f"      our Anchor2Vec (same protocol): 8.55 m | published CNNLoc band ~2.6-8.2 m")
+    print(f"      our WiFiNet (same protocol): 8.55 m | published CNNLoc band ~2.6-8.2 m")
 
 
 if __name__ == "__main__":

@@ -5,7 +5,7 @@ sys.path.insert(0, ".")
 import torch
 import torch.nn as nn
 from src.pipeline.data import FusionDataModule
-from src.pipeline.encoders import Anchor2Vec
+from src.pipeline.encoders import WiFiNet
 
 print(f"CUDA: {torch.cuda.is_available()}")
 if torch.cuda.is_available():
@@ -51,7 +51,7 @@ for batch in train_loader:
 print(f"[4] Iterate + .to({device}): {time.time()-t0:.4f}s")
 
 # --- 5. Model creation ---
-enc = Anchor2Vec(n_aps=32, embed_dim=128, n_anchors=64).to(device)
+enc = WiFiNet(n_aps=32, embed_dim=128, n_anchors=64).to(device)
 head = nn.Linear(128, 2).to(device)
 criterion = nn.HuberLoss(delta=0.5)
 params = list(enc.parameters()) + list(head.parameters())

@@ -41,26 +41,59 @@ import torch.nn as nn
 
 
 class ContinuousTimeEncoding(nn.Module):
-    """Maps a continuous Δt (seconds) to a ``dim``-vector.
+    """Maps a token's time signature to a ``dim``-vector.
 
-    This is where mTAN's continuous-time idea lives — folded into a token
-    feature instead of a separate alignment stage. A bank of sinusoids at
-    geometrically-spaced periods makes nearby times produce similar codes
-    while keeping distant times distinguishable; a linear layer mixes them
-    into the embedding space.
+    Default mode (``"learned_continuous"``) is where mTAN's continuous-time
+    idea lives — folded into a token feature instead of a separate alignment
+    stage. A bank of sinusoids at geometrically-spaced periods makes nearby
+    times produce similar codes while keeping distant times distinguishable;
+    a linear layer mixes them into the embedding space.
+
+    Modes (M1 ablation, reviewer-mandated):
+      - ``"learned_continuous"`` — current default, real-valued Δt.
+      - ``"none"``               — no time encoding (returns zeros).
+      - ``"binned"``             — bucketize ``|Δt|`` log-uniformly into
+                                    ``n_bins`` buckets; learned embedding per
+                                    bucket (the AFT-VO style this paper criticises).
+      - ``"posindex"``           — sinusoidal positional encoding by within-
+                                    modality arrival rank (0..K-1) — discards
+                                    the real Δt magnitude and keeps only ordering.
+                                    Caller must pass integer-valued ``dt`` (rank).
     """
 
     def __init__(self, dim: int, n_freqs: int = 32, min_period: float = 0.05,
-                 max_period: float = 120.0):
+                 max_period: float = 120.0, mode: str = "learned_continuous",
+                 n_bins: int = 16):
         super().__init__()
-        periods = torch.logspace(
-            math.log10(min_period), math.log10(max_period), n_freqs,
-        )
-        self.register_buffer("omega", 2.0 * math.pi / periods)  # (n_freqs,)
-        self.proj = nn.Linear(2 * n_freqs, dim)
+        if mode not in {"learned_continuous", "none", "binned", "posindex"}:
+            raise ValueError(f"unknown time_enc mode {mode!r}")
+        self.mode = mode
+        self.dim = dim
+        if mode in ("learned_continuous", "posindex"):
+            periods = torch.logspace(
+                math.log10(min_period), math.log10(max_period), n_freqs,
+            )
+            self.register_buffer("omega", 2.0 * math.pi / periods)  # (n_freqs,)
+            self.proj = nn.Linear(2 * n_freqs, dim)
+        elif mode == "binned":
+            edges = torch.logspace(
+                math.log10(min_period), math.log10(max_period), n_bins - 1,
+            )
+            self.register_buffer("edges", edges)
+            self.bin_emb = nn.Embedding(n_bins, dim)
 
     def forward(self, dt: torch.Tensor) -> torch.Tensor:
-        """dt: (...) → (..., dim)."""
+        """dt: (...) → (..., dim).
+
+        In ``posindex`` mode, ``dt`` is interpreted as integer rank within
+        the K-instant window (caller's responsibility — see ``encode_tokens``).
+        """
+        if self.mode == "none":
+            return torch.zeros(*dt.shape, self.dim,
+                               device=dt.device, dtype=torch.float32)
+        if self.mode == "binned":
+            bin_idx = torch.bucketize(dt.abs(), self.edges)
+            return self.bin_emb(bin_idx)
         ang = dt.unsqueeze(-1) * self.omega          # (..., n_freqs)
         feat = torch.cat([ang.sin(), ang.cos()], dim=-1)
         return self.proj(feat)
@@ -103,6 +136,9 @@ class FusionTransformer(nn.Module):
         use_time: bool = True,
         readout: str = "cls",
         absolute_modalities: set[str] | list[str] | None = None,
+        time_enc_mode: str = "learned_continuous",
+        time_min_period: float = 0.05,
+        time_max_period: float = 120.0,
     ):
         super().__init__()
         if readout not in {"cls", "query", "decomposed"}:
@@ -112,6 +148,7 @@ class FusionTransformer(nn.Module):
         self.encoders = nn.ModuleDict(encoders)
         self.embed_dim = embed_dim
         self.use_time = use_time
+        self.time_enc_mode = time_enc_mode
         self.readout = readout
         # Which modalities carry an ABSOLUTE position signal (place
         # recognition) vs RELATIVE motion. Used only by the decomposed
@@ -126,7 +163,13 @@ class FusionTransformer(nn.Module):
         self.modality_emb = nn.Parameter(
             torch.randn(len(self.modalities), embed_dim) * 0.02
         )
-        self.time_enc = ContinuousTimeEncoding(embed_dim) if use_time else None
+        self.time_enc = (
+            ContinuousTimeEncoding(
+                embed_dim, mode=time_enc_mode,
+                min_period=time_min_period, max_period=time_max_period,
+            )
+            if use_time else None
+        )
 
         layer = nn.TransformerEncoderLayer(
             d_model=embed_dim, nhead=n_heads,
@@ -219,7 +262,12 @@ class FusionTransformer(nn.Module):
             z = z.view(B, K, self.embed_dim)
             z = z + self.modality_emb[mi]
             if self.use_time and dt is not None:
-                z = z + self.time_enc(dt[mod])
+                if self.time_enc_mode == "posindex":
+                    rank = torch.arange(K, device=z.device, dtype=z.dtype)
+                    rank = rank.unsqueeze(0).expand(B, K)
+                    z = z + self.time_enc(rank)
+                else:
+                    z = z + self.time_enc(dt[mod])
             toks.append(z)
             pads.append(~avail[mod])              # (B, K)
         tokens = torch.cat(toks, dim=1)           # (B, K*M, embed_dim)
@@ -278,7 +326,8 @@ class FusionTransformer(nn.Module):
             # only live modality happens to have an empty window can never
             # produce an all-(-inf) softmax row (→ NaN).
             q = self.query.expand(B, -1, -1).clone()
-            if self.use_time and query_dt is not None:
+            if (self.use_time and query_dt is not None
+                    and self.time_enc_mode not in {"posindex", "none"}):
                 q = q + self.time_enc(query_dt).unsqueeze(1)
             attn_out, _ = self.cross_attn(
                 q, x, x, key_padding_mask=full_pad,
@@ -314,7 +363,8 @@ class FusionTransformer(nn.Module):
 
         # Motion (relative) path — τ-conditioned; estimates the correction.
         qm = self.motion_query.expand(B, -1, -1).clone()
-        if self.use_time and query_dt is not None:
+        if (self.use_time and query_dt is not None
+                and self.time_enc_mode not in {"posindex", "none"}):
             qm = qm + self.time_enc(query_dt).unsqueeze(1)
         m_out, _ = self.motion_attn(qm, x, x, key_padding_mask=rel_pad)
         m_feat = self.motion_norm(m_out.squeeze(1) + qm.squeeze(1))
@@ -430,7 +480,8 @@ class FusionTransformer(nn.Module):
         p_abs = self.anchor_head(a_feat)
 
         qm = self.motion_query.expand(B, -1, -1).clone()
-        if self.use_time and query_dt is not None:
+        if (self.use_time and query_dt is not None
+                and self.time_enc_mode not in {"posindex", "none"}):
             qm = qm + self.time_enc(query_dt).unsqueeze(1)
         m_out, wm = self.motion_attn(qm, x, x, key_padding_mask=rel_pad,
                                      need_weights=True, average_attn_weights=True)

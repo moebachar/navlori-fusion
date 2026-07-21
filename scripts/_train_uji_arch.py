@@ -1,8 +1,8 @@
-"""PLAN_24 — Anchor2Vec + CNN1D/LSTM-attn aggregator (K=1 degenerate) on UJI.
+"""PLAN_24 — WiFiNet + CNN1D/LSTM-attn aggregator (K=1 degenerate) on UJI.
 
 Pipeline:
   per-scan UJI WiFi vector (520 APs)
-    -> Anchor2Vec encoder -> (B, 128)
+    -> WiFiNet encoder -> (B, 128)
     -> reshape (B, 1, 128) — K=1 sequence
     -> CNN1D or LSTM-attn aggregator -> (B, 1, 128)
     -> squeeze K -> (B, 128)
@@ -11,7 +11,7 @@ Pipeline:
 At K=1, the K-axis aggregators degenerate to embedding-level transforms
 (conv kernel=3 with padding over length-1 input; BiLSTM cell over a
 single time step). The expected outcome is α7: both architectures land
-within ~5 % of the bare Anchor2Vec baseline (RESULT_01: 8.69 m val
+within ~5 % of the bare WiFiNet baseline (RESULT_01: 8.69 m val
 mean Euclidean error).
 
 Run: ``.venv/Scripts/python.exe scripts/_train_uji_arch.py --arch cnn1d``
@@ -33,7 +33,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.pipeline.encoders import Anchor2Vec  # noqa: E402
+from src.pipeline.encoders import WiFiNet  # noqa: E402
 from src.pipeline.fusion.bakeoff import _MaskedBiLSTM, _PlainCNN1D  # noqa: E402
 
 DATA = ROOT / "data" / "uji_indoorloc"
@@ -52,12 +52,12 @@ def load_split(csv):
 
 
 class UjiCNN1D(nn.Module):
-    """Anchor2Vec + aggregator (degenerate at K=1) + Linear(2)."""
+    """WiFiNet + aggregator (degenerate at K=1) + Linear(2)."""
 
     def __init__(self, agg_kind: str, n_aps: int, embed_dim: int = 128,
                  n_anchors: int = 64, dropout: float = 0.1):
         super().__init__()
-        self.enc = Anchor2Vec(n_aps=n_aps, embed_dim=embed_dim,
+        self.enc = WiFiNet(n_aps=n_aps, embed_dim=embed_dim,
                                n_anchors=n_anchors)
         if agg_kind == "cnn1d":
             self.aggregator = _PlainCNN1D(embed_dim=embed_dim, dropout=dropout)
@@ -69,7 +69,7 @@ class UjiCNN1D(nn.Module):
         self.head = nn.Linear(embed_dim, 2)
 
     def forward(self, x):
-        # x: (B, 1, n_aps) — Anchor2Vec expects this shape and returns (B, D).
+        # x: (B, 1, n_aps) — WiFiNet expects this shape and returns (B, D).
         z = self.enc(x)                          # (B, D)
         B = z.shape[0]
         z = z.unsqueeze(1)                       # (B, 1, D) — K=1 sequence
@@ -159,7 +159,7 @@ def main():
                       "batch": args.batch, "lr": args.lr},
         "best": {"val_mean_euclidean": float(best), "epoch": int(best_ep)},
         "final_val_distribution": dist,
-        "anchor2vec_baseline_RESULT_01": 8.69,
+        "wifi_net_baseline_RESULT_01": 8.69,
         "wlanloc_sota_RESULT_01": 15.17,
     }
     out_path = OUT_DIR / f"{args.arch}_uji.json"
@@ -168,7 +168,7 @@ def main():
     print(f"\n  >>> {args.arch} on UJI val: best {best:.3f} m  (epoch {best_ep})", flush=True)
     print(f"      final val distribution: mean={dist['mean']:.3f}  median={dist['median']:.3f}  "
           f"p90={dist['p90']:.3f}  max={dist['max']:.3f}", flush=True)
-    print(f"      vs Anchor2Vec 8.69 m: delta {(best-8.69)/8.69*100:+.1f} %", flush=True)
+    print(f"      vs WiFiNet 8.69 m: delta {(best-8.69)/8.69*100:+.1f} %", flush=True)
     print(f"      vs wlanloc SOTA 15.17 m: delta {(best-15.17)/15.17*100:+.1f} %", flush=True)
     print(f"\nwrote {out_path}", flush=True)
 

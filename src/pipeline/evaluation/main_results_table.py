@@ -1,8 +1,9 @@
 """Paper-ready main results table assembler.
 
-Harvests headline numbers from ``runs/overnight/run2_iter_*/`` JSONs +
-RESULT_NN canonical values (the source-of-truth from
-``handoff/SUMMARY.md``).
+Serves the canonical headline numbers (``_CANONICAL`` below), transcribed
+from the RESULT_NN records / ``handoff/SUMMARY.md``. (Automated harvesting
+from ``runs/overnight/run2_iter_*/`` JSONs was planned but never wired;
+the dict is the source of truth.)
 
 ## Paper-facing exclusions (per `handoff/SCIENTIST_NOTE_notebook-exclusions.md`)
 
@@ -12,13 +13,14 @@ RESULT_NN canonical values (the source-of-truth from
   repo (``src/pipeline/data/ipin2024.py``, ``runs/overnight/run2_iter_22/``)
   but the row is excluded from ``MainResultsTable.from_archive()``.
 - **MoTTransformer** dropped from paper-facing columns: RESULT_21 γ5
-  outcome (worst of 4 architectures). The architecture file
-  ``src/pipeline/fusion/mot_transformer.py`` + ``runs/overnight/run2_iter_21/``
-  artefacts remain for reproducibility, but the column is excluded.
+  outcome (worst of 4 architectures). The architecture file was removed
+  from the codebase in the June 2026 refactor; its run artefacts
+  (``runs/overnight/run2_iter_21/``) remain for reproducibility, but the
+  column is excluded.
 
 ## Paper schema (6 rows × 9 columns)
 
-| dataset            | modalities         | wlan_localization | RoNIN ResNet1D | TartanVO | Anchor2Vec | DPVOMotion | IMUCNN | incumbent | cnn1d (winner) | lstm_attn |
+| dataset            | modalities         | wlan_localization | RoNIN ResNet1D | TartanVO | WiFi-Net | DPVOMotion | IMUCNN | incumbent | cnn1d (winner) | lstm_attn |
 |---|---|---|---|---|---|---|---|---|---|---|
 | Webots sim         | WiFi+IMU+Cam+Odom  | n/a              | n/a            | n/a      | n/a        | n/a        | n/a    | 0.394/0.417 | 0.282/0.339  | 0.301/0.340 |
 | IMUWiFine fl.4 ⁽¹⁾ | WiFi+IMU           | 4.17/8.50        | 26.84/n.a.     | n/a      | n/a        | n/a        | n/a    | n/a       | 1.40/7.09    | 1.26/7.20 |
@@ -65,7 +67,7 @@ SOTA_COLS = [
     "wlan_localization",
     "RoNIN_ResNet1D",
     "TartanVO",
-    "Anchor2Vec",
+    "WiFi-Net",
     "DPVOMotion",
     "IMUCNN",
 ]
@@ -91,7 +93,7 @@ _CANONICAL = {
         dict(val=21.26, test=28.31, source="RESULT_15 (NEW)", metric="MAE"),
     ("msiln_site1_b1", "incumbent"):
         dict(val=16.60, test=14.02, source="RESULT_15", metric="MAE",
-             note="deployed config (WiFiSetTransformer + IMUCNN); CNN1D Anchor2Vec re-run queued"),
+             note="deployed config (WiFiSetTransformer + IMUCNN); CNN1D WiFi-Net re-run queued"),
     # ----- RoNIN canonical (IMU only) -----
     ("ronin_canonical", "RoNIN_ResNet1D"):
         dict(val=None, test=5.140, source="RESULT_07 (paper-exact reproduction)", metric="ATE"),
@@ -111,7 +113,7 @@ _CANONICAL = {
     ("uji_indoorloc", "wlan_localization"):
         dict(val=15.17, test=None, source="RESULT_01", metric="MAE",
              note="global mode; no test split (validationData.csv only)"),
-    ("uji_indoorloc", "Anchor2Vec"):
+    ("uji_indoorloc", "WiFi-Net"):
         dict(val=8.69,  test=None, source="RESULT_01", metric="MAE"),
     ("uji_indoorloc", "cnn1d"):    dict(val=8.72,  test=None, source="RESULT_24",
                                          metric="MAE", note="K=1 M=1 degenerate (α7 collapse)"),
@@ -142,7 +144,9 @@ class MainResultsTable:
     Paper-facing presentation excludes IPIN dataset + MoTTransformer
     architecture per
     ``handoff/SCIENTIST_NOTE_notebook-exclusions.md`` (2026-05-26).
-    Both remain in the codebase for reproducibility.
+    The IPIN data module remains in the codebase; MoTTransformer was
+    removed in the June 2026 refactor (run artefacts kept under
+    ``runs/overnight/run2_iter_21/``).
     """
 
     def __init__(self, cells: dict[tuple[str, str], TableCell]):
@@ -209,10 +213,10 @@ class MainResultsTable:
             "note": (
                 "Both excluded from paper-facing presentation per "
                 "handoff/SCIENTIST_NOTE_notebook-exclusions.md (2026-05-26). "
-                "Code + artifacts retained in repo for reproducibility "
-                "(`src/pipeline/data/ipin2024.py`, "
-                "`src/pipeline/fusion/mot_transformer.py`, "
-                "`runs/overnight/run2_iter_{21,22}/`)."
+                "IPIN data module + run artifacts retained for "
+                "reproducibility (`src/pipeline/data/ipin2024.py`, "
+                "`runs/overnight/run2_iter_{21,22}/`); mot_transformer.py "
+                "was removed from the codebase in the June 2026 refactor."
             ),
         }
 

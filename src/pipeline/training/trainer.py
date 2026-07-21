@@ -70,7 +70,7 @@ class EncoderTrainer:
     Parameters
     ----------
     encoder : nn.Module
-        The modality encoder (e.g. Anchor2Vec, IMUCNN, OdomCNN).
+        The modality encoder (e.g. WiFiNet, IMUCNN, OdomCNN).
     modality : str
         Which key to read from the dataloader batch (e.g. "wifi", "imu").
     dm : FusionDataModule

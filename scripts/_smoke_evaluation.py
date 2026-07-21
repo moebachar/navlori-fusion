@@ -47,8 +47,8 @@ def main():
     assert abs(webots_cnn1d.test - 0.339) < 0.005, \
         f"CNN1D Webots test should be 0.339; got {webots_cnn1d.test}"
 
-    # UJI Anchor2Vec
-    uji_a2v = t.cell("uji_indoorloc", "Anchor2Vec")
+    # UJI WiFiNet
+    uji_a2v = t.cell("uji_indoorloc", "WiFiNet")
     assert uji_a2v is not None and abs(uji_a2v.val - 8.69) < 0.05
 
     # RoNIN ResNet1D paper-exact

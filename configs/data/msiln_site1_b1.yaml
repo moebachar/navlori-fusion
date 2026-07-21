@@ -13,9 +13,9 @@ data:
   source: msiln
   modalities: [wifi, imu]
   # Per-AP WiFi set-transformer encoder (PLAN_05). Default for other
-  # datasets is 'anchor2vec'; only msiln gets the heavier per-BSSID
+  # datasets is 'wifi_net'; only msiln gets the heavier per-BSSID
   # token model because msiln has 1419 APs (vs IPIN's ~125) where
-  # Anchor2Vec saturates (RESULT_04).
+  # WiFi-Net saturates (RESULT_04).
   wifi_encoder_type: set_transformer
 
   split:

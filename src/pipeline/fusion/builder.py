@@ -24,7 +24,7 @@ from torch.utils.data import DataLoader
 
 from src.pipeline.data.datamodule import FusionDataModule
 from src.pipeline.encoders import (
-    Anchor2Vec,
+    WiFiNet,
     DPVOMotionEncoder,
     IMUCNN,
     OdomCNN,
@@ -161,17 +161,19 @@ def build_encoders(
         enc["odom"] = OdomCNN(in_features=5, embed_dim=embed)
     if "wifi" in mods:
         wifi_kind = str(
-            cfg.dataset.get("wifi_encoder_type", "anchor2vec")
+            cfg.dataset.get("wifi_encoder_type", "wifi_net")
         ).lower()
+        if wifi_kind == "anchor2vec":  # pre-PLAN_39 run metadata / configs
+            wifi_kind = "wifi_net"
         n_aps = int(dm.train_ds.feature_dims["wifi"])
         if wifi_kind == "set_transformer":
             enc["wifi"] = WiFiSetTransformer(n_aps=n_aps, embed_dim=embed)
-        elif wifi_kind == "anchor2vec":
-            enc["wifi"] = Anchor2Vec(n_aps=n_aps, embed_dim=embed)
+        elif wifi_kind == "wifi_net":
+            enc["wifi"] = WiFiNet(n_aps=n_aps, embed_dim=embed)
         else:
             raise ValueError(
                 f"Unknown wifi_encoder_type={wifi_kind!r}; "
-                "expected 'anchor2vec' or 'set_transformer'."
+                "expected 'wifi_net' or 'set_transformer'."
             )
     vision = None
     if "camera" in mods:
@@ -229,6 +231,9 @@ def build_model(cfg, encoders) -> FusionTransformer:
         ff_mult=m.ff_mult, dropout=m.dropout, use_time=m.use_time,
         readout=m.readout,
         absolute_modalities=list(abs_mods) if abs_mods is not None else None,
+        time_enc_mode=m.get("time_enc_mode", "learned_continuous"),
+        time_min_period=float(m.get("time_min_period", 0.05)),
+        time_max_period=float(m.get("time_max_period", 120.0)),
     )
 
 

@@ -17,23 +17,23 @@ notebook's primary entry point for evaluating run-2 checkpoints.
 
 from .fusion_trainer import FusionTrainer, load_trained
 from .inline_encoders import (
-    anchor2vec_predict,
-    anchor2vec_val_mae,
     compute_trivial_integration_floor,
     load_webots_odom_pb,
-    train_anchor2vec,
     train_dpvo_motion_head,
     train_fusion_arch,
     train_imucnn,
     train_odomcnn,
     train_ronin_canonical_arch,
     train_uji_arch,
+    train_wifi_net,
+    wifi_net_predict,
+    wifi_net_val_mae,
 )
 from .trainer import EncoderTrainer
 
 __all__ = [
     "EncoderTrainer", "FusionTrainer", "load_trained",
-    "train_anchor2vec", "anchor2vec_predict", "anchor2vec_val_mae",
+    "train_wifi_net", "wifi_net_predict", "wifi_net_val_mae",
     "train_imucnn",
     "train_odomcnn", "load_webots_odom_pb", "compute_trivial_integration_floor",
     "train_dpvo_motion_head",

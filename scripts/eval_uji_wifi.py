@@ -1,9 +1,9 @@
-"""Anchor2Vec on UJIIndoorLoc — WiFi-leg SOTA comparison.
+"""WiFiNet on UJIIndoorLoc — WiFi-leg SOTA comparison.
 
-Runs OUR WiFi encoder (Anchor2Vec) as a static RSSI->position regressor on
+Runs OUR WiFi encoder (WiFiNet) as a static RSSI->position regressor on
 the standard UJIIndoorLoc benchmark, using its fixed train/validation split,
 and reports mean Euclidean error in meters. Reference to beat/match:
-eAaT+ / Anchor2Vec published ~8.16 m mean positioning error.
+eAaT+ / WiFiNet published ~8.16 m mean positioning error.
 
 WiFi encoding mirrors the pipeline's M1 "raw" mode (no whitening): the
 not-detected sentinel (100) -> no-signal, detected RSSI [-104,0] -> [~0,1]
@@ -27,7 +27,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.pipeline.encoders import Anchor2Vec  # noqa: E402
+from src.pipeline.encoders import WiFiNet  # noqa: E402
 
 DATA = ROOT / "data" / "uji_indoorloc"
 
@@ -64,7 +64,7 @@ def main():
     Xva_t = torch.tensor(Xva, device=dev).unsqueeze(1)
     Yva_t = torch.tensor(Yva_c, device=dev)
 
-    enc = Anchor2Vec(n_aps=n_aps, embed_dim=128, n_anchors=args.anchors).to(dev)
+    enc = WiFiNet(n_aps=n_aps, embed_dim=128, n_anchors=args.anchors).to(dev)
     head = nn.Linear(128, 2).to(dev)
     params = list(enc.parameters()) + list(head.parameters())
     opt = torch.optim.AdamW(params, lr=args.lr, weight_decay=1e-4)
@@ -91,8 +91,8 @@ def main():
             print(f"  epoch {ep:3d}  val mean-euclidean = {mae:.3f} m  (best {best:.3f})",
                   flush=True)
 
-    print(f"\n  >>> Anchor2Vec on UJIIndoorLoc val: {best:.3f} m mean Euclidean error")
-    print(f"      reference eAaT+/Anchor2Vec published ~8.16 m")
+    print(f"\n  >>> WiFiNet on UJIIndoorLoc val: {best:.3f} m mean Euclidean error")
+    print(f"      reference eAaT+/WiFiNet published ~8.16 m")
     verdict = "MATCHES/BEATS" if best <= 8.5 else "ABOVE"
     print(f"      [{verdict} the published WiFi-only baseline]")
 
