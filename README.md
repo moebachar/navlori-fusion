@@ -79,8 +79,9 @@ navlori-fusion/
 │   ├── convert_*.py                # External-dataset converters
 │   ├── eval_*.py                   # Per-dataset / per-baseline evaluation
 │   └── optuna_fusion.py            # Hyperparameter search
-├── data/                           # DVC-tracked data directory
-│   └── async_collection/           # Collected sensor data (per path)
+├── data/                           # 7 datasets, all DVC-pinned (store: X:\navlori-data)
+│   ├── async_collection/           # Webots sim collection (per path)
+│   ├── msiln_site1_b1/ ...         # + MSILN, IMUWiFine fl.4, UJI, RoNIN, IPIN fl.0, TartanAir
 ├── tests/
 ├── pyproject.toml
 └── .gitignore
@@ -115,13 +116,17 @@ ResNet1D, DPVO Windows-build limitation).
 python -m ipykernel install --user --name navlori-fusion --display-name "NavLoRI Fusion"
 ```
 
-### 3. Initialize DVC
+### 3. Restore the datasets (DVC)
+
+The repo pins all 7 datasets with DVC; the store is `X:\navlori-data`
+(config already in `.dvc/config`):
 
 ```powershell
-dvc init
-dvc remote add -d local D:\dvc_store
-mkdir D:\dvc_store
+dvc pull
 ```
+
+After changing a dataset: `dvc add data\<name>`, `dvc push`, then commit the
+updated `.dvc` file.
 
 ### 4. Install services (InfluxDB + Grafana)
 
@@ -153,7 +158,7 @@ src/simulation/worlds/Tiago++'s world.wbt
 
 Set the TIAGO++ robot's `controller` field to `async_collector` and the Python command to:
 ```
-C:\Users\Administrateur\navlori-fusion\.venv\Scripts\python.exe
+X:\navlori-fusion\.venv\Scripts\python.exe
 ```
 
 ---
@@ -201,8 +206,14 @@ powershell -ExecutionPolicy Bypass -File scripts\services.ps1 stop
 
 ### Run training
 
+Stage-A encoders train via `EncoderTrainer` (see the per-encoder scripts in
+`scripts/`); the fusion pipeline builds through
+`src.pipeline.fusion.builder.load_config(dataset)` — used by the notebooks,
+the smoke harness (`scripts\_smoke_fusion.py`, 5 gated phases) and the
+hyperparameter search:
+
 ```powershell
-python scripts/train.py
+.venv\Scripts\python.exe scripts\optuna_fusion.py --dataset simulation
 ```
 
 ### Run MLflow UI
@@ -264,7 +275,7 @@ The robot's actual collision radius is measured dynamically after `tuck_arms()` 
 Everything runs on the desktop. From the laptop:
 
 1. **VS Code Remote SSH** → connect to `navlori-gpu` (100.126.253.37 via Tailscline)
-2. Open folder: `C:\Users\Administrateur\navlori-fusion`
+2. Open folder: `X:\navlori-fusion`
 3. **Parsec** for Webots GUI (cameras need a real GPU session — SSH has no display context)
 4. Access services via browser:
    - Grafana: http://100.126.253.37:3000
