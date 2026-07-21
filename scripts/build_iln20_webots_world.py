@@ -867,11 +867,26 @@ def fmt_corner_planter(idx: int, x: float, y: float) -> str:
 
 
 def fmt_corner_extinguisher(idx: int, x: float, y: float) -> str:
-    """Fire extinguisher proto placed at corner."""
+    """Visual-only fire-extinguisher look-alike (red body + dark valve).
+    Deliberately NOT the stock FireExtinguisher PROTO: that one carries
+    Physics + boundingObject internally, and replay worlds must be fully
+    non-collidable except the floor."""
     return (
-        f"DEF CORNER_{idx:05d} FireExtinguisher {{\n"
-        f"  translation {x:.4f} {y:.4f} 0\n"
+        f"DEF CORNER_{idx:05d} Solid {{\n"
+        f"  translation {x:.4f} {y:.4f} 0.30\n"
         f"  name \"corner_ext_{idx:05d}\"\n"
+        f"  children [\n"
+        f"    Shape {{\n"
+        f"      appearance PBRAppearance {{ baseColor 0.82 0.08 0.08 "
+        f"roughness 0.35 metalness 0.25 }}\n"
+        f"      geometry Cylinder {{ radius 0.085 height 0.55 }}\n"
+        f"    }}\n"
+        f"    Pose {{ translation 0 0 0.31 children [ Shape {{\n"
+        f"      appearance PBRAppearance {{ baseColor 0.18 0.18 0.18 "
+        f"roughness 0.5 metalness 0.5 }}\n"
+        f"      geometry Cylinder {{ radius 0.035 height 0.12 }}\n"
+        f"    }} ] }}\n"
+        f"  ]\n"
         f"}}\n"
     )
 

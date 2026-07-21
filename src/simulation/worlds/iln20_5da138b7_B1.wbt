@@ -4,7 +4,6 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/project
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/floors/protos/Floor.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/robots/pal_robotics/tiagopp/protos/Tiago++.proto"
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/factory/fire_extinguisher/protos/FireExtinguisher.proto"
 
 WorldInfo {
   basicTimeStep 32
@@ -23718,9 +23717,19 @@ DEF DECOR_00288 Solid {
 
 DEF CORNER_OBJECTS Group {
   children [
-DEF CORNER_00000 FireExtinguisher {
-  translation 17.1261 424.1338 0
+DEF CORNER_00000 Solid {
+  translation 17.1261 424.1338 0.30
   name "corner_ext_00000"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00001 Solid {
@@ -23743,9 +23752,19 @@ DEF CORNER_00001 Solid {
   ]
 }
 
-DEF CORNER_00002 FireExtinguisher {
-  translation 30.9351 404.0719 0
+DEF CORNER_00002 Solid {
+  translation 30.9351 404.0719 0.30
   name "corner_ext_00002"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00003 Solid {
@@ -23768,14 +23787,34 @@ DEF CORNER_00003 Solid {
   ]
 }
 
-DEF CORNER_00004 FireExtinguisher {
-  translation 83.6866 193.4973 0
+DEF CORNER_00004 Solid {
+  translation 83.6866 193.4973 0.30
   name "corner_ext_00004"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00005 FireExtinguisher {
-  translation 91.6533 102.2938 0
+DEF CORNER_00005 Solid {
+  translation 91.6533 102.2938 0.30
   name "corner_ext_00005"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00006 Solid {
@@ -23798,19 +23837,49 @@ DEF CORNER_00006 Solid {
   ]
 }
 
-DEF CORNER_00007 FireExtinguisher {
-  translation 90.6466 87.7253 0
+DEF CORNER_00007 Solid {
+  translation 90.6466 87.7253 0.30
   name "corner_ext_00007"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00008 FireExtinguisher {
-  translation 83.0939 195.3978 0
+DEF CORNER_00008 Solid {
+  translation 83.0939 195.3978 0.30
   name "corner_ext_00008"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00009 FireExtinguisher {
-  translation 93.5371 118.9617 0
+DEF CORNER_00009 Solid {
+  translation 93.5371 118.9617 0.30
   name "corner_ext_00009"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00010 Solid {
@@ -23833,19 +23902,49 @@ DEF CORNER_00010 Solid {
   ]
 }
 
-DEF CORNER_00011 FireExtinguisher {
-  translation 101.9398 137.9458 0
+DEF CORNER_00011 Solid {
+  translation 101.9398 137.9458 0.30
   name "corner_ext_00011"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00012 FireExtinguisher {
-  translation 97.8975 186.4943 0
+DEF CORNER_00012 Solid {
+  translation 97.8975 186.4943 0.30
   name "corner_ext_00012"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00013 FireExtinguisher {
-  translation 125.1403 177.4226 0
+DEF CORNER_00013 Solid {
+  translation 125.1403 177.4226 0.30
   name "corner_ext_00013"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00014 Solid {
@@ -23868,14 +23967,34 @@ DEF CORNER_00014 Solid {
   ]
 }
 
-DEF CORNER_00015 FireExtinguisher {
-  translation 86.0855 58.0372 0
+DEF CORNER_00015 Solid {
+  translation 86.0855 58.0372 0.30
   name "corner_ext_00015"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00016 FireExtinguisher {
-  translation 86.3189 60.2211 0
+DEF CORNER_00016 Solid {
+  translation 86.3189 60.2211 0.30
   name "corner_ext_00016"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00017 Solid {
@@ -23898,14 +24017,34 @@ DEF CORNER_00017 Solid {
   ]
 }
 
-DEF CORNER_00018 FireExtinguisher {
-  translation 98.8846 46.2314 0
+DEF CORNER_00018 Solid {
+  translation 98.8846 46.2314 0.30
   name "corner_ext_00018"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00019 FireExtinguisher {
-  translation 111.0967 64.3502 0
+DEF CORNER_00019 Solid {
+  translation 111.0967 64.3502 0.30
   name "corner_ext_00019"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00020 Solid {
@@ -23928,9 +24067,19 @@ DEF CORNER_00020 Solid {
   ]
 }
 
-DEF CORNER_00021 FireExtinguisher {
-  translation 178.1012 31.5225 0
+DEF CORNER_00021 Solid {
+  translation 178.1012 31.5225 0.30
   name "corner_ext_00021"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00022 Solid {
@@ -24033,9 +24182,19 @@ DEF CORNER_00026 Solid {
   ]
 }
 
-DEF CORNER_00027 FireExtinguisher {
-  translation 86.1188 101.3260 0
+DEF CORNER_00027 Solid {
+  translation 86.1188 101.3260 0.30
   name "corner_ext_00027"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00028 Solid {
@@ -24098,9 +24257,19 @@ DEF CORNER_00030 Solid {
   ]
 }
 
-DEF CORNER_00031 FireExtinguisher {
-  translation 35.4829 260.9688 0
+DEF CORNER_00031 Solid {
+  translation 35.4829 260.9688 0.30
   name "corner_ext_00031"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00032 Solid {
@@ -24143,9 +24312,19 @@ DEF CORNER_00033 Solid {
   ]
 }
 
-DEF CORNER_00034 FireExtinguisher {
-  translation 105.0449 40.6354 0
+DEF CORNER_00034 Solid {
+  translation 105.0449 40.6354 0.30
   name "corner_ext_00034"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00035 Solid {
@@ -24168,19 +24347,49 @@ DEF CORNER_00035 Solid {
   ]
 }
 
-DEF CORNER_00036 FireExtinguisher {
-  translation 143.7377 28.8540 0
+DEF CORNER_00036 Solid {
+  translation 143.7377 28.8540 0.30
   name "corner_ext_00036"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00037 FireExtinguisher {
-  translation 143.0198 31.1762 0
+DEF CORNER_00037 Solid {
+  translation 143.0198 31.1762 0.30
   name "corner_ext_00037"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00038 FireExtinguisher {
-  translation 127.3963 171.2868 0
+DEF CORNER_00038 Solid {
+  translation 127.3963 171.2868 0.30
   name "corner_ext_00038"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00039 Solid {
@@ -24203,14 +24412,34 @@ DEF CORNER_00039 Solid {
   ]
 }
 
-DEF CORNER_00040 FireExtinguisher {
-  translation 142.3600 152.8895 0
+DEF CORNER_00040 Solid {
+  translation 142.3600 152.8895 0.30
   name "corner_ext_00040"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00041 FireExtinguisher {
-  translation 134.7011 158.1928 0
+DEF CORNER_00041 Solid {
+  translation 134.7011 158.1928 0.30
   name "corner_ext_00041"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00042 Solid {
@@ -24233,9 +24462,19 @@ DEF CORNER_00042 Solid {
   ]
 }
 
-DEF CORNER_00043 FireExtinguisher {
-  translation 155.6008 120.8773 0
+DEF CORNER_00043 Solid {
+  translation 155.6008 120.8773 0.30
   name "corner_ext_00043"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00044 Solid {
@@ -24278,14 +24517,34 @@ DEF CORNER_00045 Solid {
   ]
 }
 
-DEF CORNER_00046 FireExtinguisher {
-  translation 153.7559 85.9946 0
+DEF CORNER_00046 Solid {
+  translation 153.7559 85.9946 0.30
   name "corner_ext_00046"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00047 FireExtinguisher {
-  translation 118.8216 123.3840 0
+DEF CORNER_00047 Solid {
+  translation 118.8216 123.3840 0.30
   name "corner_ext_00047"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00048 Solid {
@@ -24348,29 +24607,79 @@ DEF CORNER_00050 Solid {
   ]
 }
 
-DEF CORNER_00051 FireExtinguisher {
-  translation 150.8156 113.5073 0
+DEF CORNER_00051 Solid {
+  translation 150.8156 113.5073 0.30
   name "corner_ext_00051"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00052 FireExtinguisher {
-  translation 144.4333 110.9944 0
+DEF CORNER_00052 Solid {
+  translation 144.4333 110.9944 0.30
   name "corner_ext_00052"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00053 FireExtinguisher {
-  translation 156.9115 61.6581 0
+DEF CORNER_00053 Solid {
+  translation 156.9115 61.6581 0.30
   name "corner_ext_00053"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00054 FireExtinguisher {
-  translation 159.4222 53.0361 0
+DEF CORNER_00054 Solid {
+  translation 159.4222 53.0361 0.30
   name "corner_ext_00054"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00055 FireExtinguisher {
-  translation 146.1147 39.0928 0
+DEF CORNER_00055 Solid {
+  translation 146.1147 39.0928 0.30
   name "corner_ext_00055"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00056 Solid {
@@ -24393,9 +24702,19 @@ DEF CORNER_00056 Solid {
   ]
 }
 
-DEF CORNER_00057 FireExtinguisher {
-  translation 158.1440 44.6991 0
+DEF CORNER_00057 Solid {
+  translation 158.1440 44.6991 0.30
   name "corner_ext_00057"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00058 Solid {
@@ -24458,9 +24777,19 @@ DEF CORNER_00060 Solid {
   ]
 }
 
-DEF CORNER_00061 FireExtinguisher {
-  translation 145.5702 72.2046 0
+DEF CORNER_00061 Solid {
+  translation 145.5702 72.2046 0.30
   name "corner_ext_00061"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00062 Solid {
@@ -24503,9 +24832,19 @@ DEF CORNER_00063 Solid {
   ]
 }
 
-DEF CORNER_00064 FireExtinguisher {
-  translation 114.2327 164.6628 0
+DEF CORNER_00064 Solid {
+  translation 114.2327 164.6628 0.30
   name "corner_ext_00064"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00065 Solid {
@@ -24528,9 +24867,19 @@ DEF CORNER_00065 Solid {
   ]
 }
 
-DEF CORNER_00066 FireExtinguisher {
-  translation 125.1492 163.8066 0
+DEF CORNER_00066 Solid {
+  translation 125.1492 163.8066 0.30
   name "corner_ext_00066"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00067 Solid {
@@ -24553,14 +24902,34 @@ DEF CORNER_00067 Solid {
   ]
 }
 
-DEF CORNER_00068 FireExtinguisher {
-  translation 147.9286 84.2971 0
+DEF CORNER_00068 Solid {
+  translation 147.9286 84.2971 0.30
   name "corner_ext_00068"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00069 FireExtinguisher {
-  translation 151.8284 85.4247 0
+DEF CORNER_00069 Solid {
+  translation 151.8284 85.4247 0.30
   name "corner_ext_00069"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00070 Solid {
@@ -24603,9 +24972,19 @@ DEF CORNER_00071 Solid {
   ]
 }
 
-DEF CORNER_00072 FireExtinguisher {
-  translation 118.5691 83.1059 0
+DEF CORNER_00072 Solid {
+  translation 118.5691 83.1059 0.30
   name "corner_ext_00072"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00073 Solid {
@@ -24628,9 +25007,19 @@ DEF CORNER_00073 Solid {
   ]
 }
 
-DEF CORNER_00074 FireExtinguisher {
-  translation 121.8422 91.9963 0
+DEF CORNER_00074 Solid {
+  translation 121.8422 91.9963 0.30
   name "corner_ext_00074"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00075 Solid {
@@ -24653,14 +25042,34 @@ DEF CORNER_00075 Solid {
   ]
 }
 
-DEF CORNER_00076 FireExtinguisher {
-  translation 153.1359 60.7586 0
+DEF CORNER_00076 Solid {
+  translation 153.1359 60.7586 0.30
   name "corner_ext_00076"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00077 FireExtinguisher {
-  translation 156.3219 51.3029 0
+DEF CORNER_00077 Solid {
+  translation 156.3219 51.3029 0.30
   name "corner_ext_00077"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00078 Solid {
@@ -24683,14 +25092,34 @@ DEF CORNER_00078 Solid {
   ]
 }
 
-DEF CORNER_00079 FireExtinguisher {
-  translation 121.9200 146.4967 0
+DEF CORNER_00079 Solid {
+  translation 121.9200 146.4967 0.30
   name "corner_ext_00079"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00080 FireExtinguisher {
-  translation 130.3028 117.5205 0
+DEF CORNER_00080 Solid {
+  translation 130.3028 117.5205 0.30
   name "corner_ext_00080"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00081 Solid {
@@ -24733,9 +25162,19 @@ DEF CORNER_00082 Solid {
   ]
 }
 
-DEF CORNER_00083 FireExtinguisher {
-  translation 142.5174 110.4195 0
+DEF CORNER_00083 Solid {
+  translation 142.5174 110.4195 0.30
   name "corner_ext_00083"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00084 Solid {
@@ -24758,9 +25197,19 @@ DEF CORNER_00084 Solid {
   ]
 }
 
-DEF CORNER_00085 FireExtinguisher {
-  translation 116.0428 62.2312 0
+DEF CORNER_00085 Solid {
+  translation 116.0428 62.2312 0.30
   name "corner_ext_00085"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00086 Solid {
@@ -24803,14 +25252,34 @@ DEF CORNER_00087 Solid {
   ]
 }
 
-DEF CORNER_00088 FireExtinguisher {
-  translation 140.1252 35.6622 0
+DEF CORNER_00088 Solid {
+  translation 140.1252 35.6622 0.30
   name "corner_ext_00088"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00089 FireExtinguisher {
-  translation 141.2401 36.0345 0
+DEF CORNER_00089 Solid {
+  translation 141.2401 36.0345 0.30
   name "corner_ext_00089"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00090 Solid {
@@ -24853,19 +25322,49 @@ DEF CORNER_00091 Solid {
   ]
 }
 
-DEF CORNER_00092 FireExtinguisher {
-  translation 177.7268 32.5668 0
+DEF CORNER_00092 Solid {
+  translation 177.7268 32.5668 0.30
   name "corner_ext_00092"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00093 FireExtinguisher {
-  translation 177.0279 33.0202 0
+DEF CORNER_00093 Solid {
+  translation 177.0279 33.0202 0.30
   name "corner_ext_00093"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00094 FireExtinguisher {
-  translation 169.6473 31.0222 0
+DEF CORNER_00094 Solid {
+  translation 169.6473 31.0222 0.30
   name "corner_ext_00094"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00095 Solid {
@@ -24888,39 +25387,109 @@ DEF CORNER_00095 Solid {
   ]
 }
 
-DEF CORNER_00096 FireExtinguisher {
-  translation 115.4250 23.4836 0
+DEF CORNER_00096 Solid {
+  translation 115.4250 23.4836 0.30
   name "corner_ext_00096"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00097 FireExtinguisher {
-  translation 113.8675 27.6447 0
+DEF CORNER_00097 Solid {
+  translation 113.8675 27.6447 0.30
   name "corner_ext_00097"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00098 FireExtinguisher {
-  translation 145.8384 13.8474 0
+DEF CORNER_00098 Solid {
+  translation 145.8384 13.8474 0.30
   name "corner_ext_00098"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00099 FireExtinguisher {
-  translation 149.9763 15.2184 0
+DEF CORNER_00099 Solid {
+  translation 149.9763 15.2184 0.30
   name "corner_ext_00099"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00100 FireExtinguisher {
-  translation 167.3890 39.0359 0
+DEF CORNER_00100 Solid {
+  translation 167.3890 39.0359 0.30
   name "corner_ext_00100"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00101 FireExtinguisher {
-  translation 112.0252 74.7233 0
+DEF CORNER_00101 Solid {
+  translation 112.0252 74.7233 0.30
   name "corner_ext_00101"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00102 FireExtinguisher {
-  translation 118.8755 71.2478 0
+DEF CORNER_00102 Solid {
+  translation 118.8755 71.2478 0.30
   name "corner_ext_00102"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00103 Solid {
@@ -25003,14 +25572,34 @@ DEF CORNER_00106 Solid {
   ]
 }
 
-DEF CORNER_00107 FireExtinguisher {
-  translation 96.8051 111.7134 0
+DEF CORNER_00107 Solid {
+  translation 96.8051 111.7134 0.30
   name "corner_ext_00107"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00108 FireExtinguisher {
-  translation 97.6256 108.6456 0
+DEF CORNER_00108 Solid {
+  translation 97.6256 108.6456 0.30
   name "corner_ext_00108"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00109 Solid {
@@ -25033,29 +25622,79 @@ DEF CORNER_00109 Solid {
   ]
 }
 
-DEF CORNER_00110 FireExtinguisher {
-  translation 141.5475 15.6309 0
+DEF CORNER_00110 Solid {
+  translation 141.5475 15.6309 0.30
   name "corner_ext_00110"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00111 FireExtinguisher {
-  translation 129.4338 23.7043 0
+DEF CORNER_00111 Solid {
+  translation 129.4338 23.7043 0.30
   name "corner_ext_00111"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00112 FireExtinguisher {
-  translation 114.0569 39.5423 0
+DEF CORNER_00112 Solid {
+  translation 114.0569 39.5423 0.30
   name "corner_ext_00112"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00113 FireExtinguisher {
-  translation 118.6230 25.6173 0
+DEF CORNER_00113 Solid {
+  translation 118.6230 25.6173 0.30
   name "corner_ext_00113"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00114 FireExtinguisher {
-  translation 122.9609 26.9292 0
+DEF CORNER_00114 Solid {
+  translation 122.9609 26.9292 0.30
   name "corner_ext_00114"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00115 Solid {
@@ -25098,19 +25737,49 @@ DEF CORNER_00116 Solid {
   ]
 }
 
-DEF CORNER_00117 FireExtinguisher {
-  translation 74.1465 155.4273 0
+DEF CORNER_00117 Solid {
+  translation 74.1465 155.4273 0.30
   name "corner_ext_00117"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00118 FireExtinguisher {
-  translation 65.1154 152.7087 0
+DEF CORNER_00118 Solid {
+  translation 65.1154 152.7087 0.30
   name "corner_ext_00118"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00119 FireExtinguisher {
-  translation 66.8024 154.7409 0
+DEF CORNER_00119 Solid {
+  translation 66.8024 154.7409 0.30
   name "corner_ext_00119"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00120 Solid {
@@ -25173,19 +25842,49 @@ DEF CORNER_00122 Solid {
   ]
 }
 
-DEF CORNER_00123 FireExtinguisher {
-  translation 77.7854 161.4492 0
+DEF CORNER_00123 Solid {
+  translation 77.7854 161.4492 0.30
   name "corner_ext_00123"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00124 FireExtinguisher {
-  translation 21.6818 294.6565 0
+DEF CORNER_00124 Solid {
+  translation 21.6818 294.6565 0.30
   name "corner_ext_00124"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00125 FireExtinguisher {
-  translation 21.3524 294.6112 0
+DEF CORNER_00125 Solid {
+  translation 21.3524 294.6112 0.30
   name "corner_ext_00125"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00126 Solid {
@@ -25208,14 +25907,34 @@ DEF CORNER_00126 Solid {
   ]
 }
 
-DEF CORNER_00127 FireExtinguisher {
-  translation 85.6873 114.8281 0
+DEF CORNER_00127 Solid {
+  translation 85.6873 114.8281 0.30
   name "corner_ext_00127"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00128 FireExtinguisher {
-  translation 87.5278 109.4127 0
+DEF CORNER_00128 Solid {
+  translation 87.5278 109.4127 0.30
   name "corner_ext_00128"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00129 Solid {
@@ -25238,14 +25957,34 @@ DEF CORNER_00129 Solid {
   ]
 }
 
-DEF CORNER_00130 FireExtinguisher {
-  translation 89.7591 117.7114 0
+DEF CORNER_00130 Solid {
+  translation 89.7591 117.7114 0.30
   name "corner_ext_00130"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00131 FireExtinguisher {
-  translation 80.6466 202.8746 0
+DEF CORNER_00131 Solid {
+  translation 80.6466 202.8746 0.30
   name "corner_ext_00131"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00132 Solid {
@@ -25288,14 +26027,34 @@ DEF CORNER_00133 Solid {
   ]
 }
 
-DEF CORNER_00134 FireExtinguisher {
-  translation 76.7553 172.8401 0
+DEF CORNER_00134 Solid {
+  translation 76.7553 172.8401 0.30
   name "corner_ext_00134"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00135 FireExtinguisher {
-  translation 77.5136 170.2773 0
+DEF CORNER_00135 Solid {
+  translation 77.5136 170.2773 0.30
   name "corner_ext_00135"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00136 Solid {
@@ -25318,24 +26077,64 @@ DEF CORNER_00136 Solid {
   ]
 }
 
-DEF CORNER_00137 FireExtinguisher {
-  translation 72.4958 131.0657 0
+DEF CORNER_00137 Solid {
+  translation 72.4958 131.0657 0.30
   name "corner_ext_00137"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00138 FireExtinguisher {
-  translation 72.0019 131.3394 0
+DEF CORNER_00138 Solid {
+  translation 72.0019 131.3394 0.30
   name "corner_ext_00138"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00139 FireExtinguisher {
-  translation 48.5463 303.9623 0
+DEF CORNER_00139 Solid {
+  translation 48.5463 303.9623 0.30
   name "corner_ext_00139"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00140 FireExtinguisher {
-  translation 25.2429 340.2342 0
+DEF CORNER_00140 Solid {
+  translation 25.2429 340.2342 0.30
   name "corner_ext_00140"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00141 Solid {
@@ -25358,9 +26157,19 @@ DEF CORNER_00141 Solid {
   ]
 }
 
-DEF CORNER_00142 FireExtinguisher {
-  translation 57.5977 365.7172 0
+DEF CORNER_00142 Solid {
+  translation 57.5977 365.7172 0.30
   name "corner_ext_00142"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00143 Solid {
@@ -25383,39 +26192,109 @@ DEF CORNER_00143 Solid {
   ]
 }
 
-DEF CORNER_00144 FireExtinguisher {
-  translation 68.0793 313.6396 0
+DEF CORNER_00144 Solid {
+  translation 68.0793 313.6396 0.30
   name "corner_ext_00144"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00145 FireExtinguisher {
-  translation 71.1549 314.2587 0
+DEF CORNER_00145 Solid {
+  translation 71.1549 314.2587 0.30
   name "corner_ext_00145"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00146 FireExtinguisher {
-  translation 75.1534 314.9340 0
+DEF CORNER_00146 Solid {
+  translation 75.1534 314.9340 0.30
   name "corner_ext_00146"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00147 FireExtinguisher {
-  translation 46.3162 412.0548 0
+DEF CORNER_00147 Solid {
+  translation 46.3162 412.0548 0.30
   name "corner_ext_00147"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00148 FireExtinguisher {
-  translation 47.8456 309.5873 0
+DEF CORNER_00148 Solid {
+  translation 47.8456 309.5873 0.30
   name "corner_ext_00148"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00149 FireExtinguisher {
-  translation 58.3481 280.4098 0
+DEF CORNER_00149 Solid {
+  translation 58.3481 280.4098 0.30
   name "corner_ext_00149"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00150 FireExtinguisher {
-  translation 30.5502 332.1952 0
+DEF CORNER_00150 Solid {
+  translation 30.5502 332.1952 0.30
   name "corner_ext_00150"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00151 Solid {
@@ -25438,9 +26317,19 @@ DEF CORNER_00151 Solid {
   ]
 }
 
-DEF CORNER_00152 FireExtinguisher {
-  translation 31.1400 271.2859 0
+DEF CORNER_00152 Solid {
+  translation 31.1400 271.2859 0.30
   name "corner_ext_00152"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00153 Solid {
@@ -25483,14 +26372,34 @@ DEF CORNER_00154 Solid {
   ]
 }
 
-DEF CORNER_00155 FireExtinguisher {
-  translation 37.3184 287.4723 0
+DEF CORNER_00155 Solid {
+  translation 37.3184 287.4723 0.30
   name "corner_ext_00155"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00156 FireExtinguisher {
-  translation 47.1192 283.9009 0
+DEF CORNER_00156 Solid {
+  translation 47.1192 283.9009 0.30
   name "corner_ext_00156"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00157 Solid {
@@ -25533,9 +26442,19 @@ DEF CORNER_00158 Solid {
   ]
 }
 
-DEF CORNER_00159 FireExtinguisher {
-  translation 38.1107 342.7946 0
+DEF CORNER_00159 Solid {
+  translation 38.1107 342.7946 0.30
   name "corner_ext_00159"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00160 Solid {
@@ -25618,14 +26537,34 @@ DEF CORNER_00163 Solid {
   ]
 }
 
-DEF CORNER_00164 FireExtinguisher {
-  translation 23.4422 294.1155 0
+DEF CORNER_00164 Solid {
+  translation 23.4422 294.1155 0.30
   name "corner_ext_00164"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00165 FireExtinguisher {
-  translation 43.6707 304.1981 0
+DEF CORNER_00165 Solid {
+  translation 43.6707 304.1981 0.30
   name "corner_ext_00165"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00166 Solid {
@@ -25648,14 +26587,34 @@ DEF CORNER_00166 Solid {
   ]
 }
 
-DEF CORNER_00167 FireExtinguisher {
-  translation 91.2515 170.1761 0
+DEF CORNER_00167 Solid {
+  translation 91.2515 170.1761 0.30
   name "corner_ext_00167"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00168 FireExtinguisher {
-  translation 24.9198 326.5257 0
+DEF CORNER_00168 Solid {
+  translation 24.9198 326.5257 0.30
   name "corner_ext_00168"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00169 Solid {
@@ -25718,9 +26677,19 @@ DEF CORNER_00171 Solid {
   ]
 }
 
-DEF CORNER_00172 FireExtinguisher {
-  translation 92.5022 188.6814 0
+DEF CORNER_00172 Solid {
+  translation 92.5022 188.6814 0.30
   name "corner_ext_00172"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00173 Solid {
@@ -25743,24 +26712,64 @@ DEF CORNER_00173 Solid {
   ]
 }
 
-DEF CORNER_00174 FireExtinguisher {
-  translation 58.9097 247.0337 0
+DEF CORNER_00174 Solid {
+  translation 58.9097 247.0337 0.30
   name "corner_ext_00174"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00175 FireExtinguisher {
-  translation 58.0716 251.0490 0
+DEF CORNER_00175 Solid {
+  translation 58.0716 251.0490 0.30
   name "corner_ext_00175"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00176 FireExtinguisher {
-  translation 47.4803 358.5679 0
+DEF CORNER_00176 Solid {
+  translation 47.4803 358.5679 0.30
   name "corner_ext_00176"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00177 FireExtinguisher {
-  translation 90.2885 192.9827 0
+DEF CORNER_00177 Solid {
+  translation 90.2885 192.9827 0.30
   name "corner_ext_00177"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00178 Solid {
@@ -25783,34 +26792,94 @@ DEF CORNER_00178 Solid {
   ]
 }
 
-DEF CORNER_00179 FireExtinguisher {
-  translation 89.3235 198.6317 0
+DEF CORNER_00179 Solid {
+  translation 89.3235 198.6317 0.30
   name "corner_ext_00179"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00180 FireExtinguisher {
-  translation 78.6640 165.6582 0
+DEF CORNER_00180 Solid {
+  translation 78.6640 165.6582 0.30
   name "corner_ext_00180"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00181 FireExtinguisher {
-  translation 79.5824 164.1593 0
+DEF CORNER_00181 Solid {
+  translation 79.5824 164.1593 0.30
   name "corner_ext_00181"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00182 FireExtinguisher {
-  translation 78.1275 168.3735 0
+DEF CORNER_00182 Solid {
+  translation 78.1275 168.3735 0.30
   name "corner_ext_00182"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00183 FireExtinguisher {
-  translation 38.7118 266.3238 0
+DEF CORNER_00183 Solid {
+  translation 38.7118 266.3238 0.30
   name "corner_ext_00183"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00184 FireExtinguisher {
-  translation 86.3161 205.0808 0
+DEF CORNER_00184 Solid {
+  translation 86.3161 205.0808 0.30
   name "corner_ext_00184"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00185 Solid {
@@ -25833,9 +26902,19 @@ DEF CORNER_00185 Solid {
   ]
 }
 
-DEF CORNER_00186 FireExtinguisher {
-  translation 43.4495 240.5874 0
+DEF CORNER_00186 Solid {
+  translation 43.4495 240.5874 0.30
   name "corner_ext_00186"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00187 Solid {
@@ -25858,9 +26937,19 @@ DEF CORNER_00187 Solid {
   ]
 }
 
-DEF CORNER_00188 FireExtinguisher {
-  translation 32.9497 316.1379 0
+DEF CORNER_00188 Solid {
+  translation 32.9497 316.1379 0.30
   name "corner_ext_00188"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00189 Solid {
@@ -25883,9 +26972,19 @@ DEF CORNER_00189 Solid {
   ]
 }
 
-DEF CORNER_00190 FireExtinguisher {
-  translation 30.8792 391.2525 0
+DEF CORNER_00190 Solid {
+  translation 30.8792 391.2525 0.30
   name "corner_ext_00190"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00191 Solid {
@@ -25928,29 +27027,79 @@ DEF CORNER_00192 Solid {
   ]
 }
 
-DEF CORNER_00193 FireExtinguisher {
-  translation 90.4563 54.9586 0
+DEF CORNER_00193 Solid {
+  translation 90.4563 54.9586 0.30
   name "corner_ext_00193"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00194 FireExtinguisher {
-  translation 89.5862 63.2993 0
+DEF CORNER_00194 Solid {
+  translation 89.5862 63.2993 0.30
   name "corner_ext_00194"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00195 FireExtinguisher {
-  translation 91.4468 66.0115 0
+DEF CORNER_00195 Solid {
+  translation 91.4468 66.0115 0.30
   name "corner_ext_00195"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00196 FireExtinguisher {
-  translation 38.9486 253.2904 0
+DEF CORNER_00196 Solid {
+  translation 38.9486 253.2904 0.30
   name "corner_ext_00196"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00197 FireExtinguisher {
-  translation 39.3650 250.9552 0
+DEF CORNER_00197 Solid {
+  translation 39.3650 250.9552 0.30
   name "corner_ext_00197"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00198 Solid {
@@ -25973,9 +27122,19 @@ DEF CORNER_00198 Solid {
   ]
 }
 
-DEF CORNER_00199 FireExtinguisher {
-  translation 61.1031 376.9452 0
+DEF CORNER_00199 Solid {
+  translation 61.1031 376.9452 0.30
   name "corner_ext_00199"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00200 Solid {
@@ -26018,24 +27177,64 @@ DEF CORNER_00201 Solid {
   ]
 }
 
-DEF CORNER_00202 FireExtinguisher {
-  translation 25.2183 324.5474 0
+DEF CORNER_00202 Solid {
+  translation 25.2183 324.5474 0.30
   name "corner_ext_00202"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00203 FireExtinguisher {
-  translation 40.9669 276.9325 0
+DEF CORNER_00203 Solid {
+  translation 40.9669 276.9325 0.30
   name "corner_ext_00203"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00204 FireExtinguisher {
-  translation 43.7858 283.3708 0
+DEF CORNER_00204 Solid {
+  translation 43.7858 283.3708 0.30
   name "corner_ext_00204"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00205 FireExtinguisher {
-  translation 88.1583 107.5105 0
+DEF CORNER_00205 Solid {
+  translation 88.1583 107.5105 0.30
   name "corner_ext_00205"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00206 Solid {
@@ -26138,9 +27337,19 @@ DEF CORNER_00210 Solid {
   ]
 }
 
-DEF CORNER_00211 FireExtinguisher {
-  translation 43.8680 383.4098 0
+DEF CORNER_00211 Solid {
+  translation 43.8680 383.4098 0.30
   name "corner_ext_00211"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00212 Solid {
@@ -26163,9 +27372,19 @@ DEF CORNER_00212 Solid {
   ]
 }
 
-DEF CORNER_00213 FireExtinguisher {
-  translation 93.5486 201.2160 0
+DEF CORNER_00213 Solid {
+  translation 93.5486 201.2160 0.30
   name "corner_ext_00213"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00214 Solid {
@@ -26188,39 +27407,109 @@ DEF CORNER_00214 Solid {
   ]
 }
 
-DEF CORNER_00215 FireExtinguisher {
-  translation 80.4670 172.1323 0
+DEF CORNER_00215 Solid {
+  translation 80.4670 172.1323 0.30
   name "corner_ext_00215"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00216 FireExtinguisher {
-  translation 45.0734 239.4179 0
+DEF CORNER_00216 Solid {
+  translation 45.0734 239.4179 0.30
   name "corner_ext_00216"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00217 FireExtinguisher {
-  translation 52.4724 234.0768 0
+DEF CORNER_00217 Solid {
+  translation 52.4724 234.0768 0.30
   name "corner_ext_00217"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00218 FireExtinguisher {
-  translation 54.4146 236.1023 0
+DEF CORNER_00218 Solid {
+  translation 54.4146 236.1023 0.30
   name "corner_ext_00218"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00219 FireExtinguisher {
-  translation 25.8859 348.8015 0
+DEF CORNER_00219 Solid {
+  translation 25.8859 348.8015 0.30
   name "corner_ext_00219"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00220 FireExtinguisher {
-  translation 28.4047 345.4340 0
+DEF CORNER_00220 Solid {
+  translation 28.4047 345.4340 0.30
   name "corner_ext_00220"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00221 FireExtinguisher {
-  translation 45.2316 375.9168 0
+DEF CORNER_00221 Solid {
+  translation 45.2316 375.9168 0.30
   name "corner_ext_00221"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00222 Solid {
@@ -26243,9 +27532,19 @@ DEF CORNER_00222 Solid {
   ]
 }
 
-DEF CORNER_00223 FireExtinguisher {
-  translation 86.1569 186.0375 0
+DEF CORNER_00223 Solid {
+  translation 86.1569 186.0375 0.30
   name "corner_ext_00223"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00224 Solid {
@@ -26268,19 +27567,49 @@ DEF CORNER_00224 Solid {
   ]
 }
 
-DEF CORNER_00225 FireExtinguisher {
-  translation 124.6069 138.8006 0
+DEF CORNER_00225 Solid {
+  translation 124.6069 138.8006 0.30
   name "corner_ext_00225"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00226 FireExtinguisher {
-  translation 123.3852 142.6696 0
+DEF CORNER_00226 Solid {
+  translation 123.3852 142.6696 0.30
   name "corner_ext_00226"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00227 FireExtinguisher {
-  translation 82.6260 233.3868 0
+DEF CORNER_00227 Solid {
+  translation 82.6260 233.3868 0.30
   name "corner_ext_00227"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
 DEF CORNER_00228 Solid {
@@ -26303,14 +27632,34 @@ DEF CORNER_00228 Solid {
   ]
 }
 
-DEF CORNER_00229 FireExtinguisher {
-  translation 95.1214 196.1964 0
+DEF CORNER_00229 Solid {
+  translation 95.1214 196.1964 0.30
   name "corner_ext_00229"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
-DEF CORNER_00230 FireExtinguisher {
-  translation 97.3309 188.4110 0
+DEF CORNER_00230 Solid {
+  translation 97.3309 188.4110 0.30
   name "corner_ext_00230"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
 }
 
   ]
