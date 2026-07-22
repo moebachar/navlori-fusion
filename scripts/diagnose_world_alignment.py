@@ -76,16 +76,24 @@ def parse_floor(text: str):
 
 
 def load_waypoints(dataset: Path) -> dict[str, list[tuple[float, float]]]:
+    """Raw waypoints per path; falls back to (subsampled) dense
+    ground_truth.csv for datasets without waypoints_raw.csv (msiln_*)."""
     out = {}
     for d in sorted(dataset.iterdir()):
         if not d.name.startswith("path_"):
             continue
         f = d / "waypoints_raw.csv"
+        stride = 1
         if not f.is_file():
-            continue
+            f = d / "ground_truth.csv"
+            stride = 10  # 10 Hz dense -> ~1 Hz points
+            if not f.is_file():
+                continue
         with open(f, newline="", encoding="utf-8") as fh:
             rows = list(csv.DictReader(fh))
-        out[d.name] = [(float(r["gt_x"]), float(r["gt_y"])) for r in rows]
+        pts = [(float(r["gt_x"]), float(r["gt_y"])) for r in rows[::stride]]
+        if pts:
+            out[d.name] = pts
     return out
 
 
@@ -109,6 +117,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--world", required=True)
     ap.add_argument("--dataset", required=True)
+    ap.add_argument("--gate", action="store_true",
+                    help="exit 1 unless robot-start/floor/coverage checks pass "
+                         "(and, when WP_ markers exist, the identity-transform "
+                         "fit). Used by replay_site.py as an automated gate.")
     args = ap.parse_args()
 
     world = Path(args.world)
@@ -123,20 +135,33 @@ def main():
     print(f"[dataset] {dataset.name}: floor {W:.1f} x {H:.1f} m, "
           f"{len(wps)} paths, {len(all_pts)} raw waypoints")
 
-    # ── 1. start markers vs path_00 ──
-    tiago = parse_named_translation(text, "TIAGO")
+    gates: list[tuple[str, bool, str]] = []
+
+    # ── 1. robot start (TIAGO or REPLAY_RIG) + markers vs path_00 ──
+    robot_pt = parse_named_translation(text, "TIAGO")
+    robot_label = "TIAGO"
+    if robot_pt is None:
+        robot_pt = parse_named_translation(text, "REPLAY_RIG")
+        robot_label = "REPLAY_RIG"
     green = parse_named_translation(text, "MARKER_START_GREEN")
     red = parse_named_translation(text, "MARKER_SECOND_RED")
-    p00 = wps.get("path_00", [])
-    for label, world_pt, ds_pt in (("TIAGO vs path_00 wp0", tiago, p00[0] if p00 else None),
-                                   ("green  vs path_00 wp0", green, p00[0] if p00 else None),
-                                   ("red    vs path_00 wp1", red, p00[1] if len(p00) > 1 else None)):
+    p00 = wps.get("path_00") or (next(iter(wps.values())) if wps else [])
+    rows = [(f"{robot_label} vs path wp0", robot_pt, p00[0] if p00 else None, True)]
+    if green or red:  # debug markers are optional (absent in --clean worlds)
+        rows += [("green  vs path wp0", green, p00[0] if p00 else None, False),
+                 ("red    vs path wp1", red, p00[1] if len(p00) > 1 else None, False)]
+    for label, world_pt, ds_pt, gated in rows:
         if world_pt and ds_pt:
             d = math.hypot(world_pt[0] - ds_pt[0], world_pt[1] - ds_pt[1])
             print(f"[markers] {label}: world=({world_pt[0]:.2f},{world_pt[1]:.2f}) "
                   f"dataset=({ds_pt[0]:.2f},{ds_pt[1]:.2f})  delta={d:.3f} m")
+            if gated:
+                gates.append(("robot-start", d < 0.05,
+                              f"{label} delta {d:.3f} m (limit 0.05)"))
         else:
             print(f"[markers] {label}: MISSING ({'world' if not world_pt else 'dataset'})")
+            if gated:
+                gates.append(("robot-start", False, f"{label}: missing"))
 
     # ── 2. wall bbox vs floor extent ──
     wb = parse_wall_bbox(text)
@@ -151,6 +176,11 @@ def main():
     if fl:
         print(f"[floor] proto at ({fl[0]:.2f},{fl[1]:.2f}) size {fl[2]:.1f} x {fl[3]:.1f} "
               f"(expected centre ({W/2:.2f},{H/2:.2f}))")
+        d = math.hypot(fl[0] - W / 2, fl[1] - H / 2)
+        gates.append(("floor-centre", d < 0.5,
+                      f"floor proto centre off by {d:.2f} m (limit 0.5)"))
+    else:
+        gates.append(("floor-centre", False, "no Floor proto found"))
 
     # ── 3. waypoint coverage inside wall bbox ──
     if wb:
@@ -158,12 +188,20 @@ def main():
         inside = sum(1 for x, y in all_pts
                      if xmin - margin <= x <= xmax + margin
                      and ymin - margin <= y <= ymax + margin)
+        frac = inside / max(1, len(all_pts))
         print(f"[coverage] {inside}/{len(all_pts)} waypoints "
-              f"({100 * inside / len(all_pts):.1f}%) inside wall bbox (+{margin}m)")
+              f"({100 * frac:.1f}%) inside wall bbox (+{margin}m)")
+        gates.append(("coverage", frac >= 0.995,
+                      f"{100 * frac:.1f}% waypoints inside wall bbox "
+                      f"(limit 99.5%)"))
+    else:
+        gates.append(("coverage", False, "no WALL_ solids parsed"))
 
-    # ── 4. transform identification via WP_ markers ──
+    # ── 4. transform identification via WP_ markers (skipped in clean worlds:
+    #     the builder emits none; robot-start + coverage carry the gate) ──
     markers = parse_wp_markers(text)
-    print(f"[transform] {len(markers)} WP_ path markers in world")
+    print(f"[transform] {len(markers)} WP_ path markers in world"
+          + (" (clean world -- fit skipped)" if not markers else ""))
     if markers and all_pts:
         sample = markers[:: max(1, len(markers) // 200)]
         print(f"[transform] fitting {len(sample)} markers against dataset "
@@ -188,6 +226,18 @@ def main():
         else:
             print("[verdict] no clean transform match -- world geometry was "
                   "edited independently of the dataset (manual shift?).")
+        gates.append(("transform", best_name == "identity" and best_med < 0.05,
+                      f"best='{best_name}' median={best_med:.3f} m"))
+
+    # ── Gate summary ──
+    if args.gate:
+        print("\n[gate]")
+        all_ok = True
+        for name, ok, detail in gates:
+            print(f"  [{'PASS' if ok else 'FAIL'}] {name}: {detail}")
+            all_ok &= ok
+        print(f"[gate] {'ALL PASS' if all_ok else 'FAILURE'}")
+        sys.exit(0 if all_ok else 1)
 
 
 if __name__ == "__main__":

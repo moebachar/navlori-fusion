@@ -41,7 +41,7 @@ BOX_SIZE_RE = re.compile(
     r"(-?\d+\.?\d*(?:[eE][+-]?\d+)?)\s+"
     r"(-?\d+\.?\d*(?:[eE][+-]?\d+)?)"
 )
-TIAGO_HEAD_RE = re.compile(r"^DEF TIAGO\b", re.MULTILINE)
+ROBOT_HEAD_RE = re.compile(r"^DEF (?:TIAGO|REPLAY_RIG)\b", re.MULTILINE)
 CEILING_HEAD_RE = re.compile(r"DEF CEILING\b")
 
 
@@ -208,11 +208,10 @@ def main():
         new_text = text[:start] + block + text[end:]
         action = "replaced existing"
     else:
-        # Insert just before "DEF TIAGO" -- semantic end of structural blocks.
-        m = TIAGO_HEAD_RE.search(text)
-        if not m:
-            sys.exit("no DEF TIAGO block found -- where do I insert?")
-        ins = m.start()
+        # Insert just before the robot block (DEF TIAGO or DEF REPLAY_RIG)
+        # -- semantic end of structural blocks. Fall back to end-of-file.
+        m = ROBOT_HEAD_RE.search(text)
+        ins = m.start() if m else len(text)
         new_text = text[:ins] + block + text[ins:]
         action = "inserted new"
 

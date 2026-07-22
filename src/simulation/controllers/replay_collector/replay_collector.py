@@ -28,6 +28,7 @@ import csv
 import json
 import math
 import os
+import shutil
 import sys
 import time as pytime
 from pathlib import Path
@@ -448,7 +449,7 @@ def run_path(robot, node, timestep, cfg, path_id, sensors, motors, output_dir):
                 "depth_path": depth_rel,
                 "cam_x": round(st.x, 5),
                 "cam_y": round(st.y, 5),
-                "cam_z": round(z_keep + 1.0, 5),  # camera ~1m above base
+                "cam_z": round(z_keep + 1.19, 5),  # head camera height
             }
             csvs["camera"].write(cam_row)
             frame_count += 1
@@ -508,12 +509,19 @@ def run_path(robot, node, timestep, cfg, path_id, sensors, motors, output_dir):
     with open(path_dir_out / "metadata.json", "w", encoding="utf-8") as f:
         json.dump(meta, f, indent=2)
 
-    return {
+    result = {
         "path_id": path_id,
         "frames": frame_count,
         "duration_s": rp.duration,
         "n_original_waypoints": rp.n_waypoints,
     }
+    # Completion marker, written LAST: a path dir without _done.json is a
+    # crash leftover and gets wiped + redone on the next (resumed) run.
+    with open(path_dir_out / "_done.json", "w", encoding="utf-8") as f:
+        json.dump({"summary": result,
+                   "completed": pytime.strftime("%Y-%m-%dT%H:%M:%S")},
+                  f, indent=2)
+    return result
 
 
 def _sort_csv_by_sim_time(path: str):
@@ -568,6 +576,24 @@ def main():
         print("!" * 64, flush=True)
         return
 
+    # ── Scene-content guard: rebuilds happen on DISK; Webots does not
+    #     auto-reload, so the loaded scene can be an older, dirty version of
+    #     a world whose file is clean (this contaminated the iteration-2
+    #     pilot frames with debug path overlays). Ask the LIVE scene tree. ──
+    if bool(cfg.get("require_clean_world", True)):
+        dirty = [d for d in ("ROBOT_PATHS", "MARKER_START_GREEN",
+                             "MARKER_SECOND_RED", "WP_00000")
+                 if robot.getFromDef(d) is not None]
+        if dirty:
+            print("!" * 64)
+            print("  DEBUG GEOMETRY IN LOADED SCENE -- REFUSING TO RUN")
+            print(f"  found DEFs   : {dirty}")
+            print("  The world FILE on disk is clean; Webots is still showing")
+            print("  an older scene from before the rebuild.")
+            print("  -> In Webots: File > Reload World (Ctrl+Shift+R), then Play.")
+            print("!" * 64, flush=True)
+            return
+
     # ── Kinematic replay needs no dynamics: zero gravity so the hovering,
     #     pose-anchored robot has no free-fall to strain its joints between
     #     anchors. Position-controlled motors (arm tuck, wheels) work fine
@@ -615,11 +641,27 @@ def main():
     # ── Arms tucked (matches async_collector dataset visuals) ──
     tuck_arms(robot, timestep)
 
-    # ── Run paths ──
+    # ── Run paths (resume-aware: completed paths carry a _done.json) ──
     output_dir = Path(cfg["output_dir"])
     output_dir.mkdir(parents=True, exist_ok=True)
+    resume = bool(cfg.get("resume", True))
     summary = {}
     for pid in cfg["path_ids"]:
+        pdir = output_dir / f"path_{pid:02d}"
+        done = pdir / "_done.json"
+        if resume and done.is_file():
+            try:
+                with open(done, "r", encoding="utf-8") as f:
+                    summary[pid] = json.load(f)["summary"]
+                print(f"[resume] path {pid}: already complete -- skipping",
+                      flush=True)
+                continue
+            except (json.JSONDecodeError, KeyError):
+                print(f"[resume] path {pid}: unreadable _done.json -- redoing")
+        if pdir.is_dir():
+            print(f"[resume] path {pid}: partial output (no valid _done.json) "
+                  f"-- wiping {pdir.name}/ and redoing", flush=True)
+            shutil.rmtree(pdir)
         try:
             r = run_path(robot, node, timestep, cfg, pid, sensors, (lm, rm),
                           str(output_dir))

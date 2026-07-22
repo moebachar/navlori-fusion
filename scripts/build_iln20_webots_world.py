@@ -46,6 +46,9 @@ from pathlib import Path
 from PIL import Image as PILImage
 from PIL import ImageDraw, ImageFont
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from replay_rig import format_rig  # noqa: E402
+
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -893,14 +896,20 @@ def fmt_corner_extinguisher(idx: int, x: float, y: float) -> str:
 
 def fmt_ceiling_billboard(idx: int, cx: float, cy: float, yaw: float,
                             text: str, color_idx: int) -> str:
-    """Custom hanging billboard - colored emissive panel suspended at z=2.6m
-    with a thin support stem above. Visible from far in the corridor; never
-    intersects walls because we place it over trajectory midlines."""
+    """Custom hanging billboard - colored emissive panel suspended at z=2.55m
+    with a support stem that reaches the ceiling slab (slab bottom sits at
+    WALL_HEIGHT -- add_ceiling_to_wbt derives it from the walls, so the stem
+    length is computed from the same constant and can't detach again).
+    Never intersects walls because we place it over trajectory midlines."""
     r, g, b = SIGN_COLORS[color_idx % len(SIGN_COLORS)]
     panel_w = min(3.2, max(1.5, len(text) * 0.34))
+    hang_z = 2.55            # panel centre height (panel is 0.50 tall)
+    panel_top = 0.25         # relative to the solid origin
+    stem_len = (WALL_HEIGHT - hang_z) - panel_top + 0.02  # 2 cm into the slab
+    stem_rel = panel_top + stem_len / 2
     return (
         f"DEF BB_{idx:05d} Solid {{\n"
-        f"  translation {cx:.4f} {cy:.4f} 2.55\n"
+        f"  translation {cx:.4f} {cy:.4f} {hang_z:.2f}\n"
         f"  rotation 0 0 1 {yaw:.5f}\n"
         f"  name \"billboard_{idx:05d}\"\n"
         f"  children [\n"
@@ -913,14 +922,14 @@ def fmt_ceiling_billboard(idx: int, cx: float, cy: float, yaw: float,
         f"      }}\n"
         f"      geometry Box {{ size {panel_w:.2f} 0.06 0.50 }}\n"
         f"    }}\n"
-        # thin support stem going UP (toward ceiling)
+        # thin support stem going UP, panel top -> ceiling slab
         f"    Pose {{\n"
-        f"      translation 0 0 0.30\n"
+        f"      translation 0 0 {stem_rel:.3f}\n"
         f"      children [\n"
         f"        Shape {{\n"
         f"          appearance PBRAppearance {{ baseColor 0.30 0.30 0.30 "
         f"roughness 0.6 metalness 0.4 }}\n"
-        f"          geometry Box {{ size 0.05 0.05 0.20 }}\n"
+        f"          geometry Box {{ size 0.05 0.05 {stem_len:.3f} }}\n"
         f"        }}\n"
         f"      ]\n"
         f"    }}\n"
@@ -1473,7 +1482,9 @@ def build_wbt(name: str, W: float, H: float, segs_local, start_xy, second_xy,
               floor_rotation: float = 0.0,
               floor_tile_size: float = 5.0,
               floor_margin: float = 200.0,
-              seed: int = DECOR_SEED) -> str:
+              seed: int = DECOR_SEED,
+              clean: bool = False,
+              robot: str = "tiago") -> str:
     # Building frame is [0,W] x [0,H] in floor coords. The Floor proto is
     # centred at (W/2, H/2) but sized (W + 2*margin) x (H + 2*margin) so it
     # extends `margin` metres beyond the building outline in every direction.
@@ -1532,17 +1543,20 @@ def build_wbt(name: str, W: float, H: float, segs_local, start_xy, second_xy,
         corner_rng = random.Random(seed + 23)
         corners = find_corners(segs_local, tol=0.10)
         ci = 0
-        for cx, cy in corners:
+        # NB: loop vars must NOT be named cx/cy -- those hold the floor
+        # centre used by the Floor proto + Viewpoint below (a shadowing bug
+        # here once shifted the floor to the last corner's coordinates).
+        for qx, qy in corners:
             # corridor-adjacent? trajectory within 2.5 m of corner
-            if not _is_near_any_point(cx, cy, points, 2.5):
+            if not _is_near_any_point(qx, qy, points, 2.5):
                 continue
             # don't pile decorations next to a wall decoration (skip every other)
             if corner_rng.random() > 0.5:
                 continue
             if corner_rng.random() < 0.6:
-                corner_blocks.append(fmt_corner_extinguisher(ci, cx, cy))
+                corner_blocks.append(fmt_corner_extinguisher(ci, qx, qy))
             else:
-                corner_blocks.append(fmt_corner_planter(ci, cx, cy))
+                corner_blocks.append(fmt_corner_planter(ci, qx, qy))
             ci += 1
 
     # ---- floor objects against walls on corridor side ----
@@ -1579,8 +1593,10 @@ def build_wbt(name: str, W: float, H: float, segs_local, start_xy, second_xy,
     # ---- path visualisation: small spheres at every raw waypoint + thin
     #      connecting boxes. One color per path index (cycled). Capped to
     #      20 paths for the big mall (otherwise ~4000 path objects).
+    #      SKIPPED in --clean mode: replay camera data must never contain
+    #      debug geometry.
     path_blocks = []
-    if raw_waypoints_per_path:
+    if raw_waypoints_per_path and not clean:
         PATH_COLORS = [
             (0.95, 0.45, 0.10),  # orange
             (0.20, 0.75, 0.35),  # green
@@ -1630,14 +1646,45 @@ def build_wbt(name: str, W: float, H: float, segs_local, start_xy, second_xy,
         'objects/backgrounds/protos/TexturedBackgroundLight.proto"',
         '"https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/'
         'objects/floors/protos/Floor.proto"',
-        '"https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/'
-        'robots/pal_robotics/tiagopp/protos/Tiago++.proto"',
     ]
+    if robot == "tiago":
+        extern_lines.append(
+            '"https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/'
+            'robots/pal_robotics/tiagopp/protos/Tiago++.proto"')
     if any("FireExtinguisher" in b for b in corner_blocks):
         extern_lines.append(
             f'"https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/'
             f'objects/factory/fire_extinguisher/protos/FireExtinguisher.proto"')
     extern_blob = "\n".join(f"EXTERNPROTO {x}" for x in extern_lines)
+
+    # ---- debug visuals (path overlay group + start/second markers) ----
+    # Omitted entirely in --clean mode so the replay camera can never see
+    # them; the marker-vs-waypoint alignment check then uses the robot's
+    # start pose instead (diagnose_world_alignment.py).
+    if clean:
+        debug_section = ""
+    else:
+        debug_section = f"""DEF ROBOT_PATHS Group {{
+  children [
+{path_blob}  ]
+}}
+
+{fmt_marker("START_GREEN", sx, sy, (0.0, 0.9, 0.0))}
+{fmt_marker("SECOND_RED",  second_xy[0], second_xy[1], (0.95, 0.05, 0.05))}
+"""
+
+    # ---- robot ----
+    if robot == "rig":
+        robot_section = format_rig(sx, sy, yaw)
+    else:
+        robot_section = f"""DEF TIAGO Tiago++ {{
+  translation {sx:.4f} {sy:.4f} 0
+  rotation 0 0 1 {yaw:.5f}
+  name "tiago"
+  controller "<none>"
+  supervisor TRUE
+}}
+"""
 
     return f"""#VRML_SIM R2025a utf8
 
@@ -1712,22 +1759,8 @@ DEF CEILING_BILLBOARDS Group {{
   ]
 }}
 
-DEF ROBOT_PATHS Group {{
-  children [
-{path_blob}  ]
-}}
-
-{fmt_marker("START_GREEN", sx, sy, (0.0, 0.9, 0.0))}
-{fmt_marker("SECOND_RED",  second_xy[0], second_xy[1], (0.95, 0.05, 0.05))}
-
-DEF TIAGO Tiago++ {{
-  translation {sx:.4f} {sy:.4f} 0
-  rotation 0 0 1 {yaw:.5f}
-  name "tiago"
-  controller "<none>"
-  supervisor TRUE
-}}
-"""
+{debug_section}
+{robot_section}"""
 
 
 # ---------------------------------------------------------------------------
@@ -1751,12 +1784,24 @@ def main():
                          "each other. Floor outline + LineString features are "
                          "NOT shrunk so the building perimeter stays put. "
                          "Default 0.0 = no shrink.")
+    ap.add_argument("--clean", action="store_true",
+                    help="emit NO debug visuals (path spheres/segments, "
+                         "start/second markers) -- required for replay worlds "
+                         "so the camera never sees debug geometry")
+    ap.add_argument("--robot", choices=("tiago", "rig"), default="tiago",
+                    help="'tiago' = articulated Tiago++ PROTO, controller <none> "
+                         "(legacy/demo). 'rig' = physics-less TIAGO-shell "
+                         "REPLAY_RIG wired to replay_collector (data runs).")
+    ap.add_argument("--out-name", default=None,
+                    help="override output world stem (default: dataset dir "
+                         "name). Must equal the replay dataset dir name -- the "
+                         "controller's world guard compares the two.")
     args = ap.parse_args()
 
     ds = Path(args.dataset_dir).resolve()
     if not ds.is_dir():
         sys.exit(f"dataset dir not found: {ds}")
-    name = ds.name
+    name = args.out_name or ds.name
     meta = ds / "meta"
 
     fi = json.load(open(meta / "floor_info.json"))
@@ -1823,15 +1868,38 @@ def main():
         ppm = PX_PER_M_SMALL if W * H < 20000 else PX_PER_M_BIG
     print(f"[wbt] floor texture resolution: {ppm} px/m -> {int(W*ppm)} x {int(H*ppm)} px")
 
-    # path_00 waypoints for TIAGO + markers
-    with open(ds / "path_00" / "waypoints_raw.csv") as fh:
-        rows = list(csv.DictReader(fh))
-    if len(rows) < 2:
-        sys.exit("path_00 has < 2 raw waypoints")
-    start = (float(rows[0]["gt_x"]), float(rows[0]["gt_y"]))
-    second = (float(rows[1]["gt_x"]), float(rows[1]["gt_y"]))
-    print(f"[wbt] TIAGO start: ({start[0]:.2f}, {start[1]:.2f}) -> facing wp1 "
-          f"({second[0]:.2f}, {second[1]:.2f})")
+    # Robot start pose (+ markers when not --clean): prefer sparse
+    # waypoints_raw.csv; fall back to dense ground_truth.csv for datasets
+    # that ship no raw waypoints (e.g. msiln_site1_b1).
+    def _first_two_points(pdir: Path):
+        src = pdir / "waypoints_raw.csv"
+        if not src.exists():
+            src = pdir / "ground_truth.csv"
+        if not src.exists():
+            return None
+        with open(src) as fh:
+            pts = [(float(r["gt_x"]), float(r["gt_y"]))
+                   for r in csv.DictReader(fh)]
+        if len(pts) < 2:
+            return None
+        p0 = pts[0]
+        for p in pts[1:]:  # first point far enough for a stable heading
+            if math.hypot(p[0] - p0[0], p[1] - p0[1]) > 0.15:
+                return p0, p
+        return p0, pts[1]
+
+    start = second = None
+    for pdir in [ds / "path_00"] + sorted(d for d in ds.iterdir()
+                                          if d.name.startswith("path_")):
+        got = _first_two_points(pdir) if pdir.is_dir() else None
+        if got:
+            start, second = got
+            print(f"[wbt] robot start from {pdir.name}: "
+                  f"({start[0]:.2f}, {start[1]:.2f}) -> facing "
+                  f"({second[0]:.2f}, {second[1]:.2f})  [{args.robot}]")
+            break
+    if start is None:
+        sys.exit("no path_XX dir with >= 2 usable waypoints found")
 
     worlds_dir = Path(args.worlds_dir)
     worlds_dir.mkdir(parents=True, exist_ok=True)
@@ -1918,7 +1986,9 @@ def main():
                      raw_waypoints_per_path=raw_waypoints_per_path,
                      floor_rotation=args.floor_rotation,
                      floor_tile_size=floor_tile_size,
-                     seed=args.seed)
+                     seed=args.seed,
+                     clean=args.clean,
+                     robot=args.robot)
     wbt_path = worlds_dir / f"{name}.wbt"
     wbt_path.write_text(wbt, encoding="utf-8")
     n_decor = wbt.count("DEF DECOR_")

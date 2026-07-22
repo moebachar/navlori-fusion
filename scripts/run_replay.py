@@ -15,85 +15,16 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
-import shutil
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from replay_rig import ensure_replay_rig  # noqa: E402
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CONTROLLER_DIR = REPO_ROOT / "src" / "simulation" / "controllers" / "replay_collector"
 CONFIG_PATH = CONTROLLER_DIR / "replay_config.json"
-
-
-# ── world-file robot patch ──
-TIAGO_HEAD_RE = re.compile(r"DEF TIAGO Tiago\+\+ \{")
-RIG_CTRL_RE = re.compile(r'(DEF REPLAY_RIG Robot \{[^}]*?\bcontroller )"([^"]*)"',
-                         re.DOTALL)
-
-# Minimal kinematic replay rig. Deliberately contains NO Physics node and no
-# boundingObject: a physics-less Robot is moved purely by supervisor field
-# writes -- the constraint solver never touches it, so nothing can explode,
-# drift, or detach (all of which the articulated Tiago++ PROTO did when
-# pose-anchored). Camera matches the TIAGO head camera: 640x480, ~60 deg
-# horizontal FOV, 1.19 m height, looking along +x (Webots FLU).
-RIG_TEMPLATE = """DEF REPLAY_RIG Robot {{
-  translation {x:.4f} {y:.4f} 0
-  rotation 0 0 1 {yaw:.5f}
-  name "replay_rig"
-  controller "replay_collector"
-  supervisor TRUE
-  children [
-    Pose {{
-      translation 0 0 0.20
-      children [
-        Shape {{
-          appearance PBRAppearance {{ baseColor 0.25 0.25 0.28 roughness 0.6 metalness 0.3 }}
-          geometry Cylinder {{ radius 0.27 height 0.30 }}
-        }}
-      ]
-    }}
-    Pose {{
-      translation 0 0 0.75
-      children [
-        Shape {{
-          appearance PBRAppearance {{ baseColor 0.88 0.88 0.90 roughness 0.55 metalness 0.1 }}
-          geometry Capsule {{ radius 0.16 height 0.70 }}
-        }}
-      ]
-    }}
-    Pose {{
-      translation 0 0 1.16
-      children [
-        Shape {{
-          appearance PBRAppearance {{ baseColor 0.30 0.30 0.33 roughness 0.5 metalness 0.2 }}
-          geometry Sphere {{ radius 0.11 }}
-        }}
-      ]
-    }}
-    Camera {{
-      translation 0.08 0 1.19
-      name "head_front_camera"
-      fieldOfView 1.0472
-      width 640
-      height 480
-      far 50
-    }}
-  ]
-}}
-"""
-
-
-def _block_end(text: str, brace_open_idx: int) -> int:
-    depth = 0
-    for i in range(brace_open_idx, len(text)):
-        if text[i] == "{":
-            depth += 1
-        elif text[i] == "}":
-            depth -= 1
-            if depth == 0:
-                return i + 1
-    raise ValueError("unbalanced braces")
 
 
 def parse_path_ids(spec: str) -> list[int]:
@@ -111,39 +42,6 @@ def parse_path_ids(spec: str) -> list[int]:
     return sorted(set(out))
 
 
-def ensure_replay_rig(world: Path, dry_run: bool) -> tuple[bool, str]:
-    """Replace the world's Tiago++ node with the kinematic REPLAY_RIG
-    (keeping its start translation/rotation). Idempotent: if the rig is
-    already present, just confirm its controller."""
-    text = world.read_text(encoding="utf-8")
-
-    if "DEF REPLAY_RIG Robot" in text:
-        m = RIG_CTRL_RE.search(text)
-        if m and m.group(2) == "replay_collector":
-            return True, "REPLAY_RIG already present, controller ok"
-        return False, "REPLAY_RIG present but controller field not readable"
-
-    m = TIAGO_HEAD_RE.search(text)
-    if not m:
-        return False, "neither REPLAY_RIG nor DEF TIAGO Tiago++ found"
-    end = _block_end(text, m.end() - 1)
-    block = text[m.start():end]
-    mt = re.search(r"translation\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)", block)
-    mr = re.search(r"rotation\s+0\s+0\s+1\s+(-?[\d.]+)", block)
-    if not mt:
-        return False, "TIAGO block has no parsable translation"
-    rig = RIG_TEMPLATE.format(x=float(mt.group(1)), y=float(mt.group(2)),
-                              yaw=float(mr.group(1)) if mr else 0.0)
-    new_text = text[:m.start()] + rig + text[end:]
-    # the Tiago++ PROTO is no longer used -- drop its EXTERNPROTO download
-    new_text = re.sub(r'EXTERNPROTO "[^"]*Tiago\+\+\.proto"\n', "", new_text)
-    if not dry_run:
-        bak = world.with_suffix(world.suffix + ".bak-tiago")
-        shutil.copy2(world, bak)
-        world.write_text(new_text, encoding="utf-8")
-    return True, "replaced Tiago++ with kinematic REPLAY_RIG (backup .bak-tiago)"
-
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--world", required=True, help="path to .wbt world")
@@ -159,6 +57,9 @@ def main():
     ap.add_argument("--no-pose-anchor", action="store_true",
                     help="run with real differential-drive tracking; exact timing "
                          "only when path is feasible at TIAGO++'s wheel cap")
+    ap.add_argument("--fresh", action="store_true",
+                    help="redo every listed path even if its _done.json exists "
+                         "(default: resume -- completed paths are skipped)")
     ap.add_argument("--dry-run", action="store_true",
                     help="print what would happen; don't write config or patch world")
     args = ap.parse_args()
@@ -178,6 +79,14 @@ def main():
 
     # Identify dataset name for metadata
     dataset_name = dataset.name
+
+    # Pipeline invariant: the controller's world guard compares the OPEN
+    # world's stem to the dataset dir name. Staging a mismatched pair would
+    # be refused in Webots anyway -- fail here, at staging time, instead.
+    if world.stem != dataset_name:
+        sys.exit(f"world/dataset name mismatch: world '{world.stem}.wbt' vs "
+                 f"dataset '{dataset_name}' -- the world guard requires them "
+                 f"equal. Rebuild the world with --out-name {dataset_name}.")
 
     cfg = {
         "_doc": "Generated by scripts/run_replay.py - edit and reload Webots to change.",
@@ -202,6 +111,11 @@ def main():
         },
         "pose_anchor": not args.no_pose_anchor,
         "hover_m": 0.01,
+        "resume": not args.fresh,
+        # Controller refuses to run if debug DEFs (ROBOT_PATHS/MARKER_*)
+        # exist in the LOADED scene -- catches "world rebuilt on disk but
+        # Webots still shows the old scene" (needs File > Reload World).
+        "require_clean_world": True,
     }
 
     print(f"[run_replay] writing {CONFIG_PATH}")

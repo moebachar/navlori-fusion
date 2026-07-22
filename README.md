@@ -78,8 +78,11 @@ navlori-fusion/
 │   ├── launch_webots.ps1           # Launch Webots in interactive session
 │   ├── convert_*.py                # External-dataset converters
 │   ├── eval_*.py                   # Per-dataset / per-baseline evaluation
-│   ├── run_replay.py               # Stage a Webots replay (config + world patch)
-│   ├── verify_replay.py            # Gate a finished replay vs its source dataset
+│   ├── replay_site.py              # Site-generic replay pipeline: raw -> world -> gates -> replay -> package
+│   ├── run_replay.py               # Stage a Webots replay (config + world patch, resume-aware)
+│   ├── verify_replay.py            # Gate a finished replay (per-path or --all + manifest)
+│   ├── replay_rig.py               # Shared physics-less TIAGO-shell replay robot
+│   ├── render_replay_video.py      # Per-path 4-panel realtime videos (IMU+odom/camera/WiFi/map)
 │   └── optuna_fusion.py            # Hyperparameter search
 ├── data/                           # 7 datasets, all DVC-pinned (store: X:\navlori-data)
 │   ├── async_collection/           # Webots sim collection (per path)
