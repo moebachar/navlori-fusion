@@ -85,5 +85,7 @@
   "pose_anchor": true,
   "hover_m": 0.01,
   "resume": true,
+  "imu_speed_profile": true,
+  "imu_profile_v_max": 2.5,
   "require_clean_world": true
 }

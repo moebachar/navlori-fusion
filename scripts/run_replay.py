@@ -60,6 +60,11 @@ def main():
     ap.add_argument("--fresh", action="store_true",
                     help="redo every listed path even if its _done.json exists "
                          "(default: resume -- completed paths are skipped)")
+    ap.add_argument("--no-imu-profile", action="store_true",
+                    help="disable the IMU-shaped speed profile (uniform "
+                         "per-segment speed, the pre-4a behaviour)")
+    ap.add_argument("--profile-v-max", type=float, default=2.5,
+                    help="speed cap for the IMU profile's water-fill clip (m/s)")
     ap.add_argument("--dry-run", action="store_true",
                     help="print what would happen; don't write config or patch world")
     args = ap.parse_args()
@@ -112,6 +117,8 @@ def main():
         "pose_anchor": not args.no_pose_anchor,
         "hover_m": 0.01,
         "resume": not args.fresh,
+        "imu_speed_profile": not args.no_imu_profile,
+        "imu_profile_v_max": args.profile_v_max,
         # Controller refuses to run if debug DEFs (ROBOT_PATHS/MARKER_*)
         # exist in the LOADED scene -- catches "world rebuilt on disk but
         # Webots still shows the old scene" (needs File > Reload World).

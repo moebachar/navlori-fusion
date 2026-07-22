@@ -44,8 +44,8 @@ for _vsp in _VENV_CANDIDATES:
 sys.path.insert(0, CONTROLLER_DIR)
 
 from controller import Supervisor  # noqa: E402
-from path_loader import load_path, summarise  # noqa: E402
-from trajectory import HermiteTrajectory, feasibility  # noqa: E402
+from path_loader import build_trajectory, load_path, summarise  # noqa: E402
+from trajectory import feasibility  # noqa: E402
 from drive import (  # noqa: E402
     DifferentialDriveTracker, DriveConfig, OdometrySynthesizer,
     wheel_velocities_for,
@@ -227,11 +227,20 @@ def run_path(robot, node, timestep, cfg, path_id, sensors, motors, output_dir):
     print(f"  REPLAY {summarise(rp)}")
     print(f"{'='*64}")
 
-    # ── Build trajectory ──
-    ts = [w.t for w in rp.waypoints]
-    xs = [w.x for w in rp.waypoints]
-    ys = [w.y for w in rp.waypoints]
-    traj = HermiteTrajectory(ts, xs, ys)
+    # ── Build trajectory (IMU-shaped speed profile when enabled: real
+    #     walking dynamics between presses, exact timing AT every press) ──
+    traj, warp_info = build_trajectory(
+        rp,
+        imu_speed_profile=bool(cfg.get("imu_speed_profile", True)),
+        v_max=float(cfg.get("imu_profile_v_max", 2.5)))
+    if warp_info["enabled"]:
+        print(f"  [imu-profile] ON: {warp_info['n_anchors']} anchors "
+              f"({warp_info['anchor_source']}), time-scale r in "
+              f"[{warp_info['r_min']:.2f}, {warp_info['r_max']:.2f}], "
+              f"{warp_info['n_clipped_intervals']} v-capped intervals")
+    else:
+        print(f"  [imu-profile] OFF ({warp_info.get('reason', '?')}) "
+              f"-- uniform segment speed")
 
     # ── Feasibility report (informational; we pose-anchor anyway) ──
     feas = feasibility(traj,
@@ -505,6 +514,8 @@ def run_path(robot, node, timestep, cfg, path_id, sensors, motors, output_dir):
         "frames_emitted": frame_count,
         "feasibility": feas,
         "pose_anchored": pose_anchor,
+        # verify_replay rebuilds the SAME trajectory from this block
+        "imu_speed_profile": warp_info,
     }
     with open(path_dir_out / "metadata.json", "w", encoding="utf-8") as f:
         json.dump(meta, f, indent=2)

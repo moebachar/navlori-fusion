@@ -188,6 +188,183 @@ class HermiteTrajectory:
         return x, y
 
 
+class IMUTimeWarp:
+    """Monotone time reparametrisation u(t) that makes the replay's speed
+    profile follow the real IMU's walking intensity, while hitting every
+    anchor (real waypoint press) at its exact original timestamp.
+
+    Per anchor segment [T_j, T_{j+1}]: the progress fraction is the
+    normalised cumulative IMU intensity,
+        p(t) = int_{T_j}^{t} s / int_{T_j}^{T_{j+1}} s,
+    and u(t) = T_j + p(t) * (T_{j+1} - T_j). By construction u(T_j) = T_j
+    for every anchor -- timing at real waypoints is preserved no matter
+    what the IMU did in between. No accelerometer integration happens
+    anywhere (that would drift); only the *shape* of s matters, so any
+    constant bias cancels in the ratio.
+
+    r(t) = du/dt is the local time-scale: replay speed = base speed * r.
+    Guards: s is floored at floor_frac * segment mean (real stops slow to
+    ~floor, never stall numerically), and r is water-fill clipped to the
+    per-segment r_max (= v_max / base segment speed): clipped intervals sit
+    at r_max and the rest renormalises until the segment integral is exact.
+    Pure python on purpose -- imports inside the Webots controller.
+    """
+
+    def __init__(self, anchor_ts: list[float], imu_ts: list[float],
+                 intensity: list[float], floor_frac: float = 0.05,
+                 r_max_per_seg: list[float] | None = None):
+        if len(anchor_ts) < 2:
+            raise ValueError("need >= 2 anchors")
+        self.anchor_ts = list(anchor_ts)
+        # knots: piecewise-linear u over a per-segment grid; r piecewise-const
+        self.knot_t: list[float] = []
+        self.knot_u: list[float] = []
+        self.knot_r: list[float] = []   # r on interval [knot_t[k], knot_t[k+1])
+        self.seg_stats: list[dict] = []
+
+        for j in range(len(anchor_ts) - 1):
+            t0, t1 = anchor_ts[j], anchor_ts[j + 1]
+            dT = t1 - t0
+            # grid: imu timestamps strictly inside + both endpoints
+            grid = [t0] + [t for t in imu_ts if t0 < t < t1] + [t1]
+            # midpoint intensity per interval (linear interp of s)
+            s_mid = [max(0.0, _interp(imu_ts, intensity, (a + b) / 2))
+                     for a, b in zip(grid, grid[1:])]
+            mean_s = sum(si * (b - a) for si, (a, b)
+                         in zip(s_mid, zip(grid, grid[1:]))) / dT
+            if mean_s <= 1e-12:
+                s_eff = [1.0] * len(s_mid)          # no signal -> identity
+            else:
+                s_eff = [max(si, floor_frac * mean_s) for si in s_mid]
+            dts = [b - a for a, b in zip(grid, grid[1:])]
+            integ = sum(si * d for si, d in zip(s_eff, dts))
+            r = [si * dT / integ for si in s_eff]
+
+            r_max = (r_max_per_seg[j] if r_max_per_seg else float("inf"))
+            clipped = 0
+            if r_max <= 1.0:
+                # base speed already at/above the cap -> no warp can help;
+                # keep the original uniform timing for this segment.
+                r = [1.0] * len(r)
+            else:
+                for _ in range(12):
+                    over = [k for k, rk in enumerate(r) if rk > r_max + 1e-9]
+                    if not over:
+                        break
+                    fixed = sum(r_max * dts[k] for k in over)
+                    free = [k for k in range(len(r)) if k not in set(over)]
+                    need = dT - fixed
+                    free_int = sum(r[k] * dts[k] for k in free)
+                    if need <= 0 or free_int <= 1e-12:
+                        r = [min(rk, r_max) for rk in r]
+                        break
+                    scale = need / free_int
+                    for k in over:
+                        r[k] = r_max
+                    for k in free:
+                        r[k] *= scale
+                    clipped = len(over)
+
+            # exact-endpoint renormalisation (kills accumulated float error)
+            integ_r = sum(rk * d for rk, d in zip(r, dts))
+            r = [rk * dT / integ_r for rk in r]
+
+            u = t0
+            for k, (gt, d) in enumerate(zip(grid[:-1], dts)):
+                self.knot_t.append(gt)
+                self.knot_u.append(u)
+                self.knot_r.append(r[k])
+                u += r[k] * d
+            self.seg_stats.append({
+                "t0": t0, "t1": t1, "n_knots": len(grid),
+                "r_min": min(r), "r_max_used": max(r), "n_clipped": clipped,
+            })
+        self.knot_t.append(anchor_ts[-1])
+        self.knot_u.append(anchor_ts[-1])
+        self.knot_r.append(1.0)  # pad for queries at/past the end
+
+    def _k(self, t: float) -> int:
+        lo, hi = 0, len(self.knot_t) - 1
+        if t <= self.knot_t[0]:
+            return 0
+        if t >= self.knot_t[-1]:
+            return len(self.knot_t) - 1
+        while hi - lo > 1:
+            mid = (lo + hi) // 2
+            if self.knot_t[mid] <= t:
+                lo = mid
+            else:
+                hi = mid
+        return lo
+
+    def u(self, t: float) -> float:
+        if t <= self.knot_t[0]:
+            return self.knot_u[0]
+        if t >= self.knot_t[-1]:
+            return self.knot_u[-1]
+        k = self._k(t)
+        return self.knot_u[k] + self.knot_r[k] * (t - self.knot_t[k])
+
+    def udot(self, t: float) -> float:
+        if t < self.knot_t[0] or t >= self.knot_t[-1]:
+            return 1.0
+        return self.knot_r[self._k(t)]
+
+    def stats(self) -> dict:
+        rs = self.knot_r[:-1]
+        return {
+            "n_segments": len(self.seg_stats),
+            "r_min": min(rs) if rs else 1.0,
+            "r_max": max(rs) if rs else 1.0,
+            "n_clipped_intervals": sum(s["n_clipped"] for s in self.seg_stats),
+        }
+
+
+class WarpedTrajectory:
+    """HermiteTrajectory composed with an IMUTimeWarp: same interface,
+    IMU-shaped speed profile, exact anchors. Chain rule: velocity and yaw
+    rate scale by r = du/dt; acceleration by r^2 (the u-dot-dot term is
+    dropped -- r is piecewise constant, and accel is only used for the
+    informational feasibility report)."""
+
+    def __init__(self, base: HermiteTrajectory, warp: IMUTimeWarp):
+        self.base = base
+        self.warp = warp
+        self.ts = base.ts   # feasibility() samples over traj.ts[0]..[-1]
+
+    def evaluate(self, t: float) -> TrajectoryState:
+        r = self.warp.udot(t)
+        st = self.base.evaluate(self.warp.u(t))
+        return TrajectoryState(
+            t=t, x=st.x, y=st.y,
+            vx=st.vx * r, vy=st.vy * r,
+            ax=st.ax * r * r, ay=st.ay * r * r,
+            speed=st.speed * r, yaw=st.yaw, omega=st.omega * r,
+        )
+
+    def evaluate_position(self, t: float) -> tuple[float, float]:
+        return self.base.evaluate_position(self.warp.u(t))
+
+
+def _interp(ts: list[float], vs: list[float], t: float) -> float:
+    """Linear interpolation with endpoint clamping (ts ascending)."""
+    if not ts:
+        return 0.0
+    if t <= ts[0]:
+        return vs[0]
+    if t >= ts[-1]:
+        return vs[-1]
+    lo, hi = 0, len(ts) - 1
+    while hi - lo > 1:
+        mid = (lo + hi) // 2
+        if ts[mid] <= t:
+            lo = mid
+        else:
+            hi = mid
+    f = (t - ts[lo]) / (ts[lo + 1] - ts[lo])
+    return vs[lo] + f * (vs[lo + 1] - vs[lo])
+
+
 def feasibility(traj: HermiteTrajectory, max_speed: float, max_omega: float,
                   n_samples: int = 2000, yaw_window_s: float = 0.20) -> dict:
     """Sample the trajectory and report the peak required (speed, yaw_rate).
