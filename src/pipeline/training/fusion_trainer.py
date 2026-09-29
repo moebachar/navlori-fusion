@@ -21,6 +21,7 @@ collate, zero per-step Python overhead.
 from __future__ import annotations
 
 import json
+import os
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -340,6 +341,31 @@ class FusionTrainer:
             "started_at": datetime.now().isoformat(),
         }, indent=2))
 
+        # Optional Weights & Biases live logging. Opt-in via WANDB_PROJECT env;
+        # wrapped so a missing package / offline wandb never breaks training.
+        self._wandb = None
+        if os.environ.get("WANDB_PROJECT"):
+            try:
+                import wandb
+                self._wandb = wandb.init(
+                    project=os.environ["WANDB_PROJECT"],
+                    name=os.environ.get("WANDB_NAME", self.run_id),
+                    dir=str(self.run_path),
+                    config={"modalities": self.modalities, "epochs": epochs,
+                            "lr": self.lr, "batch_size": self.batch_size,
+                            "readout": getattr(self.model, "readout", "?"),
+                            "n_instants": self.n_instants,
+                            "modality_dropout": self.modality_dropout,
+                            "instant_dropout": self.instant_dropout},
+                    reinit=True)
+                # use epoch as the x-axis for every metric (cleaner than the
+                # global step; also stops the empty "epoch" panel).
+                self._wandb.define_metric("epoch")
+                self._wandb.define_metric("*", step_metric="epoch")
+            except Exception as e:  # noqa: BLE001
+                print(f"  [wandb] disabled: {e}", flush=True)
+                self._wandb = None
+
         for epoch in range(epochs):
             train_loss = self._train_epoch(steps)
             val_loss, val_mae = self._val_epoch()
@@ -362,6 +388,10 @@ class FusionTrainer:
                     "val_loss": val_loss, "val_mae": val_mae, "lr": lr,
                     "is_best": patience_ctr == 0, "t": time.time() - t0,
                 }) + "\n")
+            if self._wandb is not None:
+                self._wandb.log({"epoch": epoch, "train_loss": train_loss,
+                                 "val_loss": val_loss, "val_mae": val_mae, "lr": lr,
+                                 "best_val_mae": hist.best_val_mae})
             if verbose and (epoch % 10 == 0 or epoch == epochs - 1
                             or patience_ctr == self.patience):
                 print(f"  Epoch {epoch:3d}/{epochs}  train={train_loss:.4f}  "
@@ -389,6 +419,13 @@ class FusionTrainer:
             "finished_at": datetime.now().isoformat(),
         }, indent=2))
         torch.save(self.model.state_dict(), self.run_path / "model.pt")
+        if self._wandb is not None:
+            try:
+                self._wandb.summary["best_val_mae"] = hist.best_val_mae
+                self._wandb.summary["best_epoch"] = hist.best_epoch
+                self._wandb.finish()
+            except Exception:  # noqa: BLE001
+                pass
 
         # Always run subsets + report unused modalities + (if available)
         # how far we are from the baselines. This is the audit-mandated

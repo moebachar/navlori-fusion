@@ -157,8 +157,9 @@ class FusionDataset(Dataset):
         self.wifi_norm = wifi_norm
         # "raw" mode ignores PCA entirely — the whitening was the problem, and
         # PCA-rotation alone bought nothing (Probe 4 E vs B).
-        self.wifi_pca = None if wifi_norm == "raw" else wifi_pca
-        self._wifi_pca_model = None if wifi_norm == "raw" else wifi_pca_model
+        self.wifi_pca = None if wifi_norm in ("raw", "rel_strong") else wifi_pca
+        self._wifi_pca_model = (None if wifi_norm in ("raw", "rel_strong")
+                                else wifi_pca_model)
         # Max seconds a carried-forward WiFi scan is treated as a live fix
         # (M2). None = no cap (legacy behavior).
         self.wifi_max_stale_s = wifi_max_stale_s
@@ -533,6 +534,20 @@ class FusionDataset(Dataset):
             # (so "no signal" is one consistent value). Distance-preserving.
             chunk = np.nan_to_num(chunk, nan=-100.0)
             chunk = (chunk + 100.0) / 100.0
+        elif mod == "wifi" and self.wifi_norm == "rel_strong":
+            # Session-invariant encoding: per scan, subtract the strongest
+            # heard AP's RSSI (cancels the session-wide gain shift that breaks
+            # cross-session transfer -- device/crowd/AP-power move the whole
+            # vector; the *shape* relative to the strongest AP is stable).
+            # heard AP -> (rssi - max + 70)/70 in ~[0,1], strongest -> 1.0;
+            # absent AP -> 0 (matches front-pad zeros). kNN probe: 8.75 -> 4.53 m.
+            out = np.zeros_like(chunk)
+            for r in range(chunk.shape[0]):
+                heard = ~np.isnan(chunk[r])
+                if heard.any():
+                    ref = np.nanmax(chunk[r])
+                    out[r, heard] = (chunk[r, heard] - ref + 70.0) / 70.0
+            chunk = np.clip(out, 0.0, 1.0).astype(np.float32)
         elif mod == "wifi" and self._wifi_pca_model is not None:
             # Legacy whiten path: PCA here, per-component z-score applied below.
             chunk = self._apply_wifi_pca(chunk)
@@ -688,8 +703,8 @@ class FusionDataset(Dataset):
                 continue  # camera uses ImageNet stats
             if mod == "vision_dpvo":
                 continue  # DPVO features are normalized inside the encoder (LayerNorm)
-            if mod == "wifi" and self.wifi_norm == "raw":
-                continue  # raw WiFi is fixed-affine scaled in _get_window; no z-score
+            if mod == "wifi" and self.wifi_norm in ("raw", "rel_strong"):
+                continue  # raw/rel_strong WiFi are fixed-scaled in _get_window; no z-score
 
             if mod == "wifi":
                 cols = self._wifi_rssi_cols

@@ -1,0 +1,9 @@
+{
+  "origin_note": "Room origin = the corner you choose (e.g. SW corner of the fablab). x = meters along one wall, y = meters along the other. Measure each taped anchor from that corner with a tape measure and edit the values below. 3 anchors minimum, 4 recommended, NOT in a straight line.",
+  "anchors": [
+    { "name": "A", "x": 0.50, "y": 0.50 },
+    { "name": "B", "x": 4.00, "y": 0.60 },
+    { "name": "C", "x": 3.80, "y": 3.90 },
+    { "name": "D", "x": 0.70, "y": 4.10 }
+  ]
+}

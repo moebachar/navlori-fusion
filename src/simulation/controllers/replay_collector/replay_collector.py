@@ -295,14 +295,13 @@ def run_path(robot, node, timestep, cfg, path_id, sensors, motors, output_dir):
 
     # ── Initial pose: spline at t_start (exactly the first GT WP) ──
     s0 = traj.evaluate(rp.t_start)
-    _, _, z_keep, _ = get_pose(node)
     # Hover the anchored robot just above the floor: a pose-anchored replay
     # must have NO contact forces — wheel-floor contact makes the physics
     # solver reconcile contradictory constraints every step and inject
-    # energy until the robot is ejected. Gravity pulls it back at most
-    # ~0.5 * 9.81 * dt^2 ≈ 5 mm within one 32 ms step, so a 10 mm gap is
-    # never closed; the next anchor resets z anyway.
-    z_keep += float(cfg.get("hover_m", 0.01))
+    # energy until the robot is ejected. ABSOLUTE height, floor at z=0:
+    # reading the robot's current z here and adding hover_m accumulated
+    # +1 cm per path (gt_z reached 0.62 m by path_61 in the first F2 run).
+    z_keep = float(cfg.get("hover_m", 0.01))
     supervisor_set_pose(node, s0.x, s0.y, s0.yaw, keep_z=z_keep)
     # a few warm-up steps so sensors/cameras deliver before logging starts
     for _ in range(5):
@@ -347,9 +346,16 @@ def run_path(robot, node, timestep, cfg, path_id, sensors, motors, output_dir):
     last_print = -1.0
     step_count = 0
     finished = False
+    aborted = False   # Webots quit / world reload kills the controller:
+                      # step() returns -1. That path is INCOMPLETE -- it
+                      # must never get a _done.json (a truncated path_15
+                      # once survived as "complete" and poisoned a resume).
     extra_steps_after_finish = 30  # to flush late camera frames
 
-    while robot.step(timestep) != -1:
+    while True:
+        if robot.step(timestep) == -1:
+            aborted = not finished
+            break
         elapsed = robot.getTime() - sim_t_start_offset
         path_t = rp.t_start + elapsed
 
@@ -500,6 +506,15 @@ def run_path(robot, node, timestep, cfg, path_id, sensors, motors, output_dir):
     for c in csvs.values():
         c.close()
 
+    if aborted:
+        # Webots is quitting / reloading. The path is INCOMPLETE: flush what
+        # exists but write NO metadata and NO _done.json -- the next resumed
+        # run must wipe and redo it.
+        print(f"  [ABORT] Webots quit at path_t={path_t:.2f}/{rp.t_end:.2f}s "
+              f"-- path {path_id} left UNFINISHED (will be redone on resume)",
+              flush=True)
+        return None
+
     # Sort & rewrite ground_truth.csv by sim_time so original + dense rows
     # are time-interleaved.
     _sort_csv_by_sim_time(str(path_dir_out / "ground_truth.csv"))
@@ -514,6 +529,7 @@ def run_path(robot, node, timestep, cfg, path_id, sensors, motors, output_dir):
         "frames_emitted": frame_count,
         "feasibility": feas,
         "pose_anchored": pose_anchor,
+        "hover_m": z_keep,
         # verify_replay rebuilds the SAME trajectory from this block
         "imu_speed_profile": warp_info,
     }
@@ -605,6 +621,29 @@ def main():
             print("!" * 64, flush=True)
             return
 
+    # ── Build-stamp guard: geometry changes (wall repositioning, corridor
+    #     widening) are invisible to the debug-DEF check above. The staged
+    #     config carries the world file's BUILD_STAMP; the LIVE scene must
+    #     show the same one. ──
+    expected_stamp = cfg.get("world_build_stamp")
+    if expected_stamp:
+        n = robot.getFromDef("BUILD_STAMP")
+        live = None
+        if n is not None:
+            f = n.getField("name")
+            live = f.getSFString() if f is not None else None
+        if live != expected_stamp:
+            print("!" * 64)
+            print("  STALE SCENE -- REFUSING TO RUN")
+            print(f"  loaded scene stamp : {live}")
+            print(f"  staged world stamp : {expected_stamp}")
+            print("  The world file was rebuilt after this scene was loaded")
+            print("  (or the config was staged against a newer build).")
+            print("  -> File > Reload World (Ctrl+Shift+R). If it still")
+            print("     refuses, re-run replay_site.py prepare, then reload.")
+            print("!" * 64, flush=True)
+            return
+
     # ── Kinematic replay needs no dynamics: zero gravity so the hovering,
     #     pose-anchored robot has no free-fall to strain its joints between
     #     anchors. Position-controlled motors (arm tuck, wheels) work fine
@@ -676,6 +715,10 @@ def main():
         try:
             r = run_path(robot, node, timestep, cfg, pid, sensors, (lm, rm),
                           str(output_dir))
+            if r is None:
+                print(f"[abort] Webots is quitting -- stopping after "
+                      f"path {pid} (unfinished, no marker written)", flush=True)
+                break
             summary[pid] = r
         except FileNotFoundError as e:
             print(f"[skip] path {pid}: {e}")

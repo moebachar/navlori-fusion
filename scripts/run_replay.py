@@ -125,17 +125,29 @@ def main():
         "require_clean_world": True,
     }
 
-    print(f"[run_replay] writing {CONFIG_PATH}")
-    if args.dry_run:
-        print(json.dumps(cfg, indent=2))
-    else:
-        CONFIG_PATH.write_text(json.dumps(cfg, indent=2), encoding="utf-8")
-
     print(f"[run_replay] ensuring kinematic REPLAY_RIG in {world.name}")
     ok, msg = ensure_replay_rig(world, args.dry_run)
     if not ok:
         sys.exit(f"  ERROR: {msg}")
     print(f"  {msg}")
+
+    # Build stamp: the controller compares this against the LIVE scene's
+    # BUILD_STAMP so a stale in-memory world can never record data.
+    import re as _re
+    m = _re.search(r'DEF BUILD_STAMP Solid \{[^}]*?name "(build_\d+)"',
+                   world.read_text(encoding="utf-8"), _re.DOTALL)
+    if m:
+        cfg["world_build_stamp"] = m.group(1)
+        print(f"[run_replay] world build stamp: {m.group(1)}")
+    else:
+        print("[run_replay] note: world has no BUILD_STAMP "
+              "(pre-stamp build) -- stale-scene check disabled")
+
+    print(f"[run_replay] writing {CONFIG_PATH}")
+    if args.dry_run:
+        print(json.dumps(cfg, indent=2))
+    else:
+        CONFIG_PATH.write_text(json.dumps(cfg, indent=2), encoding="utf-8")
 
     print()
     print("Next steps:")

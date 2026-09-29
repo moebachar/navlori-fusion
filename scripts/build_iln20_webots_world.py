@@ -649,15 +649,19 @@ def render_floor_texture(shops, W, H, mx0, my0, sx, sy,
 # Webots emitters: walls + decorations + markers + assembled .wbt
 # ---------------------------------------------------------------------------
 def fmt_wall(idx: int, x1: float, y1: float, x2: float, y2: float,
-              palette_idx: int = 0) -> str:
-    """Per-wall PBR cycled through WALL_PALETTES for visual variety."""
+              palette_idx: int = 0, rgb=None) -> str:
+    """One wall Solid. If `rgb` is given (per-shop coherent colouring), it
+    wins; otherwise fall back to the legacy WALL_PALETTES cycling."""
     dx, dy = x2 - x1, y2 - y1
     length = math.hypot(dx, dy)
     if length < MIN_WALL_LENGTH:
         return ""
     mx, my = (x1 + x2) / 2, (y1 + y2) / 2
     yaw = math.atan2(dy, dx)
-    pname, (r, g, b), rough, met = WALL_PALETTES[palette_idx % len(WALL_PALETTES)]
+    if rgb is not None:
+        (r, g, b), rough, met = rgb, 0.85, 0.0
+    else:
+        pname, (r, g, b), rough, met = WALL_PALETTES[palette_idx % len(WALL_PALETTES)]
     return (
         f"  DEF WALL_{idx:05d} Solid {{\n"
         f"    translation {mx:.4f} {my:.4f} {WALL_HEIGHT/2:.4f}\n"
@@ -757,9 +761,12 @@ FLOOR_OBJ_FNS = [fmt_planter, fmt_bench, fmt_trashcan, fmt_pillar]
 
 def fmt_partial_wall(idx: int, mx: float, my: float, length: float, yaw: float,
                        z_center: float, height: float,
-                       palette_idx: int = 0) -> str:
+                       palette_idx: int = 0, rgb=None) -> str:
     """Wall piece with custom z-centre and height (for sill / lintel)."""
-    pname, (r, g, b), rough, met = WALL_PALETTES[palette_idx % len(WALL_PALETTES)]
+    if rgb is not None:
+        (r, g, b), rough, met = rgb, 0.85, 0.0
+    else:
+        pname, (r, g, b), rough, met = WALL_PALETTES[palette_idx % len(WALL_PALETTES)]
     return (
         f"  DEF PWALL_{idx:05d} Solid {{\n"
         f"    translation {mx:.4f} {my:.4f} {z_center:.4f}\n"
@@ -1484,7 +1491,9 @@ def build_wbt(name: str, W: float, H: float, segs_local, start_xy, second_xy,
               floor_margin: float = 200.0,
               seed: int = DECOR_SEED,
               clean: bool = False,
-              robot: str = "tiago") -> str:
+              robot: str = "tiago",
+              shop_rings=None,
+              wheel_max_ms: float = 1.8) -> str:
     # Building frame is [0,W] x [0,H] in floor coords. The Floor proto is
     # centred at (W/2, H/2) but sized (W + 2*margin) x (H + 2*margin) so it
     # extends `margin` metres beyond the building outline in every direction.
@@ -1508,13 +1517,44 @@ def build_wbt(name: str, W: float, H: float, segs_local, start_xy, second_xy,
         segs_local, trajectories, win_rng,
         window_prob=0.18, min_len=4.5)
 
+    # ---- wall colouring: ONE muted pastel per shop (all its walls share
+    #      it; hues spaced by the golden angle so neighbours differ),
+    #      neutral warm plaster for structural / perimeter walls. Replaces
+    #      the old per-wall random palette cycling, which looked chaotic. ----
+    import colorsys
+    NEUTRAL = (0.92, 0.90, 0.86)
+
+    def _shop_pastel(k: int) -> tuple[float, float, float]:
+        h = (k * 0.61803398875) % 1.0          # golden-angle hue spacing
+        r, g, b = colorsys.hsv_to_rgb(h, 0.28, 0.84)
+        return (round(r, 3), round(g, 3), round(b, 3))
+
+    def _dist_pt_seg(px, py, x1, y1, x2, y2) -> float:
+        vx, vy = x2 - x1, y2 - y1
+        L2 = vx * vx + vy * vy
+        t = 0.0 if L2 < 1e-12 else max(0.0, min(1.0, ((px - x1) * vx + (py - y1) * vy) / L2))
+        return math.hypot(px - (x1 + t * vx), py - (y1 + t * vy))
+
+    def wall_rgb(mx: float, my: float) -> tuple[float, float, float]:
+        if not shop_rings:
+            return NEUTRAL
+        best_k, best_d = -1, 1e9
+        for k, ring in enumerate(shop_rings):
+            pts = ring["ring"]
+            for (x1, y1), (x2, y2) in zip(pts, pts[1:]):
+                d = _dist_pt_seg(mx, my, x1, y1, x2, y2)
+                if d < best_d:
+                    best_d, best_k = d, k
+        return _shop_pastel(best_k) if best_d < 0.40 else NEUTRAL
+
     # ---- walls: full-height + partial (sill/lintel) ----
     wall_blocks = []
     for i, s in enumerate(segs_local):
-        wall_blocks.append(fmt_wall(i, *s, palette_idx=(i * 17 + 3) % len(WALL_PALETTES)))
+        wall_blocks.append(fmt_wall(
+            i, *s, rgb=wall_rgb((s[0] + s[2]) / 2, (s[1] + s[3]) / 2)))
     for pi, (mx, my, length, yaw, zc, ht) in enumerate(partial_walls):
         wall_blocks.append(fmt_partial_wall(pi, mx, my, length, yaw, zc, ht,
-                                              palette_idx=(pi * 13 + 5) % len(WALL_PALETTES)))
+                                              rgb=wall_rgb(mx, my)))
 
     # ---- windows (custom Solid: glass + 4 frame strips) ----
     window_blocks = [fmt_window(i, *w) for i, w in enumerate(window_placements)]
@@ -1648,9 +1688,9 @@ def build_wbt(name: str, W: float, H: float, segs_local, start_xy, second_xy,
         'objects/floors/protos/Floor.proto"',
     ]
     if robot == "tiago":
-        extern_lines.append(
-            '"https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/'
-            'robots/pal_robotics/tiagopp/protos/Tiago++.proto"')
+        # LOCAL proto copy (src/simulation/protos/) with tunable wheel speed
+        # fields -- worlds live in src/simulation/worlds/, so ../protos/.
+        extern_lines.append('"../protos/Tiago++.proto"')
     if any("FireExtinguisher" in b for b in corner_blocks):
         extern_lines.append(
             f'"https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/'
@@ -1673,16 +1713,38 @@ def build_wbt(name: str, W: float, H: float, segs_local, start_xy, second_xy,
 {fmt_marker("SECOND_RED",  second_xy[0], second_xy[1], (0.95, 0.05, 0.05))}
 """
 
+    # ---- build stamp: invisible Solid below the floor. run_replay copies
+    #      its name into replay_config.json; the controller compares it to
+    #      the LIVE scene so a stale in-memory world (rebuilt on disk, not
+    #      reloaded in Webots) is refused -- debug-DEF checks can't see
+    #      geometry changes like wall repositioning. ----
+    import time as _time
+    stamp = f"build_{int(_time.time())}"
+    stamp_section = (f"DEF BUILD_STAMP Solid {{\n"
+                     f"  translation {cx:.2f} {cy:.2f} -0.5\n"
+                     f"  name \"{stamp}\"\n"
+                     f"}}\n")
+
     # ---- robot ----
     if robot == "rig":
         robot_section = format_rig(sx, sy, yaw)
     else:
+        # TIAGO fully AS-IS: stock wheel speed/accel/torque. Time-dilation
+        # (pretreat_dilate.py) slows each path's clock so real walking speed
+        # fits under the stock 1.0 m/s cap -- no robot modification, no
+        # tipping. wheel_max_ms=1.0 -> stock 10.1523 rad/s.
+        w_rad = wheel_max_ms / 0.0985
+        w_acc = 5.0762     # stock
+        w_torque = 10.0    # stock
         robot_section = f"""DEF TIAGO Tiago++ {{
   translation {sx:.4f} {sy:.4f} 0
   rotation 0 0 1 {yaw:.5f}
   name "tiago"
   controller "<none>"
   supervisor TRUE
+  wheelMaxVelocity {w_rad:.4f}
+  wheelAcceleration {w_acc:.4f}
+  wheelMaxTorque {w_torque:.2f}
 }}
 """
 
@@ -1760,6 +1822,7 @@ DEF CEILING_BILLBOARDS Group {{
 }}
 
 {debug_section}
+{stamp_section}
 {robot_section}"""
 
 
@@ -1788,6 +1851,11 @@ def main():
                     help="emit NO debug visuals (path spheres/segments, "
                          "start/second markers) -- required for replay worlds "
                          "so the camera never sees debug geometry")
+    ap.add_argument("--wheel-max-ms", type=float, default=1.0,
+                    help="TIAGO wheel speed cap in m/s (default 1.8). Sets the "
+                         "local proto's wheelMaxVelocity/accel/torque. Stock "
+                         "real TIAGO is 1.0; raise to keep more paths, lower "
+                         "for fidelity. Fine-tune here or in the scene tree.")
     ap.add_argument("--robot", choices=("tiago", "rig"), default="tiago",
                     help="'tiago' = articulated Tiago++ PROTO, controller <none> "
                          "(legacy/demo). 'rig' = physics-less TIAGO-shell "
@@ -1930,16 +1998,28 @@ def main():
         if not d.name.startswith("path_"):
             continue
         gt_csv = d / "ground_truth.csv"
-        if not gt_csv.exists():
-            continue
-        with open(gt_csv) as fh:
-            rows = list(csv.DictReader(fh))
-        if len(rows) >= 2:
-            # downsample for speed — every 10th point (~1 Hz) is plenty for
-            # corridor detection, no need for 10 Hz density
+        pts: list[tuple[float, float]] = []
+        if gt_csv.exists():
+            with open(gt_csv) as fh:
+                rows = list(csv.DictReader(fh))
+            # downsample for speed — ~1 Hz is plenty for corridor detection
             pts = [(float(r["gt_x"]), float(r["gt_y"])) for r in rows[::10]]
-            if len(pts) >= 2:
-                trajectories.append(pts)
+        else:
+            # v2 inputs ship only raw waypoint presses -- densify the
+            # polyline at ~1 m spacing for corridor-side detection
+            wp_csv = d / "waypoints_raw.csv"
+            if wp_csv.exists():
+                with open(wp_csv) as fh:
+                    wps = [(float(r["gt_x"]), float(r["gt_y"]))
+                           for r in csv.DictReader(fh)]
+                for (x1, y1), (x2, y2) in zip(wps, wps[1:]):
+                    n = max(1, int(math.hypot(x2 - x1, y2 - y1)))
+                    pts += [(x1 + (x2 - x1) * k / n, y1 + (y2 - y1) * k / n)
+                            for k in range(n)]
+                if wps:
+                    pts.append(wps[-1])
+        if len(pts) >= 2:
+            trajectories.append(pts)
 
     # shop centroids + chosen names — derived from the SAME (possibly shrunken)
     # floor-frame rings used for walls, so signs stay inside the new perimeter.
@@ -1988,7 +2068,9 @@ def main():
                      floor_tile_size=floor_tile_size,
                      seed=args.seed,
                      clean=args.clean,
-                     robot=args.robot)
+                     robot=args.robot,
+                     shop_rings=shop_rings_local,
+                     wheel_max_ms=args.wheel_max_ms)
     wbt_path = worlds_dir / f"{name}.wbt"
     wbt_path.write_text(wbt, encoding="utf-8")
     n_decor = wbt.count("DEF DECOR_")

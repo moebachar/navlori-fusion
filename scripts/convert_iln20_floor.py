@@ -58,7 +58,7 @@ from pathlib import Path
 DEFAULT_SITE = "5d27099f03f801723c32511d"
 DEFAULT_FLOOR = "F2"
 DEFAULT_SRC_ROOT = r"X:\navlori-fusion\data\iln20\data"
-DEFAULT_OUT_ROOT = r"X:\navlori-fusion\data"
+DEFAULT_OUT_ROOT = r"X:\navlori-fusion\data\iln20_converted"
 DEFAULT_SEED = 42
 DEFAULT_GT_HZ = 10.0     # match project Webots GT cadence
 
@@ -283,6 +283,10 @@ def main():
     ap.add_argument("--out-root", default=DEFAULT_OUT_ROOT)
     ap.add_argument("--seed", type=int, default=DEFAULT_SEED)
     ap.add_argument("--gt-hz", type=float, default=DEFAULT_GT_HZ)
+    ap.add_argument("--out-name", default=None,
+                    help="output dir name (default iln20_<site8>_<floor>; "
+                         "override when two sites share an 8-char prefix -- "
+                         "41 collision groups exist in the full dump)")
     args = ap.parse_args()
 
     src = os.path.join(args.src_root, args.site, args.floor)
@@ -290,7 +294,7 @@ def main():
     if not os.path.isdir(pdir):
         sys.exit(f"source not found: {pdir}")
 
-    out_name = f"iln20_{args.site[:8]}_{args.floor}"
+    out_name = args.out_name or f"iln20_{args.site[:8]}_{args.floor}"
     out = os.path.join(args.out_root, out_name)
     if os.path.isdir(out):
         print(f"[warn] {out} exists; will overwrite per-path contents")

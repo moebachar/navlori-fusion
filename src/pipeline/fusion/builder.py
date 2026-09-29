@@ -222,6 +222,98 @@ def extract_vision_tokens(dm, vision_encoder, device: str = "cuda") -> dict:
     return {"camera": out}
 
 
+def extract_vision_tokens_fast(dm, vision_encoder, device: str = "cuda",
+                               subsample_stride: int = 1,
+                               flush_batch: int = 128) -> dict:
+    """Like extract_vision_tokens, but runs the expensive DPVO forward only
+    ONCE per unique camera frame-pair and scatters the token to every sample
+    that shares it. On this data the camera is 5 Hz but samples are 10 Hz, so
+    ~2x of the frame-pairs are exact duplicates -> ~2x fewer DPVO forwards,
+    zero quality loss (identical input tensors give identical frozen tokens).
+
+    subsample_stride > 1 adds a lossy speedup: only every Nth UNIQUE pair is
+    actually run through DPVO; intermediate uniques reuse the previous token.
+    At walking pace adjacent (~0.2 s) pairs are near-identical, so stride 2-3
+    costs little. stride 1 = exact dedup only (default, lossless).
+
+    Cache format + return value match extract_vision_tokens (drop-in).
+    """
+    import torch as _t
+    cache = dm.data_dir / ".dpvomotion_fusion_cache"
+    tag = "" if subsample_stride <= 1 else f"_s{subsample_stride}"
+    splits = {"train": dm.train_ds, "val": dm.val_ds, "test": dm.test_ds}
+    out: dict = {}
+    vision_encoder.to(device).eval()
+
+    def key_of(xi: _t.Tensor) -> bytes:
+        # strided subsample -> cheap, collision-safe content key; identical
+        # frames (same PNGs + same transform) hash identically.
+        return xi[:, :, ::16, ::16].contiguous().numpy().tobytes()
+
+    for split, ds in splits.items():
+        if ds is None:
+            continue
+        cpath = cache / f"{split}{tag}.pt"
+        if cpath.exists():
+            saved = _t.load(cpath, weights_only=True)
+            out[split] = saved["features"]
+            print(f"  [vision] {split}: cache hit", flush=True)
+            continue
+        loader = DataLoader(ds, batch_size=128, shuffle=False)
+        order_keys: list = []
+        key_to_tok: dict = {}
+        pend_x: list = []
+        pend_k: list = []
+        pend_set: set = set()
+        tgts = []
+        n_uniq_run = 0
+        uniq_seen = 0
+
+        def flush():
+            nonlocal n_uniq_run
+            if not pend_x:
+                return
+            with _t.no_grad():
+                toks = vision_encoder._frozen_tokens(
+                    _t.stack(pend_x).to(device)).cpu()
+            for k, tk in zip(pend_k, toks):
+                key_to_tok[k] = tk
+            n_uniq_run += len(pend_x)
+            pend_x.clear(); pend_k.clear()
+
+        with _t.no_grad():
+            for batch in loader:
+                x, y = batch["camera"], batch["target"]
+                tgts.append(y)
+                for i in range(x.shape[0]):
+                    k = key_of(x[i])
+                    order_keys.append(k)
+                    if k in key_to_tok or k in pend_set:
+                        continue
+                    uniq_seen += 1
+                    # lossy subsample: only run every Nth unique pair; others
+                    # copy the most recent run token
+                    if subsample_stride > 1 and (uniq_seen % subsample_stride) != 1 \
+                            and key_to_tok:
+                        key_to_tok[k] = next(reversed(key_to_tok.values()))
+                        continue
+                    pend_x.append(x[i]); pend_k.append(k); pend_set.add(k)
+                    if len(pend_x) >= flush_batch:
+                        flush()
+                        pend_set = set(key_to_tok.keys())
+            flush()
+        features = _t.stack([key_to_tok[k] for k in order_keys])
+        targets = _t.cat(tgts)
+        cpath.parent.mkdir(parents=True, exist_ok=True)
+        _t.save({"features": features, "targets": targets}, cpath)
+        print(f"  [vision] {split}: {len(order_keys)} samples, "
+              f"{uniq_seen} unique pairs, {n_uniq_run} DPVO forwards "
+              f"({100*n_uniq_run/max(1,len(order_keys)):.0f}% of samples)",
+              flush=True)
+        out[split] = features
+    return {"camera": out}
+
+
 def build_model(cfg, encoders) -> FusionTransformer:
     """FusionTransformer from the ``model`` config block."""
     m = cfg.model

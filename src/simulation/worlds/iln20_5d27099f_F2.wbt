@@ -3,6 +3,7 @@
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/floors/protos/Floor.proto"
+EXTERNPROTO "../protos/Tiago++.proto"
 
 WorldInfo {
   basicTimeStep 32
@@ -47,8 +48,8 @@ DEF WALLS Group {
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.95 0.93 0.9
-          roughness 0.55
+          baseColor 0.92 0.9 0.86
+          roughness 0.85
           metalness 0.0
         }
         geometry Box { size 134.0002 0.12 3.2 }
@@ -61,9 +62,9 @@ DEF WALLS Group {
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.4 0.42 0.46
-          roughness 0.4
-          metalness 0.15
+          baseColor 0.92 0.9 0.86
+          roughness 0.85
+          metalness 0.0
         }
         geometry Box { size 43.0191 0.12 3.2 }
       }
@@ -75,8 +76,8 @@ DEF WALLS Group {
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.86 0.8 0.72
-          roughness 0.8
+          baseColor 0.92 0.9 0.86
+          roughness 0.85
           metalness 0.0
         }
         geometry Box { size 134.0036 0.12 3.2 }
@@ -89,7 +90,7 @@ DEF WALLS Group {
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.6 0.72 0.62
+          baseColor 0.92 0.9 0.86
           roughness 0.85
           metalness 0.0
         }
@@ -98,1090 +99,1496 @@ DEF WALLS Group {
     ]
   }
   DEF WALL_00004 Solid {
-    translation 15.5774 125.3457 1.6000
-    rotation 0 0 1 1.61240
+    translation 22.9627 134.1141 1.6000
+    rotation 0 0 1 0.03594
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.45 0.18 0.22
-          roughness 0.75
+          baseColor 0.84 0.605 0.605
+          roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 18.4951 0.12 3.2 }
+        geometry Box { size 13.9874 0.12 3.2 }
       }
     ]
   }
-    DEF WALL_00006 Solid {
-    translation 31.0107 125.9023 1.6000
+  DEF WALL_00005 Solid {
+    translation 30.2611 125.8753 1.6000
     rotation 0 0 1 -1.53439
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.55 0.58 0.62
-          roughness 0.45
-          metalness 0.3
+          baseColor 0.84 0.605 0.605
+          roughness 0.85
+          metalness 0.0
         }
-        geometry Box { size 18.4914 0.12 3.2 }
+        geometry Box { size 16.9916 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00006 Solid {
+    translation 23.6254 117.1339 1.6000
+    rotation 0 0 1 -3.10543
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.84 0.605 0.605
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 13.8991 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00007 Solid {
-    translation 23.6546 116.3844 1.6000
-    rotation 0 0 1 -3.10543
+    translation 16.3270 125.3727 1.6000
+    rotation 0 0 1 1.61240
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.88 0.84 0.78
+          baseColor 0.84 0.605 0.605
           roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 15.3952 0.12 3.2 }
+        geometry Box { size 16.9949 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00008 Solid {
-    translation 36.8282 14.5271 1.6000
-    rotation 0 0 1 -3.10444
+    translation 26.7110 24.8223 1.6000
+    rotation 0 0 1 1.60696
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.92 0.9 0.85
-          roughness 0.3
-          metalness 0.1
+          baseColor 0.605 0.673 0.84
+          roughness 0.85
+          metalness 0.0
         }
-        geometry Box { size 20.9767 0.12 3.2 }
+        geometry Box { size 19.8279 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00009 Solid {
-    translation 25.9751 24.4187 1.6000
+    translation 25.9434 46.0363 1.6000
     rotation 0 0 1 1.60696
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.92 0.9 0.86
+          baseColor 0.605 0.673 0.84
           roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 20.5759 0.12 3.2 }
+        geometry Box { size 19.8279 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00010 Solid {
-    translation 25.1805 46.3802 1.6000
-    rotation 0 0 1 1.60696
+    translation 35.3167 56.3572 1.6000
+    rotation 0 0 1 0.04246
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.8 0.55 0.42
+          baseColor 0.605 0.673 0.84
           roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 20.5759 0.12 3.2 }
+        geometry Box { size 19.4811 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00011 Solid {
-    translation 35.2897 57.1067 1.6000
-    rotation 0 0 1 0.04246
+    translation 45.7906 36.2045 1.6000
+    rotation 0 0 1 -1.53473
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.2 0.3 0.55
-          roughness 0.65
-          metalness 0.0
-        }
-        geometry Box { size 20.9812 0.12 3.2 }
-      }
-    ]
-  }
-    DEF WALL_00013 Solid {
-    translation 3.7982 45.6408 1.6000
-    rotation 0 0 1 3.14159
-    children [
-      Shape {
-        appearance PBRAppearance {
-          baseColor 0.4 0.42 0.46
-          roughness 0.4
-          metalness 0.15
-        }
-        geometry Box { size 1.4424 0.12 3.2 }
-      }
-    ]
-  }
-  DEF WALL_00014 Solid {
-    translation 3.0289 47.1993 1.6000
-    rotation 0 0 1 1.60164
-    children [
-      Shape {
-        appearance PBRAppearance {
-          baseColor 0.86 0.8 0.72
-          roughness 0.8
-          metalness 0.0
-        }
-        geometry Box { size 3.1184 0.12 3.2 }
-      }
-    ]
-  }
-  DEF WALL_00015 Solid {
-    translation 3.7020 48.8134 1.6000
-    rotation 0 0 1 0.07703
-    children [
-      Shape {
-        appearance PBRAppearance {
-          baseColor 0.6 0.72 0.62
+          baseColor 0.605 0.673 0.84
           roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 1.4466 0.12 3.2 }
+        geometry Box { size 41.1590 0.12 3.2 }
       }
     ]
   }
-  DEF WALL_00016 Solid {
-    translation 4.4713 47.2549 1.6000
-    rotation 0 0 1 -1.54102
+  DEF WALL_00012 Solid {
+    translation 36.8011 15.2766 1.6000
+    rotation 0 0 1 -3.10444
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.45 0.18 0.22
-          roughness 0.75
+          baseColor 0.605 0.673 0.84
+          roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 3.2297 0.12 3.2 }
+        geometry Box { size 19.4768 0.12 3.2 }
       }
     ]
   }
-  DEF WALL_00017 Solid {
-    translation 8.2214 115.8278 1.6000
-    rotation 0 0 1 -3.10169
-    children [
-      Shape {
-        appearance PBRAppearance {
-          baseColor 0.66 0.71 0.78
-          roughness 0.7
-          metalness 0.0
-        }
-        geometry Box { size 2.7908 0.12 3.2 }
-      }
-    ]
-  }
-  DEF WALL_00018 Solid {
-    translation 6.8752 113.6014 1.6000
+  DEF WALL_00013 Solid {
+    translation 6.1091 114.3228 1.6000
     rotation 0 0 1 -1.54865
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.55 0.58 0.62
-          roughness 0.45
-          metalness 0.3
+          baseColor 0.742 0.84 0.605
+          roughness 0.85
+          metalness 0.0
         }
-        geometry Box { size 4.3425 0.12 3.2 }
+        geometry Box { size 4.3398 0.12 3.2 }
       }
     ]
   }
-  DEF WALL_00019 Solid {
-    translation 3.8463 111.3194 1.6000
+  DEF WALL_00014 Solid {
+    translation 3.8252 112.0691 1.6000
     rotation 0 0 1 -3.10543
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.88 0.84 0.78
+          baseColor 0.742 0.84 0.605
           roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 6.1581 0.12 3.2 }
+        geometry Box { size 4.6668 0.12 3.2 }
       }
     ]
   }
-      DEF WALL_00022 Solid {
-    translation 12.7889 115.9948 1.6000
+  DEF WALL_00015 Solid {
+    translation 1.1340 122.5927 1.6000
+    rotation 0 0 1 1.60466
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.742 0.84 0.605
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 21.2281 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00016 Solid {
+    translation 7.6247 133.5018 1.6000
+    rotation 0 0 1 0.04393
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.742 0.84 0.605
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 13.7133 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00017 Solid {
+    translation 14.8280 125.3161 1.6000
+    rotation 0 0 1 -1.52919
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.742 0.84 0.605
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 16.9885 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00018 Solid {
+    translation 12.3845 116.7311 1.6000
     rotation 0 0 1 -3.10653
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.8 0.55 0.42
+          baseColor 0.742 0.84 0.605
           roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 6.3503 0.12 3.2 }
+        geometry Box { size 5.5972 0.12 3.2 }
       }
     ]
   }
-  DEF WALL_00023 Solid {
-    translation 13.3658 106.2543 1.6000
-    rotation 0 0 1 1.60793
+  DEF WALL_00019 Solid {
+    translation 7.8243 116.5626 1.6000
+    rotation 0 0 1 -3.10169
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.2 0.3 0.55
-          roughness 0.65
+          baseColor 0.742 0.84 0.605
+          roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 10.3599 0.12 3.2 }
+        geometry Box { size 3.5294 0.12 3.2 }
       }
     ]
   }
-  DEF WALL_00024 Solid {
-    translation 15.2890 111.4863 1.6000
+  DEF WALL_00020 Solid {
+    translation 15.3170 110.7368 1.6000
     rotation 0 0 1 0.02631
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.95 0.93 0.9
-          roughness 0.55
+          baseColor 0.84 0.605 0.811
+          roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 4.2324 0.12 3.2 }
+        geometry Box { size 2.7326 0.12 3.2 }
       }
     ]
   }
-  DEF WALL_00025 Solid {
-    translation 17.5967 106.4213 1.6000
+  DEF WALL_00021 Solid {
+    translation 16.8473 106.3917 1.6000
     rotation 0 0 1 -1.53326
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.4 0.42 0.46
-          roughness 0.4
-          metalness 0.15
+          baseColor 0.84 0.605 0.811
+          roughness 0.85
+          metalness 0.0
         }
-        geometry Box { size 10.2486 0.12 3.2 }
+        geometry Box { size 8.7682 0.12 3.2 }
       }
     ]
   }
-  DEF WALL_00026 Solid {
-    translation 15.6736 101.1893 1.6000
+  DEF WALL_00022 Solid {
+    translation 15.6456 101.9388 1.6000
     rotation 0 0 1 -3.08902
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.86 0.8 0.72
-          roughness 0.8
-          metalness 0.0
-        }
-        geometry Box { size 4.2368 0.12 3.2 }
-      }
-    ]
-  }
-  DEF WALL_00027 Solid {
-    translation 34.8089 71.6895 1.6000
-    rotation 0 0 1 -3.09913
-    children [
-      Shape {
-        appearance PBRAppearance {
-          baseColor 0.6 0.72 0.62
+          baseColor 0.84 0.605 0.811
           roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 20.9812 0.12 3.2 }
+        geometry Box { size 2.7363 0.12 3.2 }
       }
     ]
   }
-  DEF WALL_00028 Solid {
-    translation 23.6066 90.5582 1.6000
+  DEF WALL_00023 Solid {
+    translation 14.1153 106.2839 1.6000
+    rotation 0 0 1 1.60793
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.84 0.605 0.811
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 8.8401 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00024 Solid {
+    translation 24.3559 90.5901 1.6000
     rotation 0 0 1 1.60812
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.45 0.18 0.22
-          roughness 0.75
+          baseColor 0.605 0.84 0.801
+          roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 38.6549 0.12 3.2 }
+        geometry Box { size 37.1548 0.12 3.2 }
       }
     ]
   }
-  DEF WALL_00029 Solid {
-    translation 33.3665 110.3175 1.6000
+  DEF WALL_00025 Solid {
+    translation 33.3945 109.5680 1.6000
     rotation 0 0 1 0.04246
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.66 0.71 0.78
-          roughness 0.7
-          metalness 0.0
-        }
-        geometry Box { size 20.9812 0.12 3.2 }
-      }
-    ]
-  }
-    DEF WALL_00031 Solid {
-    translation 13.3658 32.5608 1.6000
-    rotation 0 0 1 1.60380
-    children [
-      Shape {
-        appearance PBRAppearance {
-          baseColor 0.88 0.84 0.78
+          baseColor 0.605 0.84 0.801
           roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 17.4866 0.12 3.2 }
+        geometry Box { size 19.4811 0.12 3.2 }
       }
     ]
   }
-  DEF WALL_00032 Solid {
-    translation 15.5774 41.4107 1.6000
+  DEF WALL_00026 Solid {
+    translation 43.8195 91.4170 1.6000
+    rotation 0 0 1 -1.53347
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.605 0.84 0.801
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 37.1548 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00027 Solid {
+    translation 34.7809 72.4390 1.6000
+    rotation 0 0 1 -3.09913
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.605 0.84 0.801
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 19.4811 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00028 Solid {
+    translation 15.6043 40.6611 1.6000
     rotation 0 0 1 0.04450
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.92 0.9 0.85
-          roughness 0.3
-          metalness 0.1
+          baseColor 0.84 0.732 0.605
+          roughness 0.85
+          metalness 0.0
         }
-        geometry Box { size 5.0051 0.12 3.2 }
+        geometry Box { size 3.5092 0.12 3.2 }
       }
     ]
   }
-  DEF WALL_00033 Solid {
-    translation 18.4141 32.7834 1.6000
+  DEF WALL_00029 Solid {
+    translation 17.6648 32.7504 1.6000
     rotation 0 0 1 -1.53230
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.92 0.9 0.86
+          baseColor 0.84 0.732 0.605
           roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 17.4901 0.12 3.2 }
+        geometry Box { size 15.9894 0.12 3.2 }
       }
     ]
   }
-  DEF WALL_00034 Solid {
-    translation 16.2025 23.9336 1.6000
+  DEF WALL_00030 Solid {
+    translation 16.1757 24.6831 1.6000
     rotation 0 0 1 -3.09793
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.8 0.55 0.42
+          baseColor 0.84 0.732 0.605
           roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 5.1012 0.12 3.2 }
+        geometry Box { size 3.5970 0.12 3.2 }
       }
     ]
   }
-  DEF WALL_00035 Solid {
-    translation 5.7213 58.7765 1.6000
-    rotation 0 0 1 -3.10599
+  DEF WALL_00031 Solid {
+    translation 14.1152 32.5938 1.6000
+    rotation 0 0 1 1.60380
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.2 0.3 0.55
-          roughness 0.65
+          baseColor 0.84 0.732 0.605
+          roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 6.2542 0.12 3.2 }
+        geometry Box { size 15.9872 0.12 3.2 }
       }
     ]
   }
-  DEF WALL_00036 Solid {
-    translation 2.3558 66.2905 1.6000
+  DEF WALL_00032 Solid {
+    translation 3.1052 66.3241 1.6000
     rotation 0 0 1 1.60231
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.95 0.93 0.9
-          roughness 0.55
+          baseColor 0.663 0.605 0.84
+          roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 15.2583 0.12 3.2 }
+        geometry Box { size 13.7721 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00033 Solid {
+    translation 5.2184 73.3332 1.6000
+    rotation 0 0 1 0.05421
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.663 0.605 0.84
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 4.6673 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00034 Solid {
+    translation 7.8087 66.5351 1.6000
+    rotation 0 0 1 -1.53326
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.663 0.605 0.84
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 13.8589 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00035 Solid {
+    translation 5.6955 59.5260 1.6000
+    rotation 0 0 1 -3.10599
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.663 0.605 0.84
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 4.7496 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00036 Solid {
+    translation 2.6722 79.2999 1.6000
+    rotation 0 0 1 1.60677
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.615 0.84 0.605
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 9.1934 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00037 Solid {
-    translation 5.1925 74.0829 1.6000
+    translation 4.8348 84.0200 1.6000
     rotation 0 0 1 0.05421
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.4 0.42 0.46
-          roughness 0.4
-          metalness 0.15
+          baseColor 0.615 0.84 0.605
+          roughness 0.85
+          metalness 0.0
         }
-        geometry Box { size 6.1631 0.12 3.2 }
+        geometry Box { size 4.6629 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00038 Solid {
-    translation 8.5580 66.5688 1.6000
-    rotation 0 0 1 -1.53326
-    children [
-      Shape {
-        appearance PBRAppearance {
-          baseColor 0.86 0.8 0.72
-          roughness 0.8
-          metalness 0.0
-        }
-        geometry Box { size 15.3729 0.12 3.2 }
-      }
-    ]
-  }
-    DEF WALL_00040 Solid {
-    translation 4.8079 84.7696 1.6000
-    rotation 0 0 1 0.05421
-    children [
-      Shape {
-        appearance PBRAppearance {
-          baseColor 0.45 0.18 0.22
-          roughness 0.75
-          metalness 0.0
-        }
-        geometry Box { size 6.1631 0.12 3.2 }
-      }
-    ]
-  }
-  DEF WALL_00041 Solid {
-    translation 8.0772 79.5932 1.6000
+    translation 7.3282 79.5526 1.6000
     rotation 0 0 1 -1.53482
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.66 0.71 0.78
-          roughness 0.7
-          metalness 0.0
-        }
-        geometry Box { size 10.6936 0.12 3.2 }
-      }
-    ]
-  }
-  DEF WALL_00042 Solid {
-    translation 4.0867 37.9598 1.6000
-    rotation 0 0 1 0.00000
-    children [
-      Shape {
-        appearance PBRAppearance {
-          baseColor 0.55 0.58 0.62
-          roughness 0.45
-          metalness 0.3
-        }
-        geometry Box { size 1.4424 0.12 3.2 }
-      }
-    ]
-  }
-  DEF WALL_00043 Solid {
-    translation 4.7598 39.5182 1.6000
-    rotation 0 0 1 1.60164
-    children [
-      Shape {
-        appearance PBRAppearance {
-          baseColor 0.88 0.84 0.78
+          baseColor 0.615 0.84 0.605
           roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 3.1184 0.12 3.2 }
+        geometry Box { size 9.1934 0.12 3.2 }
       }
     ]
   }
-  DEF WALL_00044 Solid {
-    translation 8.8945 41.2437 1.6000
-    rotation 0 0 1 0.03990
-    children [
-      Shape {
-        appearance PBRAppearance {
-          baseColor 0.92 0.9 0.85
-          roughness 0.3
-          metalness 0.1
-        }
-        geometry Box { size 8.3723 0.12 3.2 }
-      }
-    ]
-  }
-  DEF WALL_00045 Solid {
-    translation 13.4256 31.5191 1.6000
-    rotation 0 0 1 -1.53560
-    children [
-      Shape {
-        appearance PBRAppearance {
-          baseColor 0.92 0.9 0.86
-          roughness 0.85
-          metalness 0.0
-        }
-        geometry Box { size 19.7954 0.12 3.2 }
-      }
-    ]
-  }
-  DEF WALL_00046 Solid {
-    translation 14.1714 10.3368 1.6000
-    rotation 0 0 1 -1.53560
-    children [
-      Shape {
-        appearance PBRAppearance {
-          baseColor 0.8 0.55 0.42
-          roughness 0.85
-          metalness 0.0
-        }
-        geometry Box { size 19.7954 0.12 3.2 }
-      }
-    ]
-  }
-        DEF WALL_00050 Solid {
-    translation 24.5681 63.9528 1.6000
-    rotation 0 0 1 1.60375
-    children [
-      Shape {
-        appearance PBRAppearance {
-          baseColor 0.86 0.8 0.72
-          roughness 0.8
-          metalness 0.0
-        }
-        geometry Box { size 14.5908 0.12 3.2 }
-      }
-    ]
-  }
-      DEF WALL_00053 Solid {
-    translation 4.3271 98.0166 1.6000
+  DEF WALL_00039 Solid {
+    translation 5.1655 74.8326 1.6000
     rotation 0 0 1 -3.08738
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.66 0.71 0.78
-          roughness 0.7
+          baseColor 0.615 0.84 0.605
+          roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 6.1631 0.12 3.2 }
+        geometry Box { size 4.6629 0.12 3.2 }
       }
     ]
   }
-    DEF WALL_00055 Solid {
-    translation 7.1637 104.8072 1.6000
+  DEF WALL_00040 Solid {
+    translation 5.5328 38.7834 1.6000
+    rotation 0 0 1 1.60164
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.84 0.605 0.683
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 3.1487 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00041 Solid {
+    translation 8.9193 40.4941 1.6000
+    rotation 0 0 1 0.03990
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.84 0.605 0.683
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 6.8756 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00042 Solid {
+    translation 13.0492 20.8960 1.6000
+    rotation 0 0 1 -1.53560
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.84 0.605 0.683
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 39.4948 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00043 Solid {
+    translation 9.5892 0.9722 1.6000
+    rotation 0 0 1 -3.09622
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.84 0.605 0.683
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 8.3182 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00044 Solid {
+    translation 4.7885 18.9967 1.6000
+    rotation 0 0 1 1.60625
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.84 0.605 0.683
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 36.4491 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00045 Solid {
+    translation 4.8620 37.2098 1.6000
+    rotation 0 0 1 0.00000
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.84 0.605 0.683
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 1.4388 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00046 Solid {
+    translation 44.7810 64.8116 1.6000
+    rotation 0 0 1 -1.53784
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.605 0.752 0.84
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 13.0907 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00047 Solid {
+    translation 35.2649 57.8563 1.6000
+    rotation 0 0 1 -3.09913
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.605 0.752 0.84
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 19.4811 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00048 Solid {
+    translation 25.3175 63.9847 1.6000
+    rotation 0 0 1 1.60375
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.605 0.752 0.84
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 13.0907 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00049 Solid {
+    translation 34.8336 70.9399 1.6000
+    rotation 0 0 1 0.04246
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.605 0.752 0.84
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 19.4811 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00050 Solid {
+    translation 1.7589 104.5628 1.6000
+    rotation 0 0 1 1.60677
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.821 0.84 0.605
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 11.8534 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00051 Solid {
+    translation 3.8734 110.5699 1.6000
+    rotation 0 0 1 0.03616
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.821 0.84 0.605
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 4.6583 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00052 Solid {
+    translation 6.2950 108.0635 1.6000
     rotation 0 0 1 -1.53452
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.88 0.84 0.78
+          baseColor 0.821 0.84 0.605
           roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 13.2558 0.12 3.2 }
+        geometry Box { size 5.1846 0.12 3.2 }
       }
     ]
   }
-    DEF WALL_00057 Solid {
-    translation 7.6445 91.5601 1.6000
+  DEF WALL_00053 Solid {
+    translation 6.5338 101.4832 1.6000
     rotation 0 0 1 -1.53452
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.92 0.9 0.86
+          baseColor 0.821 0.84 0.605
           roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 13.2558 0.12 3.2 }
+        geometry Box { size 5.1846 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00054 Solid {
+    translation 4.3000 98.7663 1.6000
+    rotation 0 0 1 -3.08738
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.821 0.84 0.605
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 4.6626 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00055 Solid {
+    translation 2.2395 91.2668 1.6000
+    rotation 0 0 1 1.60707
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.791 0.605 0.84
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 11.7555 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00056 Solid {
+    translation 4.3543 97.2670 1.6000
+    rotation 0 0 1 0.05421
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.791 0.605 0.84
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 4.6629 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00057 Solid {
+    translation 6.8955 91.5195 1.6000
+    rotation 0 0 1 -1.53452
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.791 0.605 0.84
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 11.7555 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00058 Solid {
-    translation 19.4237 21.3176 1.6000
-    rotation 0 0 1 0.04450
+    translation 4.7806 85.5192 1.6000
+    rotation 0 0 1 -3.08738
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.8 0.55 0.42
+          baseColor 0.791 0.605 0.84
           roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 2.5026 0.12 3.2 }
+        geometry Box { size 4.6629 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00059 Solid {
-    translation 20.7699 19.7591 1.6000
+    translation 20.0206 19.7264 1.6000
     rotation 0 0 1 -1.51129
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.2 0.3 0.55
-          roughness 0.65
+          baseColor 0.605 0.84 0.722
+          roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 3.2340 0.12 3.2 }
+        geometry Box { size 1.7326 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00060 Solid {
-    translation 19.5680 18.0893 1.6000
+    translation 19.5345 18.8386 1.6000
     rotation 0 0 1 -3.09874
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.95 0.93 0.9
-          roughness 0.55
+          baseColor 0.605 0.84 0.722
+          roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 2.5986 0.12 3.2 }
+        geometry Box { size 1.0762 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00061 Solid {
-    translation 18.2218 19.6478 1.6000
+    translation 18.9711 19.6805 1.6000
     rotation 0 0 1 1.60057
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.4 0.42 0.46
-          roughness 0.4
-          metalness 0.15
-        }
-        geometry Box { size 3.2297 0.12 3.2 }
-      }
-    ]
-  }
-    DEF WALL_00063 Solid {
-    translation 8.9323 55.9816 1.6000
-    rotation 0 0 1 -1.54127
-    children [
-      Shape {
-        appearance PBRAppearance {
-          baseColor 0.6 0.72 0.62
+          baseColor 0.605 0.84 0.722
           roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 5.8150 0.12 3.2 }
+        geometry Box { size 1.7308 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00062 Solid {
+    translation 19.4572 20.5683 1.6000
+    rotation 0 0 1 0.04450
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.605 0.84 0.722
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 1.0247 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00063 Solid {
+    translation 4.4248 49.6214 1.6000
+    rotation 0 0 1 -3.06457
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.84 0.653 0.605
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 1.4537 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00064 Solid {
-    translation 9.1453 48.7697 1.6000
-    rotation 0 0 1 -1.54127
+    translation 3.5375 53.7540 1.6000
+    rotation 0 0 1 1.60960
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.45 0.18 0.22
-          roughness 0.75
+          baseColor 0.84 0.653 0.605
+          roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 5.8150 0.12 3.2 }
+        geometry Box { size 8.3833 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00065 Solid {
-    translation 6.8752 45.7521 1.6000
+    translation 5.7470 58.0269 1.6000
+    rotation 0 0 1 0.03561
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.84 0.653 0.605
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 4.7472 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00066 Solid {
+    translation 8.2894 52.3446 1.6000
+    rotation 0 0 1 -1.54127
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.84 0.653 0.605
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 11.5386 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00067 Solid {
+    translation 6.8530 46.5019 1.6000
     rotation 0 0 1 -3.09438
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.66 0.71 0.78
-          roughness 0.7
-          metalness 0.0
-        }
-        geometry Box { size 4.7170 0.12 3.2 }
-      }
-    ]
-  }
-      DEF WALL_00068 Solid {
-    translation 14.2793 7.0131 1.6000
-    rotation 0 0 1 1.60738
-    children [
-      Shape {
-        appearance PBRAppearance {
-          baseColor 0.92 0.9 0.85
-          roughness 0.3
-          metalness 0.1
-        }
-        geometry Box { size 13.1444 0.12 3.2 }
-      }
-    ]
-  }
-  DEF WALL_00069 Solid {
-    translation 20.1930 13.8592 1.6000
-    rotation 0 0 1 0.04519
-    children [
-      Shape {
-        appearance PBRAppearance {
-          baseColor 0.92 0.9 0.86
+          baseColor 0.84 0.653 0.605
           roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 12.3207 0.12 3.2 }
+        geometry Box { size 3.2169 0.12 3.2 }
       }
     ]
   }
-  DEF WALL_00070 Solid {
-    translation 22.7892 113.1005 1.6000
+  DEF WALL_00068 Solid {
+    translation 5.1979 48.0517 1.6000
     rotation 0 0 1 1.60057
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.8 0.55 0.42
+          baseColor 0.84 0.653 0.605
           roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 6.4594 0.12 3.2 }
+        geometry Box { size 3.2528 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00069 Solid {
+    translation 46.7521 8.3199 1.6000
+    rotation 0 0 1 -1.54152
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.605 0.625 0.84
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 11.6435 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00070 Solid {
+    translation 31.0821 1.8628 1.6000
+    rotation 0 0 1 -3.10135
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.605 0.625 0.84
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 31.7065 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00071 Solid {
-    translation 27.0201 116.4957 1.6000
-    rotation 0 0 1 0.03857
+    translation 15.0287 7.0451 1.6000
+    rotation 0 0 1 1.60738
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.2 0.3 0.55
-          roughness 0.65
+          baseColor 0.605 0.625 0.84
+          roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 8.6606 0.12 3.2 }
+        geometry Box { size 11.6481 0.12 3.2 }
       }
     ]
   }
-      DEF WALL_00074 Solid {
-    translation 11.2504 83.2111 1.6000
-    rotation 0 0 1 1.60499
+  DEF WALL_00072 Solid {
+    translation 20.5968 13.1267 1.6000
+    rotation 0 0 1 0.04519
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.86 0.8 0.72
-          roughness 0.8
+          baseColor 0.605 0.625 0.84
+          roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 11.2499 0.12 3.2 }
+        geometry Box { size 11.5741 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00073 Solid {
+    translation 36.4798 13.7636 1.6000
+    rotation 0 0 1 0.03716
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.605 0.625 0.84
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 20.2178 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00074 Solid {
+    translation 23.5860 111.5425 1.6000
+    rotation 0 0 1 1.60057
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.693 0.84 0.605
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 1.7782 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00075 Solid {
-    translation 13.0401 88.9037 1.6000
-    rotation 0 0 1 0.03579
+    translation 23.4913 114.7193 1.6000
+    rotation 0 0 1 1.60057
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.6 0.72 0.62
+          baseColor 0.693 0.84 0.605
           roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 3.9666 0.12 3.2 }
+        geometry Box { size 1.7782 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00076 Solid {
-    translation 18.4033 89.0958 1.6000
-    rotation 0 0 1 0.03579
+    translation 27.7944 115.7751 1.6000
+    rotation 0 0 1 0.03857
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.45 0.18 0.22
-          roughness 0.75
+          baseColor 0.693 0.84 0.605
+          roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 3.9666 0.12 3.2 }
+        geometry Box { size 8.6655 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00077 Solid {
-    translation 20.5776 83.6007 1.6000
-    rotation 0 0 1 -1.53626
+    translation 31.7873 125.1842 1.6000
+    rotation 0 0 1 1.60721
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.66 0.71 0.78
-          roughness 0.7
+          baseColor 0.693 0.84 0.605
+          roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 11.1386 0.12 3.2 }
+        geometry Box { size 18.4963 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00078 Solid {
-    translation 16.1063 77.8121 1.6000
-    rotation 0 0 1 -3.09389
+    translation 36.8548 134.6706 1.6000
+    rotation 0 0 1 0.04519
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.55 0.58 0.62
-          roughness 0.45
-          metalness 0.3
+          baseColor 0.693 0.84 0.605
+          roughness 0.85
+          metalness 0.0
         }
-        geometry Box { size 9.3379 0.12 3.2 }
+        geometry Box { size 10.8193 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00079 Solid {
-    translation 15.0005 91.4488 1.6000
-    rotation 0 0 1 -3.09926
+    translation 42.6656 123.1977 1.6000
+    rotation 0 0 1 -1.53610
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.88 0.84 0.78
+          baseColor 0.693 0.84 0.605
           roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 7.8920 0.12 3.2 }
+        geometry Box { size 23.4486 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00080 Solid {
-    translation 10.9138 94.7884 1.6000
-    rotation 0 0 1 1.61191
+    translation 33.3424 111.0671 1.6000
+    rotation 0 0 1 -3.09913
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.92 0.9 0.85
-          roughness 0.3
-          metalness 0.1
+          baseColor 0.693 0.84 0.605
+          roughness 0.85
+          metalness 0.0
         }
-        geometry Box { size 7.0191 0.12 3.2 }
+        geometry Box { size 19.4774 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00081 Solid {
-    translation 15.4332 98.4619 1.6000
+    translation 15.7475 88.2502 1.6000
     rotation 0 0 1 0.03579
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.92 0.9 0.86
+          baseColor 0.84 0.605 0.762
           roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 9.3332 0.12 3.2 }
+        geometry Box { size 7.8335 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00082 Solid {
-    translation 20.1930 95.1223 1.6000
-    rotation 0 0 1 -1.54338
+    translation 19.8282 83.5695 1.6000
+    rotation 0 0 1 -1.53626
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.8 0.55 0.42
+          baseColor 0.84 0.605 0.762
           roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 7.0158 0.12 3.2 }
+        geometry Box { size 9.6475 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00083 Solid {
-    translation 19.6160 91.6158 1.6000
-    rotation 0 0 1 3.14159
+    translation 16.0805 78.5617 1.6000
+    rotation 0 0 1 -3.09389
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.2 0.3 0.55
-          roughness 0.65
+          baseColor 0.84 0.605 0.762
+          roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 1.3462 0.12 3.2 }
+        geometry Box { size 7.8375 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00084 Solid {
-    translation 16.9717 54.2124 1.6000
-    rotation 0 0 1 0.04770
+    translation 11.9997 83.2425 1.6000
+    rotation 0 0 1 1.60499
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.95 0.93 0.9
-          roughness 0.55
+          baseColor 0.84 0.605 0.762
+          roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 9.3379 0.12 3.2 }
+        geometry Box { size 9.7409 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00085 Solid {
-    translation 21.7796 50.4832 1.6000
-    rotation 0 0 1 -1.53431
+    translation 11.6633 94.8177 1.6000
+    rotation 0 0 1 1.61191
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.4 0.42 0.46
-          roughness 0.4
-          metalness 0.15
+          baseColor 0.605 0.831 0.84
+          roughness 0.85
+          metalness 0.0
         }
-        geometry Box { size 7.9089 0.12 3.2 }
+        geometry Box { size 5.5142 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00086 Solid {
-    translation 19.9418 46.4604 1.6000
-    rotation 0 0 1 -3.10580
+    translation 13.1546 97.6299 1.6000
+    rotation 0 0 1 0.03579
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.86 0.8 0.72
-          roughness 0.8
+          baseColor 0.605 0.831 0.84
+          roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 3.9666 0.12 3.2 }
+        geometry Box { size 3.2115 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00087 Solid {
-    translation 14.5786 46.2684 1.6000
-    rotation 0 0 1 -3.10580
+    translation 17.7631 97.7949 1.6000
+    rotation 0 0 1 0.03579
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.6 0.72 0.62
+          baseColor 0.605 0.831 0.84
           roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 3.9666 0.12 3.2 }
+        geometry Box { size 3.2115 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00088 Solid {
-    translation 12.4523 50.0936 1.6000
-    rotation 0 0 1 1.60780
+    translation 19.4431 95.1090 1.6000
+    rotation 0 0 1 -1.54338
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.45 0.18 0.22
-          roughness 0.75
+          baseColor 0.605 0.831 0.84
+          roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 7.7977 0.12 3.2 }
+        geometry Box { size 5.4886 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00089 Solid {
-    translation 16.2986 73.3593 1.6000
-    rotation 0 0 1 2.42496
+    translation 19.2227 92.3658 1.6000
+    rotation 0 0 1 3.14159
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.66 0.71 0.78
-          roughness 0.7
+          baseColor 0.605 0.831 0.84
+          roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 12.8801 0.12 3.2 }
+        geometry Box { size 0.5912 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00090 Solid {
-    translation 20.9622 73.5820 1.6000
-    rotation 0 0 1 -1.52763
+    translation 15.3518 92.2143 1.6000
+    rotation 0 0 1 -3.09926
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.55 0.58 0.62
-          roughness 0.45
-          metalness 0.3
+          baseColor 0.605 0.831 0.84
+          roughness 0.85
+          metalness 0.0
         }
-        geometry Box { size 8.9139 0.12 3.2 }
+        geometry Box { size 7.1569 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00091 Solid {
-    translation 16.4909 68.9066 1.6000
-    rotation 0 0 1 -3.09389
+    translation 21.0302 50.4519 1.6000
+    rotation 0 0 1 -1.53431
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.88 0.84 0.78
+          baseColor 0.84 0.781 0.605
           roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 9.3379 0.12 3.2 }
+        geometry Box { size 6.4000 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00092 Solid {
-    translation 11.6350 73.1924 1.6000
-    rotation 0 0 1 1.61343
+    translation 17.2326 47.1139 1.6000
+    rotation 0 0 1 -3.10580
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.92 0.9 0.85
-          roughness 0.3
-          metalness 0.1
+          baseColor 0.84 0.781 0.605
+          roughness 0.85
+          metalness 0.0
         }
-        geometry Box { size 9.0251 0.12 3.2 }
+        geometry Box { size 7.8336 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00093 Solid {
-    translation 21.2988 64.3425 1.6000
-    rotation 0 0 1 -1.54067
+    translation 13.2017 50.1249 1.6000
+    rotation 0 0 1 1.60780
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.92 0.9 0.86
+          baseColor 0.84 0.781 0.605
           roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 9.5778 0.12 3.2 }
+        geometry Box { size 6.3066 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00094 Solid {
-    translation 16.7794 59.3331 1.6000
-    rotation 0 0 1 -3.09389
+    translation 16.9993 53.4629 1.6000
+    rotation 0 0 1 0.04770
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.8 0.55 0.42
+          baseColor 0.84 0.781 0.605
           roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 9.3379 0.12 3.2 }
+        geometry Box { size 7.8374 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00095 Solid {
-    translation 12.0542 61.1540 1.6000
-    rotation 0 0 1 1.60092
+    translation 16.6977 77.0895 1.6000
+    rotation 0 0 1 0.04770
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.2 0.3 0.55
-          roughness 0.65
+          baseColor 0.712 0.605 0.84
+          roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 4.0889 0.12 3.2 }
+        geometry Box { size 6.7184 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00096 Solid {
-    translation 11.8889 66.6404 1.6000
-    rotation 0 0 1 1.60092
+    translation 20.1072 75.9975 1.6000
+    rotation 0 0 1 -1.52763
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.95 0.93 0.9
-          roughness 0.55
+          baseColor 0.712 0.605 0.84
+          roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 4.0889 0.12 3.2 }
+        geometry Box { size 2.5067 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00097 Solid {
-    translation 21.5392 56.9954 1.6000
-    rotation 0 0 1 -1.53326
+    translation 20.2758 72.0944 1.6000
+    rotation 0 0 1 -1.52763
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.4 0.42 0.46
-          roughness 0.4
-          metalness 0.15
+          baseColor 0.712 0.605 0.84
+          roughness 0.85
+          metalness 0.0
         }
-        geometry Box { size 5.1243 0.12 3.2 }
+        geometry Box { size 2.5067 0.12 3.2 }
       }
     ]
   }
   DEF WALL_00098 Solid {
-    translation 12.2119 56.5501 1.6000
+    translation 16.8361 73.8858 1.6000
+    rotation 0 0 1 2.42496
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.712 0.605 0.84
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 9.2670 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00099 Solid {
+    translation 12.4058 72.7209 1.6000
+    rotation 0 0 1 1.61343
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.605 0.84 0.643
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 6.5098 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00100 Solid {
+    translation 15.7697 72.8815 1.6000
+    rotation 0 0 1 -0.72311
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.605 0.84 0.643
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 9.3433 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00101 Solid {
+    translation 15.9084 69.6296 1.6000
+    rotation 0 0 1 -3.09389
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.605 0.84 0.643
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 6.7354 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00102 Solid {
+    translation 20.5495 64.3067 1.6000
+    rotation 0 0 1 -1.54067
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.84 0.605 0.635
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 8.0776 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00103 Solid {
+    translation 16.7568 60.0829 1.6000
+    rotation 0 0 1 -3.09389
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.84 0.605 0.635
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 7.8376 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00104 Solid {
+    translation 12.7208 63.9329 1.6000
+    rotation 0 0 1 1.60092
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.84 0.605 0.635
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 8.0776 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00105 Solid {
+    translation 16.5135 68.1568 1.6000
+    rotation 0 0 1 0.04770
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.84 0.605 0.635
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 7.8376 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00106 Solid {
+    translation 20.7900 56.9596 1.6000
+    rotation 0 0 1 -1.53326
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.605 0.703 0.84
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 3.6242 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00107 Solid {
+    translation 16.9436 54.9619 1.6000
+    rotation 0 0 1 -3.09389
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.605 0.703 0.84
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 7.8378 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00108 Solid {
+    translation 12.9611 56.5859 1.6000
     rotation 0 0 1 1.60833
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.86 0.8 0.72
-          roughness 0.8
+          baseColor 0.605 0.703 0.84
+          roughness 0.85
           metalness 0.0
         }
-        geometry Box { size 5.1243 0.12 3.2 }
+        geometry Box { size 3.6242 0.12 3.2 }
+      }
+    ]
+  }
+  DEF WALL_00109 Solid {
+    translation 16.8076 58.5836 1.6000
+    rotation 0 0 1 0.04770
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.605 0.703 0.84
+          roughness 0.85
+          metalness 0.0
+        }
+        geometry Box { size 7.8378 0.12 3.2 }
       }
     ]
   }
   DEF PWALL_00000 Solid {
-    translation 25.5778 35.3995 0.4250
+    translation 26.3272 35.4293 0.4250
     rotation 0 0 1 1.60696
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.8 0.55 0.42
+          baseColor 0.605 0.673 0.84
           roughness 0.85
           metalness 0.0
         }
@@ -1190,12 +1597,12 @@ DEF WALLS Group {
     ]
   }
   DEF PWALL_00001 Solid {
-    translation 25.5778 35.3995 2.7250
+    translation 26.3272 35.4293 2.7250
     rotation 0 0 1 1.60696
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.6 0.72 0.62
+          baseColor 0.605 0.673 0.84
           roughness 0.85
           metalness 0.0
         }
@@ -1204,55 +1611,55 @@ DEF WALLS Group {
     ]
   }
   DEF PWALL_00002 Solid {
-    translation 13.7985 20.9280 0.4250
-    rotation 0 0 1 -1.53560
+    translation 6.4144 104.7733 0.4250
+    rotation 0 0 1 -1.53452
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.92 0.9 0.85
-          roughness 0.3
-          metalness 0.1
+          baseColor 0.821 0.84 0.605
+          roughness 0.85
+          metalness 0.0
         }
         geometry Box { size 1.4000 0.12 0.8500 }
       }
     ]
   }
   DEF PWALL_00003 Solid {
-    translation 13.7985 20.9280 2.7250
-    rotation 0 0 1 -1.53560
+    translation 6.4144 104.7733 2.7250
+    rotation 0 0 1 -1.53452
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.4 0.42 0.46
-          roughness 0.4
-          metalness 0.15
+          baseColor 0.821 0.84 0.605
+          roughness 0.85
+          metalness 0.0
         }
         geometry Box { size 1.4000 0.12 0.9500 }
       }
     ]
   }
   DEF PWALL_00004 Solid {
-    translation 9.0388 52.3756 0.4250
-    rotation 0 0 1 -1.54127
+    translation 23.5387 113.1309 0.4250
+    rotation 0 0 1 1.60057
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.55 0.58 0.62
-          roughness 0.45
-          metalness 0.3
+          baseColor 0.693 0.84 0.605
+          roughness 0.85
+          metalness 0.0
         }
         geometry Box { size 1.4000 0.12 0.8500 }
       }
     ]
   }
   DEF PWALL_00005 Solid {
-    translation 9.0388 52.3756 2.7250
-    rotation 0 0 1 -1.54127
+    translation 23.5387 113.1309 2.7250
+    rotation 0 0 1 1.60057
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.2 0.3 0.55
-          roughness 0.65
+          baseColor 0.693 0.84 0.605
+          roughness 0.85
           metalness 0.0
         }
         geometry Box { size 1.4000 0.12 0.9500 }
@@ -1260,13 +1667,13 @@ DEF WALLS Group {
     ]
   }
   DEF PWALL_00006 Solid {
-    translation 15.7217 88.9997 0.4250
+    translation 15.4589 97.7124 0.4250
     rotation 0 0 1 0.03579
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.45 0.18 0.22
-          roughness 0.75
+          baseColor 0.605 0.831 0.84
+          roughness 0.85
           metalness 0.0
         }
         geometry Box { size 1.4000 0.12 0.8500 }
@@ -1274,12 +1681,12 @@ DEF WALLS Group {
     ]
   }
   DEF PWALL_00007 Solid {
-    translation 15.7217 88.9997 2.7250
+    translation 15.4589 97.7124 2.7250
     rotation 0 0 1 0.03579
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.92 0.9 0.86
+          baseColor 0.605 0.831 0.84
           roughness 0.85
           metalness 0.0
         }
@@ -1288,13 +1695,13 @@ DEF WALLS Group {
     ]
   }
   DEF PWALL_00008 Solid {
-    translation 17.2602 46.3644 0.4250
-    rotation 0 0 1 -3.10580
+    translation 20.1915 74.0460 0.4250
+    rotation 0 0 1 -1.52763
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.86 0.8 0.72
-          roughness 0.8
+          baseColor 0.712 0.605 0.84
+          roughness 0.85
           metalness 0.0
         }
         geometry Box { size 1.4000 0.12 0.8500 }
@@ -1302,41 +1709,13 @@ DEF WALLS Group {
     ]
   }
   DEF PWALL_00009 Solid {
-    translation 17.2602 46.3644 2.7250
-    rotation 0 0 1 -3.10580
+    translation 20.1915 74.0460 2.7250
+    rotation 0 0 1 -1.52763
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.88 0.84 0.78
+          baseColor 0.712 0.605 0.84
           roughness 0.85
-          metalness 0.0
-        }
-        geometry Box { size 1.4000 0.12 0.9500 }
-      }
-    ]
-  }
-  DEF PWALL_00010 Solid {
-    translation 11.9716 63.8972 0.4250
-    rotation 0 0 1 1.60092
-    children [
-      Shape {
-        appearance PBRAppearance {
-          baseColor 0.95 0.93 0.9
-          roughness 0.55
-          metalness 0.0
-        }
-        geometry Box { size 1.4000 0.12 0.8500 }
-      }
-    ]
-  }
-  DEF PWALL_00011 Solid {
-    translation 11.9716 63.8972 2.7250
-    rotation 0 0 1 1.60092
-    children [
-      Shape {
-        appearance PBRAppearance {
-          baseColor 0.66 0.71 0.78
-          roughness 0.7
           metalness 0.0
         }
         geometry Box { size 1.4000 0.12 0.9500 }
@@ -1349,7 +1728,7 @@ DEF WALLS Group {
 DEF WINDOWS Group {
   children [
 DEF WIN_00000 Solid {
-  translation 25.5778 35.3995 1.5500
+  translation 26.3272 35.4293 1.5500
   rotation 0 0 1 1.60696
   name "window_00000"
   children [
@@ -1389,8 +1768,8 @@ DEF WIN_00000 Solid {
   ]
 }
 DEF WIN_00001 Solid {
-  translation 13.7985 20.9280 1.5500
-  rotation 0 0 1 -1.53560
+  translation 6.4144 104.7733 1.5500
+  rotation 0 0 1 -1.53452
   name "window_00001"
   children [
     Shape {
@@ -1429,8 +1808,8 @@ DEF WIN_00001 Solid {
   ]
 }
 DEF WIN_00002 Solid {
-  translation 9.0388 52.3756 1.5500
-  rotation 0 0 1 -1.54127
+  translation 23.5387 113.1309 1.5500
+  rotation 0 0 1 1.60057
   name "window_00002"
   children [
     Shape {
@@ -1469,7 +1848,7 @@ DEF WIN_00002 Solid {
   ]
 }
 DEF WIN_00003 Solid {
-  translation 15.7217 88.9997 1.5500
+  translation 15.4589 97.7124 1.5500
   rotation 0 0 1 0.03579
   name "window_00003"
   children [
@@ -1509,49 +1888,9 @@ DEF WIN_00003 Solid {
   ]
 }
 DEF WIN_00004 Solid {
-  translation 17.2602 46.3644 1.5500
-  rotation 0 0 1 -3.10580
+  translation 20.1915 74.0460 1.5500
+  rotation 0 0 1 -1.52763
   name "window_00004"
-  children [
-    Shape {
-      appearance PBRAppearance {
-        baseColor 0.55 0.72 0.85
-        emissiveColor 0.10 0.16 0.22
-        roughness 0.05 metalness 0.20
-        transparency 0.55
-      }
-      geometry Box { size 1.400 0.04 1.400 }
-    }
-    Pose { translation 0 0 0.660
-      children [ Shape {
-        appearance PBRAppearance { baseColor 0.22 0.22 0.22 roughness 0.45 metalness 0.30 }
-        geometry Box { size 1.400 0.12 0.080 }
-      } ]
-    }
-    Pose { translation 0 0 -0.660
-      children [ Shape {
-        appearance PBRAppearance { baseColor 0.22 0.22 0.22 roughness 0.45 metalness 0.30 }
-        geometry Box { size 1.400 0.12 0.080 }
-      } ]
-    }
-    Pose { translation -0.660 0 0
-      children [ Shape {
-        appearance PBRAppearance { baseColor 0.22 0.22 0.22 roughness 0.45 metalness 0.30 }
-        geometry Box { size 0.080 0.12 1.400 }
-      } ]
-    }
-    Pose { translation 0.660 0 0
-      children [ Shape {
-        appearance PBRAppearance { baseColor 0.22 0.22 0.22 roughness 0.45 metalness 0.30 }
-        geometry Box { size 0.080 0.12 1.400 }
-      } ]
-    }
-  ]
-}
-DEF WIN_00005 Solid {
-  translation 11.9716 63.8972 1.5500
-  rotation 0 0 1 1.60092
-  name "window_00005"
   children [
     Shape {
       appearance PBRAppearance {
@@ -1594,7 +1933,7 @@ DEF WIN_00005 Solid {
 DEF DECORATIONS Group {
   children [
 DEF DECOR_00000 Solid {
-  translation 25.8801 24.4153 1.6500
+  translation 26.6160 24.8189 1.6500
   rotation 0 0 1 1.60696
   name "decor_00000_tv"
   children [
@@ -1610,7 +1949,7 @@ DEF DECOR_00000 Solid {
 }
 
 DEF DECOR_00001 Solid {
-  translation 25.0956 46.3771 2.3000
+  translation 25.8585 46.0332 2.3000
   rotation 0 0 1 1.60696
   name "decor_00001_sign"
   children [
@@ -1626,7 +1965,7 @@ DEF DECOR_00001 Solid {
 }
 
 DEF DECOR_00002 Solid {
-  translation 8.2248 115.7429 2.3000
+  translation 7.8277 116.4776 2.3000
   rotation 0 0 1 -3.10169
   name "decor_00002_sign"
   children [
@@ -1642,8 +1981,8 @@ DEF DECOR_00002 Solid {
 }
 
 DEF DECOR_00003 Solid {
-  translation 6.9602 113.6033 2.3000
-  rotation 0 0 1 -1.54865
+  translation 24.2710 90.5869 2.3000
+  rotation 0 0 1 1.60812
   name "decor_00003_sign"
   children [
     Shape {
@@ -1658,8 +1997,8 @@ DEF DECOR_00003 Solid {
 }
 
 DEF DECOR_00004 Solid {
-  translation 17.6817 106.4245 1.5000
-  rotation 0 0 1 -1.53326
+  translation 17.7497 32.7537 1.5000
+  rotation 0 0 1 -1.53230
   name "decor_00004_mirror"
   children [
     Shape {
@@ -1674,8 +2013,8 @@ DEF DECOR_00004 Solid {
 }
 
 DEF DECOR_00005 Solid {
-  translation 15.5734 41.5006 1.6500
-  rotation 0 0 1 0.04450
+  translation 14.2051 32.5968 1.6500
+  rotation 0 0 1 4.74539
   name "decor_00005_painting_landscape"
   children [
     Shape {
@@ -1690,8 +2029,8 @@ DEF DECOR_00005 Solid {
 }
 
 DEF DECOR_00006 Solid {
-  translation 18.4990 32.7867 2.3000
-  rotation 0 0 1 -1.53230
+  translation 7.8937 66.5383 2.3000
+  rotation 0 0 1 -1.53326
   name "decor_00006_sign"
   children [
     Shape {
@@ -1706,8 +2045,8 @@ DEF DECOR_00006 Solid {
 }
 
 DEF DECOR_00007 Solid {
-  translation 4.8447 39.5209 1.5000
-  rotation 0 0 1 4.74323
+  translation 25.2325 63.9819 1.5000
+  rotation 0 0 1 1.60375
   name "decor_00007_mirror"
   children [
     Shape {
@@ -1722,8 +2061,8 @@ DEF DECOR_00007 Solid {
 }
 
 DEF DECOR_00008 Solid {
-  translation 8.8909 41.3336 1.6500
-  rotation 0 0 1 0.03990
+  translation 6.3850 108.0667 1.6500
+  rotation 0 0 1 -1.53452
   name "decor_00008_painting_portrait"
   children [
     Shape {
@@ -1738,8 +2077,8 @@ DEF DECOR_00008 Solid {
 }
 
 DEF DECOR_00009 Solid {
-  translation 3.4124 39.4656 1.6500
-  rotation 0 0 1 4.74437
+  translation 6.9904 91.5229 1.6500
+  rotation 0 0 1 -1.53452
   name "decor_00009_tv"
   children [
     Shape {
@@ -1754,8 +2093,8 @@ DEF DECOR_00009 Solid {
 }
 
 DEF DECOR_00010 Solid {
-  translation 9.2302 48.7722 2.3000
-  rotation 0 0 1 -1.54127
+  translation 20.5929 13.2116 2.3000
+  rotation 0 0 1 0.04519
   name "decor_00010_sign"
   children [
     Shape {
@@ -1770,8 +2109,8 @@ DEF DECOR_00010 Solid {
 }
 
 DEF DECOR_00011 Solid {
-  translation 20.1889 13.9491 1.6500
-  rotation 0 0 1 0.04519
+  translation 23.4014 114.7166 1.6500
+  rotation 0 0 1 1.60057
   name "decor_00011_painting_landscape"
   children [
     Shape {
@@ -1786,8 +2125,8 @@ DEF DECOR_00011 Solid {
 }
 
 DEF DECOR_00012 Solid {
-  translation 22.7093 113.0981 1.5500
-  rotation 0 0 1 1.60057
+  translation 15.7446 88.3301 1.5500
+  rotation 0 0 1 0.03579
   name "decor_00012_poster"
   children [
     Shape {
@@ -1798,8 +2137,8 @@ DEF DECOR_00012 Solid {
 }
 
 DEF DECOR_00013 Solid {
-  translation 11.1704 83.2084 1.5500
-  rotation 0 0 1 1.60499
+  translation 19.9082 83.5722 1.5500
+  rotation 0 0 1 -1.53626
   name "decor_00013_poster"
   children [
     Shape {
@@ -1810,8 +2149,8 @@ DEF DECOR_00013 Solid {
 }
 
 DEF DECOR_00014 Solid {
-  translation 20.6576 83.6035 1.5500
-  rotation 0 0 1 -1.53626
+  translation 11.9198 83.2397 1.5500
+  rotation 0 0 1 1.60499
   name "decor_00014_poster"
   children [
     Shape {
@@ -1822,8 +2161,8 @@ DEF DECOR_00014 Solid {
 }
 
 DEF DECOR_00015 Solid {
-  translation 15.4303 98.5419 1.5500
-  rotation 0 0 1 0.03579
+  translation 19.5230 95.1112 1.5500
+  rotation 0 0 1 -1.54338
   name "decor_00015_poster"
   children [
     Shape {
@@ -1834,7 +2173,7 @@ DEF DECOR_00015 Solid {
 }
 
 DEF DECOR_00016 Solid {
-  translation 21.8695 50.4865 1.6500
+  translation 21.1202 50.4552 1.6500
   rotation 0 0 1 -1.53431
   name "decor_00016_painting_portrait"
   children [
@@ -1850,7 +2189,7 @@ DEF DECOR_00016 Solid {
 }
 
 DEF DECOR_00017 Solid {
-  translation 14.5817 46.1834 2.3000
+  translation 17.2357 47.0289 2.3000
   rotation 0 0 1 -3.10580
   name "decor_00017_sign"
   children [
@@ -1866,7 +2205,7 @@ DEF DECOR_00017 Solid {
 }
 
 DEF DECOR_00018 Solid {
-  translation 12.3674 50.0904 1.5000
+  translation 13.1168 50.1217 1.5000
   rotation 0 0 1 1.60780
   name "decor_00018_mirror"
   children [
@@ -1882,8 +2221,8 @@ DEF DECOR_00018 Solid {
 }
 
 DEF DECOR_00019 Solid {
-  translation 11.5451 73.1885 1.6500
-  rotation 0 0 1 1.61343
+  translation 20.3657 72.0983 1.6500
+  rotation 0 0 1 -1.52763
   name "decor_00019_painting_landscape"
   children [
     Shape {
@@ -1898,8 +2237,8 @@ DEF DECOR_00019 Solid {
 }
 
 DEF DECOR_00020 Solid {
-  translation 11.9743 61.1516 1.5500
-  rotation 0 0 1 1.60092
+  translation 20.6295 64.3091 1.5500
+  rotation 0 0 1 -1.54067
   name "decor_00020_poster"
   children [
     Shape {
@@ -1910,7 +2249,7 @@ DEF DECOR_00020 Solid {
 }
 
 DEF DECOR_00021 Solid {
-  translation 12.1270 56.5469 2.3000
+  translation 12.8762 56.5827 2.3000
   rotation 0 0 1 1.60833
   name "decor_00021_sign"
   children [
@@ -1931,7 +2270,7 @@ DEF DECOR_00021 Solid {
 DEF CORNER_OBJECTS Group {
   children [
 DEF CORNER_00000 Solid {
-  translation 24.8085 56.6614 0.30
+  translation 25.5850 55.9437 0.30
   name "corner_ext_00000"
   children [
     Shape {
@@ -1946,7 +2285,7 @@ DEF CORNER_00000 Solid {
 }
 
 DEF CORNER_00001 Solid {
-  translation 4.5194 45.6408 0.35
+  translation 6.0610 116.4922 0.35
   name "corner_planter_00001"
   children [
     Shape {
@@ -1966,7 +2305,7 @@ DEF CORNER_00001 Solid {
 }
 
 DEF CORNER_00002 Solid {
-  translation 3.0770 45.6408 0.30
+  translation 6.1571 112.1535 0.30
   name "corner_ext_00002"
   children [
     Shape {
@@ -1981,7 +2320,7 @@ DEF CORNER_00002 Solid {
 }
 
 DEF CORNER_00003 Solid {
-  translation 17.7891 101.3006 0.35
+  translation 25.0491 72.0256 0.35
   name "corner_planter_00003"
   children [
     Shape {
@@ -2001,7 +2340,7 @@ DEF CORNER_00003 Solid {
 }
 
 DEF CORNER_00004 Solid {
-  translation 22.8854 109.8722 0.30
+  translation 13.8514 40.5831 0.30
   name "corner_ext_00004"
   children [
     Shape {
@@ -2016,7 +2355,7 @@ DEF CORNER_00004 Solid {
 }
 
 DEF CORNER_00005 Solid {
-  translation 8.2695 74.2499 0.30
+  translation 7.1628 84.1463 0.30
   name "corner_ext_00005"
   children [
     Shape {
@@ -2031,7 +2370,7 @@ DEF CORNER_00005 Solid {
 }
 
 DEF CORNER_00006 Solid {
-  translation 4.7117 41.0767 0.35
+  translation 5.4843 40.3570 0.35
   name "corner_planter_00006"
   children [
     Shape {
@@ -2051,7 +2390,7 @@ DEF CORNER_00006 Solid {
 }
 
 DEF CORNER_00007 Solid {
-  translation 13.0774 41.4107 0.30
+  translation 12.3543 40.6312 0.30
   name "corner_ext_00007"
   children [
     Shape {
@@ -2066,7 +2405,7 @@ DEF CORNER_00007 Solid {
 }
 
 DEF CORNER_00008 Solid {
-  translation 3.2693 40.9654 0.30
+  translation 25.5332 57.4429 0.30
   name "corner_ext_00008"
   children [
     Shape {
@@ -2081,7 +2420,7 @@ DEF CORNER_00008 Solid {
 }
 
 DEF CORNER_00009 Solid {
-  translation 7.4041 98.1836 0.30
+  translation 25.1018 70.5265 0.30
   name "corner_ext_00009"
   children [
     Shape {
@@ -2096,7 +2435,7 @@ DEF CORNER_00009 Solid {
 }
 
 DEF CORNER_00010 Solid {
-  translation 20.6738 21.3732 0.35
+  translation 6.6279 98.8926 0.35
   name "corner_planter_00010"
   children [
     Shape {
@@ -2116,7 +2455,7 @@ DEF CORNER_00010 Solid {
 }
 
 DEF CORNER_00011 Solid {
-  translation 18.2698 18.0337 0.30
+  translation 7.1087 85.6456 0.30
   name "corner_ext_00011"
   children [
     Shape {
@@ -2131,7 +2470,7 @@ DEF CORNER_00011 Solid {
 }
 
 DEF CORNER_00012 Solid {
-  translation 14.0389 13.5809 0.30
+  translation 20.0721 18.8616 0.30
   name "corner_ext_00012"
   children [
     Shape {
@@ -2146,7 +2485,7 @@ DEF CORNER_00012 Solid {
 }
 
 DEF CORNER_00013 Solid {
-  translation 22.6931 116.3288 0.30
+  translation 18.9969 18.8155 0.30
   name "corner_ext_00013"
   children [
     Shape {
@@ -2161,7 +2500,7 @@ DEF CORNER_00013 Solid {
 }
 
 DEF CORNER_00014 Solid {
-  translation 20.3853 89.1667 0.35
+  translation 8.4597 46.5778 0.35
   name "corner_planter_00014"
   children [
     Shape {
@@ -2181,7 +2520,7 @@ DEF CORNER_00014 Solid {
 }
 
 DEF CORNER_00015 Solid {
-  translation 20.7699 78.0348 0.30
+  translation 5.2463 46.4260 0.30
   name "corner_ext_00015"
   children [
     Shape {
@@ -2196,7 +2535,7 @@ DEF CORNER_00015 Solid {
 }
 
 DEF CORNER_00016 Solid {
-  translation 10.7696 98.2949 0.30
+  translation 23.6124 110.6538 0.30
   name "corner_ext_00016"
   children [
     Shape {
@@ -2211,7 +2550,7 @@ DEF CORNER_00016 Solid {
 }
 
 DEF CORNER_00017 Solid {
-  translation 20.2891 91.6158 0.35
+  translation 11.8332 88.1100 0.35
   name "corner_planter_00017"
   children [
     Shape {
@@ -2231,7 +2570,7 @@ DEF CORNER_00017 Solid {
 }
 
 DEF CORNER_00018 Solid {
-  translation 21.6353 54.4350 0.30
+  translation 19.9948 78.7486 0.30
   name "corner_ext_00018"
   children [
     Shape {
@@ -2246,7 +2585,7 @@ DEF CORNER_00018 Solid {
 }
 
 DEF CORNER_00019 Solid {
-  translation 21.9238 46.5314 0.30
+  translation 12.1663 78.3749 0.30
   name "corner_ext_00019"
   children [
     Shape {
@@ -2261,8 +2600,158 @@ DEF CORNER_00019 Solid {
 }
 
 DEF CORNER_00020 Solid {
-  translation 12.1158 59.1104 0.35
+  translation 20.9135 53.6497 0.35
   name "corner_planter_00020"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.30 0.22 0.15 roughness 0.85 metalness 0 }
+      geometry Cylinder { radius 0.35 height 0.7 }
+    }
+    Pose {
+      translation 0 0 0.7
+      children [
+        Shape {
+          appearance PBRAppearance { baseColor 0.22 0.55 0.22 roughness 0.95 metalness 0 }
+          geometry Sphere { radius 0.45 }
+        }
+      ]
+    }
+  ]
+}
+
+DEF CORNER_00021 Solid {
+  translation 21.1469 47.2540 0.30
+  name "corner_ext_00021"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
+}
+
+DEF CORNER_00022 Solid {
+  translation 20.0531 77.2497 0.35
+  name "corner_planter_00022"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.30 0.22 0.15 roughness 0.85 metalness 0 }
+      geometry Cylinder { radius 0.35 height 0.7 }
+    }
+    Pose {
+      translation 0 0 0.7
+      children [
+        Shape {
+          appearance PBRAppearance { baseColor 0.22 0.55 0.22 roughness 0.95 metalness 0 }
+          geometry Sphere { radius 0.45 }
+        }
+      ]
+    }
+  ]
+}
+
+DEF CORNER_00023 Solid {
+  translation 12.5445 69.4690 0.35
+  name "corner_planter_00023"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.30 0.22 0.15 roughness 0.85 metalness 0 }
+      geometry Cylinder { radius 0.35 height 0.7 }
+    }
+    Pose {
+      translation 0 0 0.7
+      children [
+        Shape {
+          appearance PBRAppearance { baseColor 0.22 0.55 0.22 roughness 0.95 metalness 0 }
+          geometry Sphere { radius 0.45 }
+        }
+      ]
+    }
+  ]
+}
+
+DEF CORNER_00024 Solid {
+  translation 12.2671 75.9729 0.35
+  name "corner_planter_00024"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.30 0.22 0.15 roughness 0.85 metalness 0 }
+      geometry Cylinder { radius 0.35 height 0.7 }
+    }
+    Pose {
+      translation 0 0 0.7
+      children [
+        Shape {
+          appearance PBRAppearance { baseColor 0.22 0.55 0.22 roughness 0.95 metalness 0 }
+          geometry Sphere { radius 0.45 }
+        }
+      ]
+    }
+  ]
+}
+
+DEF CORNER_00025 Solid {
+  translation 19.2722 69.7902 0.35
+  name "corner_planter_00025"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.30 0.22 0.15 roughness 0.85 metalness 0 }
+      geometry Cylinder { radius 0.35 height 0.7 }
+    }
+    Pose {
+      translation 0 0 0.7
+      children [
+        Shape {
+          appearance PBRAppearance { baseColor 0.22 0.55 0.22 roughness 0.95 metalness 0 }
+          geometry Sphere { radius 0.45 }
+        }
+      ]
+    }
+  ]
+}
+
+DEF CORNER_00026 Solid {
+  translation 12.8425 59.8960 0.35
+  name "corner_planter_00026"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.30 0.22 0.15 roughness 0.85 metalness 0 }
+      geometry Cylinder { radius 0.35 height 0.7 }
+    }
+    Pose {
+      translation 0 0 0.7
+      children [
+        Shape {
+          appearance PBRAppearance { baseColor 0.22 0.55 0.22 roughness 0.95 metalness 0 }
+          geometry Sphere { radius 0.45 }
+        }
+      ]
+    }
+  ]
+}
+
+DEF CORNER_00027 Solid {
+  translation 20.7220 58.7704 0.30
+  name "corner_ext_00027"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.82 0.08 0.08 roughness 0.35 metalness 0.25 }
+      geometry Cylinder { radius 0.085 height 0.55 }
+    }
+    Pose { translation 0 0 0.31 children [ Shape {
+      appearance PBRAppearance { baseColor 0.18 0.18 0.18 roughness 0.5 metalness 0.5 }
+      geometry Cylinder { radius 0.035 height 0.12 }
+    } ] }
+  ]
+}
+
+DEF CORNER_00028 Solid {
+  translation 13.0291 54.7750 0.35
+  name "corner_planter_00028"
   children [
     Shape {
       appearance PBRAppearance { baseColor 0.30 0.22 0.15 roughness 0.85 metalness 0 }
@@ -2286,32 +2775,20 @@ DEF CORNER_00020 Solid {
 DEF FLOOR_OBJECTS Group {
   children [
 DEF FLOOROBJ_00000 Solid {
-  translation 5.0211 47.2713 0.25
-  rotation 0 0 1 -1.54102
-  name "bench_00000"
+  translation 26.1613 24.8024 1.35
+  name "pillar_00000"
   children [
     Shape {
-      appearance PBRAppearance { baseColor 0.40 0.28 0.18 roughness 0.7 metalness 0 }
-      geometry Box { size 1.8 0.5 0.45 }
+      appearance PBRAppearance { baseColor 0.88 0.82 0.72 roughness 0.55 metalness 0.10 }
+      geometry Cylinder { radius 0.30 height 2.7 }
     }
   ]
 }
 
 DEF FLOOROBJ_00001 Solid {
-  translation 9.1076 66.5895 0.4
-  name "trashcan_00001"
-  children [
-    Shape {
-      appearance PBRAppearance { baseColor 0.22 0.22 0.25 roughness 0.5 metalness 0.4 }
-      geometry Cylinder { radius 0.27 height 0.85 }
-    }
-  ]
-}
-
-DEF FLOOROBJ_00002 Solid {
-  translation 7.7133 104.8271 0.25
-  rotation 0 0 1 -1.53452
-  name "bench_00002"
+  translation 7.8463 116.0130 0.25
+  rotation 0 0 1 -3.10169
+  name "bench_00001"
   children [
     Shape {
       appearance PBRAppearance { baseColor 0.40 0.28 0.18 roughness 0.7 metalness 0 }
@@ -2320,8 +2797,28 @@ DEF FLOOROBJ_00002 Solid {
   ]
 }
 
+DEF FLOOROBJ_00002 Solid {
+  translation 23.8063 90.5695 0.45
+  name "planter_00002"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.42 0.30 0.18 roughness 0.85 metalness 0 }
+      geometry Cylinder { radius 0.45 height 0.9 }
+    }
+    Pose {
+      translation 0 0 0.85
+      children [
+        Shape {
+          appearance PBRAppearance { baseColor 0.18 0.55 0.22 roughness 0.95 metalness 0 }
+          geometry Sphere { radius 0.55 }
+        }
+      ]
+    }
+  ]
+}
+
 DEF FLOOROBJ_00003 Solid {
-  translation 8.1941 91.5800 0.4
+  translation 15.5798 41.2106 0.4
   name "trashcan_00003"
   children [
     Shape {
@@ -2332,8 +2829,106 @@ DEF FLOOROBJ_00003 Solid {
 }
 
 DEF FLOOROBJ_00004 Solid {
-  translation 11.5045 61.1374 1.35
+  translation 8.3583 66.5558 1.35
   name "pillar_00004"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.88 0.82 0.72 roughness 0.55 metalness 0.10 }
+      geometry Cylinder { radius 0.30 height 2.7 }
+    }
+  ]
+}
+
+DEF FLOOROBJ_00005 Solid {
+  translation 7.8778 79.5724 0.25
+  rotation 0 0 1 -1.53482
+  name "bench_00005"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.40 0.28 0.18 roughness 0.7 metalness 0 }
+      geometry Box { size 1.8 0.5 0.45 }
+    }
+  ]
+}
+
+DEF FLOOROBJ_00006 Solid {
+  translation 6.8447 108.0834 0.4
+  name "trashcan_00006"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.22 0.22 0.25 roughness 0.5 metalness 0.4 }
+      geometry Cylinder { radius 0.27 height 0.85 }
+    }
+  ]
+}
+
+DEF FLOOROBJ_00007 Solid {
+  translation 7.4451 91.5394 0.45
+  name "planter_00007"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.42 0.30 0.18 roughness 0.85 metalness 0 }
+      geometry Cylinder { radius 0.45 height 0.9 }
+    }
+    Pose {
+      translation 0 0 0.85
+      children [
+        Shape {
+          appearance PBRAppearance { baseColor 0.18 0.55 0.22 roughness 0.95 metalness 0 }
+          geometry Sphere { radius 0.55 }
+        }
+      ]
+    }
+  ]
+}
+
+DEF FLOOROBJ_00008 Solid {
+  translation 11.4501 83.2237 0.25
+  rotation 0 0 1 1.60499
+  name "bench_00008"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.40 0.28 0.18 roughness 0.7 metalness 0 }
+      geometry Box { size 1.8 0.5 0.45 }
+    }
+  ]
+}
+
+DEF FLOOROBJ_00009 Solid {
+  translation 15.3751 91.6648 0.45
+  name "planter_00009"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.42 0.30 0.18 roughness 0.85 metalness 0 }
+      geometry Cylinder { radius 0.45 height 0.9 }
+    }
+    Pose {
+      translation 0 0 0.85
+      children [
+        Shape {
+          appearance PBRAppearance { baseColor 0.18 0.55 0.22 roughness 0.95 metalness 0 }
+          geometry Sphere { radius 0.55 }
+        }
+      ]
+    }
+  ]
+}
+
+DEF FLOOROBJ_00010 Solid {
+  translation 11.8563 72.6975 0.25
+  rotation 0 0 1 1.61343
+  name "bench_00010"
+  children [
+    Shape {
+      appearance PBRAppearance { baseColor 0.40 0.28 0.18 roughness 0.7 metalness 0 }
+      geometry Box { size 1.8 0.5 0.45 }
+    }
+  ]
+}
+
+DEF FLOOROBJ_00011 Solid {
+  translation 21.0993 64.3233 1.35
+  name "pillar_00011"
   children [
     Shape {
       appearance PBRAppearance { baseColor 0.88 0.82 0.72 roughness 0.55 metalness 0.10 }
@@ -2348,39 +2943,14 @@ DEF FLOOROBJ_00004 Solid {
 DEF CEILING_BILLBOARDS Group {
   children [
 DEF BB_00000 Solid {
-  translation 22.6631 29.3648 2.55
-  rotation 0 0 1 -2.16910
+  translation 14.7059 23.4028 2.55
+  rotation 0 0 1 -3.05502
   name "billboard_00000"
   children [
     Shape {
       appearance PBRAppearance {
         baseColor 0.95 0.18 0.18
         emissiveColor 0.617 0.117 0.117
-        roughness 0.30 metalness 0.10
-      }
-      geometry Box { size 2.72 0.06 0.50 }
-    }
-    Pose {
-      translation 0 0 0.460
-      children [
-        Shape {
-          appearance PBRAppearance { baseColor 0.30 0.30 0.30 roughness 0.6 metalness 0.4 }
-          geometry Box { size 0.05 0.05 0.420 }
-        }
-      ]
-    }
-  ]
-}
-
-DEF BB_00001 Solid {
-  translation 22.6180 81.6617 2.55
-  rotation 0 0 1 1.80878
-  name "billboard_00001"
-  children [
-    Shape {
-      appearance PBRAppearance {
-        baseColor 0.15 0.45 0.95
-        emissiveColor 0.098 0.293 0.617
         roughness 0.30 metalness 0.10
       }
       geometry Box { size 2.04 0.06 0.50 }
@@ -2397,65 +2967,40 @@ DEF BB_00001 Solid {
   ]
 }
 
+DEF BB_00001 Solid {
+  translation 23.4103 41.5812 2.55
+  rotation 0 0 1 0.02940
+  name "billboard_00001"
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.15 0.45 0.95
+        emissiveColor 0.098 0.293 0.617
+        roughness 0.30 metalness 0.10
+      }
+      geometry Box { size 1.50 0.06 0.50 }
+    }
+    Pose {
+      translation 0 0 0.460
+      children [
+        Shape {
+          appearance PBRAppearance { baseColor 0.30 0.30 0.30 roughness 0.6 metalness 0.4 }
+          geometry Box { size 0.05 0.05 0.420 }
+        }
+      ]
+    }
+  ]
+}
+
 DEF BB_00002 Solid {
-  translation 9.3216 107.6494 2.55
-  rotation 0 0 1 0.84533
+  translation 21.4788 69.6172 2.55
+  rotation 0 0 1 1.60168
   name "billboard_00002"
   children [
     Shape {
       appearance PBRAppearance {
         baseColor 0.95 0.65 0.1
         emissiveColor 0.617 0.423 0.065
-        roughness 0.30 metalness 0.10
-      }
-      geometry Box { size 1.50 0.06 0.50 }
-    }
-    Pose {
-      translation 0 0 0.460
-      children [
-        Shape {
-          appearance PBRAppearance { baseColor 0.30 0.30 0.30 roughness 0.6 metalness 0.4 }
-          geometry Box { size 0.05 0.05 0.420 }
-        }
-      ]
-    }
-  ]
-}
-
-DEF BB_00003 Solid {
-  translation 16.6160 44.2072 2.55
-  rotation 0 0 1 -0.76915
-  name "billboard_00003"
-  children [
-    Shape {
-      appearance PBRAppearance {
-        baseColor 0.2 0.78 0.3
-        emissiveColor 0.130 0.507 0.195
-        roughness 0.30 metalness 0.10
-      }
-      geometry Box { size 1.50 0.06 0.50 }
-    }
-    Pose {
-      translation 0 0 0.460
-      children [
-        Shape {
-          appearance PBRAppearance { baseColor 0.30 0.30 0.30 roughness 0.6 metalness 0.4 }
-          geometry Box { size 0.05 0.05 0.420 }
-        }
-      ]
-    }
-  ]
-}
-
-DEF BB_00004 Solid {
-  translation 9.4589 90.0259 2.55
-  rotation 0 0 1 2.55198
-  name "billboard_00004"
-  children [
-    Shape {
-      appearance PBRAppearance {
-        baseColor 0.78 0.2 0.85
-        emissiveColor 0.507 0.130 0.552
         roughness 0.30 metalness 0.10
       }
       geometry Box { size 3.06 0.06 0.50 }
@@ -2472,9 +3017,59 @@ DEF BB_00004 Solid {
   ]
 }
 
+DEF BB_00003 Solid {
+  translation 22.9254 92.6671 2.55
+  rotation 0 0 1 -1.52467
+  name "billboard_00003"
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.2 0.78 0.3
+        emissiveColor 0.130 0.507 0.195
+        roughness 0.30 metalness 0.10
+      }
+      geometry Box { size 2.04 0.06 0.50 }
+    }
+    Pose {
+      translation 0 0 0.460
+      children [
+        Shape {
+          appearance PBRAppearance { baseColor 0.30 0.30 0.30 roughness 0.6 metalness 0.4 }
+          geometry Box { size 0.05 0.05 0.420 }
+        }
+      ]
+    }
+  ]
+}
+
+DEF BB_00004 Solid {
+  translation 8.2537 87.1895 2.55
+  rotation 0 0 1 -1.52505
+  name "billboard_00004"
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.78 0.2 0.85
+        emissiveColor 0.507 0.130 0.552
+        roughness 0.30 metalness 0.10
+      }
+      geometry Box { size 1.50 0.06 0.50 }
+    }
+    Pose {
+      translation 0 0 0.460
+      children [
+        Shape {
+          appearance PBRAppearance { baseColor 0.30 0.30 0.30 roughness 0.6 metalness 0.4 }
+          geometry Box { size 0.05 0.05 0.420 }
+        }
+      ]
+    }
+  ]
+}
+
 DEF BB_00005 Solid {
-  translation 10.3514 64.1494 2.55
-  rotation 0 0 1 -1.36255
+  translation 10.6507 50.5851 2.55
+  rotation 0 0 1 -1.80251
   name "billboard_00005"
   children [
     Shape {
@@ -2483,7 +3078,32 @@ DEF BB_00005 Solid {
         emissiveColor 0.617 0.552 0.065
         roughness 0.30 metalness 0.10
       }
-      geometry Box { size 2.72 0.06 0.50 }
+      geometry Box { size 3.20 0.06 0.50 }
+    }
+    Pose {
+      translation 0 0 0.460
+      children [
+        Shape {
+          appearance PBRAppearance { baseColor 0.30 0.30 0.30 roughness 0.6 metalness 0.4 }
+          geometry Box { size 0.05 0.05 0.420 }
+        }
+      ]
+    }
+  ]
+}
+
+DEF BB_00006 Solid {
+  translation 12.6470 115.2783 2.55
+  rotation 0 0 1 0.04705
+  name "billboard_00006"
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.92 0.3 0.55
+        emissiveColor 0.598 0.195 0.358
+        roughness 0.30 metalness 0.10
+      }
+      geometry Box { size 1.50 0.06 0.50 }
     }
     Pose {
       translation 0 0 0.460
@@ -2500,6 +3120,11 @@ DEF BB_00005 Solid {
   ]
 }
 
+
+DEF BUILD_STAMP Solid {
+  translation 23.90 67.85 -0.5
+  name "build_1789051053"
+}
 
 
 # To hide the ceiling at runtime, right-click DEF CEILING in the
@@ -2525,179 +3150,13 @@ DEF CEILING Group {
   ]
 }
 
-DEF REPLAY_RIG Robot {
+DEF TIAGO Tiago++ {
   translation 25.8726 14.5698 0
-  rotation 0 0 1 1.60092
-  name "replay_rig"
-  controller "replay_collector"
+  rotation 0 0 1 -1.52763
+  name "tiago"
+  controller "replay_driver"
   supervisor TRUE
-  children [
-    Pose {
-      translation 0 0.2022 0.0985
-      rotation 1 0 0 1.5708
-      children [
-        Shape {
-          appearance PBRAppearance { baseColor 0.10 0.10 0.11 roughness 0.8 metalness 0.1 }
-          geometry Cylinder { radius 0.0985 height 0.045 }
-        }
-      ]
-    }
-    Pose {
-      translation 0 -0.2022 0.0985
-      rotation 1 0 0 1.5708
-      children [
-        Shape {
-          appearance PBRAppearance { baseColor 0.10 0.10 0.11 roughness 0.8 metalness 0.1 }
-          geometry Cylinder { radius 0.0985 height 0.045 }
-        }
-      ]
-    }
-    Pose {
-      translation 0 0 0.19
-      children [
-        Shape {
-          appearance PBRAppearance { baseColor 0.16 0.16 0.18 roughness 0.6 metalness 0.3 }
-          geometry Cylinder { radius 0.27 height 0.30 }
-        }
-      ]
-    }
-    Pose {
-      translation 0 0 0.315
-      children [
-        Shape {
-          appearance PBRAppearance { baseColor 0.93 0.40 0.05 roughness 0.5 metalness 0.1 }
-          geometry Cylinder { radius 0.272 height 0.035 }
-        }
-      ]
-    }
-    Pose {
-      translation 0 0 0.62
-      children [
-        Shape {
-          appearance PBRAppearance { baseColor 0.93 0.93 0.94 roughness 0.55 metalness 0.05 }
-          geometry Box { size 0.28 0.32 0.56 }
-        }
-      ]
-    }
-    Pose {
-      translation 0 0 0.97
-      children [
-        Shape {
-          appearance PBRAppearance { baseColor 0.93 0.93 0.94 roughness 0.55 metalness 0.05 }
-          geometry Box { size 0.22 0.50 0.14 }
-        }
-      ]
-    }
-    Pose {
-      translation 0 0.29 0.95
-      children [
-        Shape {
-          appearance PBRAppearance { baseColor 0.93 0.40 0.05 roughness 0.5 metalness 0.1 }
-          geometry Sphere { radius 0.062 }
-        }
-      ]
-    }
-    Pose {
-      translation 0 -0.29 0.95
-      children [
-        Shape {
-          appearance PBRAppearance { baseColor 0.93 0.40 0.05 roughness 0.5 metalness 0.1 }
-          geometry Sphere { radius 0.062 }
-        }
-      ]
-    }
-    Pose {
-      translation 0.05 0.305 0.815
-      rotation 0 1 0 0.30
-      children [
-        Shape {
-          appearance PBRAppearance { baseColor 0.45 0.45 0.48 roughness 0.6 metalness 0.2 }
-          geometry Capsule { radius 0.048 height 0.26 }
-        }
-      ]
-    }
-    Pose {
-      translation 0.05 -0.305 0.815
-      rotation 0 1 0 0.30
-      children [
-        Shape {
-          appearance PBRAppearance { baseColor 0.45 0.45 0.48 roughness 0.6 metalness 0.2 }
-          geometry Capsule { radius 0.048 height 0.26 }
-        }
-      ]
-    }
-    Pose {
-      translation 0.16 0.26 0.66
-      rotation 0 1 0 1.35
-      children [
-        Shape {
-          appearance PBRAppearance { baseColor 0.45 0.45 0.48 roughness 0.6 metalness 0.2 }
-          geometry Capsule { radius 0.042 height 0.24 }
-        }
-      ]
-    }
-    Pose {
-      translation 0.16 -0.26 0.66
-      rotation 0 1 0 1.35
-      children [
-        Shape {
-          appearance PBRAppearance { baseColor 0.45 0.45 0.48 roughness 0.6 metalness 0.2 }
-          geometry Capsule { radius 0.042 height 0.24 }
-        }
-      ]
-    }
-    Pose {
-      translation 0.27 0.25 0.63
-      children [
-        Shape {
-          appearance PBRAppearance { baseColor 0.16 0.16 0.18 roughness 0.7 metalness 0.2 }
-          geometry Sphere { radius 0.045 }
-        }
-      ]
-    }
-    Pose {
-      translation 0.27 -0.25 0.63
-      children [
-        Shape {
-          appearance PBRAppearance { baseColor 0.16 0.16 0.18 roughness 0.7 metalness 0.2 }
-          geometry Sphere { radius 0.045 }
-        }
-      ]
-    }
-    Pose {
-      translation 0 0 1.06
-      children [
-        Shape {
-          appearance PBRAppearance { baseColor 0.45 0.45 0.48 roughness 0.6 metalness 0.2 }
-          geometry Cylinder { radius 0.05 height 0.06 }
-        }
-      ]
-    }
-    Pose {
-      translation -0.025 0 1.16
-      children [
-        Shape {
-          appearance PBRAppearance { baseColor 0.93 0.93 0.94 roughness 0.5 metalness 0.05 }
-          geometry Box { size 0.20 0.24 0.155 }
-        }
-      ]
-    }
-    Pose {
-      translation 0.065 0 1.175
-      children [
-        Shape {
-          appearance PBRAppearance { baseColor 0.07 0.07 0.09 roughness 0.3 metalness 0.4 }
-          geometry Box { size 0.02 0.20 0.06 }
-        }
-      ]
-    }
-    Camera {
-      translation 0.08 0 1.19
-      name "head_front_camera"
-      fieldOfView 1.0472
-      width 640
-      height 480
-      far 50
-    }
-  ]
+  wheelMaxVelocity 10.1523
+  wheelAcceleration 5.0762
+  wheelMaxTorque 10.00
 }

@@ -182,6 +182,49 @@ tablet, that wobble becomes fake position error in the dataset).
   so every session has the controller in the exact same place. Design comes
   later — not needed today.
 
+## 9. Give the coordinates a real-world reference (after Room Setup)
+
+SteamVR's **Room Setup** ("Configurer la pièce") calibrates the tracking frame:
+floor at height 0, origin and axes placed somewhere in the traced field. Two rules:
+
+- **Do Room Setup once, then never again** during the collection campaign, and
+  don't move the base stations. Re-running it (or moving a station) changes the
+  frame — sessions before and after would live in different coordinates.
+- The origin/axes are still arbitrary w.r.t. the physical room. The anchor
+  protocol below pins them to real room coordinates — and doubles as a
+  start-of-day check that nothing moved.
+
+**One-time setup:**
+
+1. Choose a room origin (e.g. the SW corner) and two axis directions along the walls.
+2. Tape **4 marks** on the floor, spread out, NOT in a straight line.
+3. Measure each mark's (x, y) from your origin with a tape measure (±1 cm is fine).
+4. Copy `anchors.example.json` to `anchors.json` and put your measurements in it.
+
+**Each collection day (2 minutes):**
+
+1. Start the logger for a short dedicated session.
+2. Place the controller on each anchor **in the order listed in anchors.json**,
+   hold it still, and **hold the trigger ~1 second** on each.
+3. Ctrl+C, then:
+
+```powershell
+.venv\Scripts\python register_frame.py sessions\vive_gt_XXXXXX.csv anchors.json
+```
+
+It prints per-anchor residuals and saves `frame_calibration.json`. Residuals of
+a few mm–cm = healthy; a warning above 5 cm = redo (wrong order, wrong
+measurement, or a station moved).
+
+**To convert any session into room coordinates** (adds `room_x`/`room_y` columns):
+
+```powershell
+.venv\Scripts\python register_frame.py --apply sessions\vive_gt_YYYYYY.csv
+```
+
+Keep using the raw CSVs as the primary record; the calibration can always be
+re-applied later.
+
 ---
 
 ## Appendix: coordinates and advanced setup

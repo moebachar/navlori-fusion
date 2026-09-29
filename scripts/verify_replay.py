@@ -123,6 +123,31 @@ def verify_path(src: Path, rep: Path, path_id: int, args) -> tuple[bool, dict]:
     else:
         all_ok &= gate("anchor", False, "no anchor_err_m values found in ground_truth.csv")
 
+    # ── Gate 1b: hover height — gt_z must equal the configured hover and be
+    #     CONSTANT (the cumulative +1cm/path bug reached 0.62 m unnoticed;
+    #     it also lifted the camera by the same amount). Only gated when the
+    #     controller recorded hover_m (post-fix data). ──
+    hover = None
+    try:
+        hover = float(json.loads((rep / "metadata.json")
+                                 .read_text(encoding="utf-8"))["hover_m"])
+    except (FileNotFoundError, KeyError, ValueError, json.JSONDecodeError):
+        pass
+    if hover is None:
+        # Absence of hover_m marks PRE-FIX controller output. A truncated
+        # stale path once hid behind the old "skip when missing" behaviour
+        # (path_15, gt_z=0.16, cut at 16.8/19.2s) -- stale is a failure.
+        all_ok &= gate("z-hover", False,
+                       "metadata.json lacks hover_m -> stale pre-fix data; "
+                       "delete the path dir and re-replay it")
+    else:
+        zs = [float(r["gt_z"]) for r in gt_rows if r.get("gt_z") not in (None, "")]
+        if zs:
+            worst = max(abs(z - hover) for z in zs)
+            all_ok &= gate("z-hover", worst < 0.005,
+                           f"max |gt_z - {hover:.3f}| = {worst*1000:.1f}mm "
+                           f"(limit 5mm; camera height depends on it)")
+
     # ── Gate 2: camera count + non-black ──
     cam_rows = read_csv(rep / "camera.csv")
     expected = duration * args.camera_hz
@@ -266,11 +291,13 @@ def main() -> int:
     ap.add_argument("--cam-tol", type=float, default=0.05, help="gate 2 frame-count tolerance")
     ap.add_argument("--black-std", type=float, default=2.0,
                     help="gate 2: min per-image pixel std to count as non-black")
-    ap.add_argument("--max-drift", type=float, default=0.05,
+    ap.add_argument("--max-drift", type=float, default=0.06,
                     help="gate 3 threshold (fraction). Catches synthesis BUGS "
-                         "(the historic timing bug was 43%%); the stochastic "
-                         "slip-noise tail on ~100m paths reaches ~4%%, so 3%% "
-                         "was too tight for long paths.")
+                         "(the historic timing bug was 43%%). The stochastic "
+                         "slip tail on ~100m paths reaches ~4%% at uniform "
+                         "speed and ~5.5%% with the IMU profile (motion "
+                         "concentrates into bursts -> larger per-step wheel "
+                         "arcs -> more slip variance at identical distance).")
     ap.add_argument("--n-sample-frames", type=int, default=20)
     args = ap.parse_args()
 

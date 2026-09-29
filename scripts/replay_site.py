@@ -19,10 +19,14 @@ Phases (subcommands):
 The ONLY manual step is the Webots run itself (CLAUDE.md rule 4: cameras
 render NULL outside a real desktop session -- use Parsec).
 
+Data layout (2026-09-07 reorg): converted source floors live under
+data/iln20_converted/<name>/ (regenerable, gitignored); finished replay
+datasets land at data/<name>_replay/ next to the other DVC datasets.
+
 Usage (PowerShell, from repo root):
     # pilot on the already-converted F2 dataset, paths 0-4:
     .venv\\Scripts\\python.exe scripts\\replay_site.py prepare \\
-        --dataset data/iln20_5d27099f_F2 --paths 0-4
+        --dataset data/iln20_converted/iln20_5d27099f_F2 --paths 0-4
 
     # a fresh site/floor straight from the raw dump:
     .venv\\Scripts\\python.exe scripts\\replay_site.py prepare \\
@@ -30,7 +34,7 @@ Usage (PowerShell, from repo root):
 
     # after the Webots run:
     .venv\\Scripts\\python.exe scripts\\replay_site.py verify \\
-        --dataset data/iln20_5d27099f_F2 \\
+        --dataset data/iln20_converted/iln20_5d27099f_F2 \\
         --replay  data/iln20_5d27099f_F2_replay
 """
 from __future__ import annotations
@@ -46,6 +50,10 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCRIPTS = REPO_ROOT / "scripts"
 WORLDS_DIR = REPO_ROOT / "src" / "simulation" / "worlds"
+# Converted source floors live in a sub-dir so data/'s top level stays a
+# short list of real datasets (2026-09-07 reorg). Replay OUTPUT datasets
+# (the products) stay at data/ top level next to the other DVC datasets.
+CONVERTED_ROOT = REPO_ROOT / "data" / "iln20_converted"
 
 
 def run_step(title: str, argv: list[str]) -> None:
@@ -93,15 +101,20 @@ def cmd_prepare(args) -> None:
     else:
         if not (args.site and args.floor):
             sys.exit("prepare needs --dataset OR (--site AND --floor)")
-        dataset = REPO_ROOT / "data" / f"iln20_{args.site[:8]}_{args.floor}"
+        dataset = CONVERTED_ROOT / (
+            args.out_name or f"iln20_{args.site[:8]}_{args.floor}")
 
     # ── 1. Convert (only when missing) ──
     if not dataset.is_dir():
         if not (args.site and args.floor):
             sys.exit(f"dataset dir not found ({dataset}) and no --site/--floor "
                      f"given to convert it from the raw dump")
-        run_step("convert", [SCRIPTS / "convert_iln20_floor.py",
-                             "--site", args.site, "--floor", args.floor])
+        conv_argv = [SCRIPTS / "convert_iln20_floor.py",
+                     "--site", args.site, "--floor", args.floor,
+                     "--out-root", CONVERTED_ROOT]
+        if args.out_name:
+            conv_argv += ["--out-name", args.out_name]
+        run_step("convert", conv_argv)
         if not dataset.is_dir():
             sys.exit(f"convert finished but {dataset} still missing")
     else:
@@ -109,8 +122,10 @@ def cmd_prepare(args) -> None:
 
     name = args.out_name or dataset.name
     world = WORLDS_DIR / f"{name}.wbt"
+    # Products (replay datasets) go to data/ TOP level, next to the other
+    # DVC datasets -- never into iln20_converted/ with the sources.
     output = Path(args.output).resolve() if args.output \
-        else dataset.parent / f"{dataset.name}_replay"
+        else REPO_ROOT / "data" / f"{dataset.name}_replay"
     paths_spec = args.paths or ",".join(str(i) for i in all_path_ids(dataset))
     if not paths_spec:
         sys.exit(f"no path_XX dirs found in {dataset}")
@@ -138,7 +153,13 @@ def cmd_prepare(args) -> None:
                                 "--world", world, "--dataset", dataset,
                                 "--gate"])
 
-    # ── 8. Stage the replay ──
+    # ── 8. Stage the replay (skipped in batch world-building: there is ONE
+    #      shared replay_config.json; stage the floor you actually open) ──
+    if args.no_stage:
+        print(f"\n[replay_site] PREPARE (no-stage) COMPLETE -- world ready: "
+              f"{world}\n  stage later with: replay_site.py prepare "
+              f"--dataset {dataset.relative_to(REPO_ROOT)}")
+        return
     stage_argv = [SCRIPTS / "run_replay.py", "--world", world,
                   "--dataset", dataset, "--output", output,
                   "--paths", paths_spec]
@@ -395,9 +416,16 @@ def main() -> None:
                    help="world stem override (default: dataset dir name; must "
                         "equal it for the controller's world guard)")
     p.add_argument("--seed", type=int, default=1337)
-    p.add_argument("--shrink-shops", type=float, default=0.0)
+    p.add_argument("--shrink-shops", type=float, default=0.75,
+                   help="move shop walls this many metres away from the "
+                        "corridor (default 0.75 since 2026-07-22: surveyors "
+                        "hug walls -- 22.9%% of F2 GT points were within "
+                        "0.5 m of a wall). Perimeter walls never move.")
     p.add_argument("--fresh", action="store_true",
                    help="redo paths even if _done.json exists")
+    p.add_argument("--no-stage", action="store_true",
+                   help="stop after the world gates (build_all_sites.py batch "
+                        "mode) -- do not write replay_config.json")
     p.set_defaults(fn=cmd_prepare)
 
     v = sub.add_parser("verify", help="post-Webots batch gates + manifest")
