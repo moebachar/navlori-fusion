@@ -1,0 +1,30 @@
+# side_golden — 12 real TurtleBot3 runs (side_navlori golden runs, 2026-09-24)
+# Real WiFi + IMU + wheel odometry + camera; ground truth = lidar SLAM + gyro
+# heading placed in the building frame by an AprilTag network.
+# Converted by scripts/convert_side_golden.py (path_id = golden run - 1).
+# Split by run: train runs 1,4,5,7,9,10,11 | val runs 3,8 | test runs 2,6,12.
+data:
+  name: side_golden
+  root: ${oc.env:NAVLORI_DATA_ROOT,data}
+  collection_dir: side_golden
+  source: real
+  modalities: [wifi, imu, odom, camera]
+  wifi_encoder_type: set_transformer
+
+  split:
+    train_paths: [0, 3, 4, 6, 8, 9, 10]
+    val_paths: [2, 7]
+    test_paths: [1, 5, 11]
+
+  preprocessing:
+    normalize: true
+    wifi_norm: raw
+    wifi_pca: 128
+    wifi_max_stale_s: null
+    imu_frame: world
+
+  windows:
+    imu: 32
+    odom: 16
+    wifi: 1
+    camera: 1
