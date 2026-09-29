@@ -1,26 +1,2 @@
-# Ignore all collected data (versioned via DVC)
-async_collection/
-*.csv
-*.png
-*.json
-*.zip
-*.tar.gz
-*.hdf5
-ronin_frdr/
-hospital_sample*/
-tartanair_hospital/
-imuwifine_floor4/
-msiln_site1_b1/
-ronin_a000/
-ronin_a000_intra/
-ipin2024_floor*/
-uji_indoorloc/
-!.gitkeep
-!.gitignore
 /async_collection
-/msiln_site1_b1
-/imuwifine_floor4
-/uji_indoorloc
-/ipin2024_floor0
-/tartanair_hospital
-/ronin_frdr
+/iln20_5d27099f_F2_replay

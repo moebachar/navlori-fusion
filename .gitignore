@@ -6,13 +6,8 @@ dist/
 build/
 .venv/
 
-# Data (tracked by DVC)
-data/async_collection/
-!/data/.gitkeep
-
-# Third-party datasets (downloaded, not tracked)
-data/iln20/
-data/iln20_*/
+# Data lives in the vault X:/navlori-data (git + DVC); data/ is a link to X:/navlori-data/datasets
+/data
 
 # Experiment tracking
 mlruns/
