@@ -88,3 +88,7 @@ paper/main.pdf
 !.claude/skills/
 !.claude/skills/paper-content/
 !.claude/skills/paper-format/
+
+# Agent worktrees (one per agent, see docs/agents/README.md) and the shared GPU lock
+/.worktrees/
+/.gpu_lock
