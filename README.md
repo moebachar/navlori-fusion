@@ -1,312 +1,113 @@
-# NavLoRI — Fusion
+# NavLoRI Fusion
 
-**Attention-Based Asynchronous Fusion of WiFi, Vision, IMU, and Odometry for Indoor Robot Localization**
+Indoor localization for a mobile robot by fusing WiFi signal strength, an IMU, wheel odometry and a camera.
 
-TIAGO++ robot, CESI LINEACT. Author: Mohamed Bachar.
+WiFi tells you roughly where you are in a building. The motion sensors tell you precisely how you moved, but they drift. This repository learns to combine them, even though they report at very different rates (WiFi about once every few seconds, the IMU over a hundred times a second) and one of them is sometimes missing.
 
----
+Mohamed Bachar, CESI LINEACT.
 
-## Project Overview
+Paper: *Continuous-Time Set-Transformers for Asynchronous WiFi-IMU Indoor Localization*, ICINCO 2026.
 
-Indoor position prediction (x, y) using 4-modality fusion: **WiFi RSSI + Vision + IMU + Odometry**.
+## How it works
 
-### Architecture (as built)
+Each sensor stream is cut into a short window ending at the moment we want a position. A small encoder turns each window into a 128-d token:
 
-| Stage | Module | Description |
-|-------|--------|-------------|
-| **A** | `src/pipeline/encoders/` | Per-modality encoders → 128-d tokens: WiFi-Net, IMUCNN, OdomCNN, ACEVision / DPVOMotion (vision) |
-| **B+C** | `src/pipeline/fusion/` | **One** continuous-time set-transformer: self-attention = cross-modal fusion, K instants = temporal fusion, cross-attention query = readout. CNN1D / LSTM-attn bake-off candidates in `bakeoff.py`. |
-| **D** | *(subsumed)* | Temporal self-attention learns the smoothing a filter would; `src/pipeline/filters/` is a stub for future work |
-| **E** | `src/pipeline/uncertainty/` | Split-conformal `(x, y) ± r` intervals (α=0.1) |
-| ext | `src/pipeline/baselines/` | Centralised loaders for the 6 SOTA submodules under `external_methods/` |
-| data | `src/pipeline/data/` | `load_dataset(name)` factory across all datasets (Webots, MSILN, UJI, RoNIN, IMUWiFine, IPIN) |
-| viz | `src/pipeline/visualization/` | Paper-figure plotters |
+| Sensor | Encoder |
+|---|---|
+| WiFi | WiFi-Net, or a per-access-point set transformer |
+| IMU | 1-D CNN |
+| Wheel odometry | 1-D CNN |
+| Camera | DPVO motion tokens (experimental) |
 
-### Contributions
+The tokens from the last K time instants go into a single set transformer. Self-attention fuses the sensors and the instants, and a learned query reads out `(x, y)`. Every token carries its own timestamp, encoded in continuous time, so nothing is resampled to a common rate.
 
-- **C0**: Multi-modal async simulation dataset (Webots, TIAGO++)
-- **C1**: Continuous-time set-transformer fusion of asynchronous WiFi+IMU (ICINCO 2026 submission)
-- **C2**: Async robustness via modality dropout + per-instant dropout (no rate-resampling)
-- **C3**: Conformal position intervals
+At training time, whole sensors and whole instants are randomly dropped. This teaches the model to keep working when WiFi is stale or a sensor is down. An optional split-conformal step turns the prediction into `(x, y) ± r`.
 
-Full pipeline walkthrough: [docs/fusion_pipeline.md](docs/fusion_pipeline.md).
+[docs/fusion_pipeline.md](docs/fusion_pipeline.md) walks through every step, with the equations and the code locations.
 
----
-
-## Project Structure
+## Repository layout
 
 ```
-navlori-fusion/
-├── src/
-│   ├── simulation/                 # Webots simulation
-│   │   ├── worlds/                 # .wbt world file (TIAGO++ indoor env)
-│   │   └── controllers/
-│   │       ├── async_collector/    # Main data collection controller
-│   │       │   ├── async_collector.py   # Event-driven multi-modal collector
-│   │       │   ├── dwa_planner.py       # DWA obstacle avoidance (from PythonRobotics)
-│   │       │   ├── paths.py             # Path loader
-│   │       │   ├── paths.json           # 30 collision-free paths
-│   │       │   ├── fix_paths.py         # Safety zone violation fixer
-│   │       │   ├── viz_paths.py         # Path visualization generator
-│   │       │   └── viz/                 # Generated path images
-│   │       ├── wifi_supervisor/    # WiFi RSSI predictor (GPR-based)
-│   │       └── replay_collector/   # Replay phase: retrace real-dataset paths
-│   ├── pipeline/                   # ML pipeline
-│   │   ├── encoders/               # Stage A: per-modality encoders
-│   │   ├── fusion/                 # Stage B+C: set-transformer + bake-off + builder
-│   │   ├── baselines/              # Loaders for the 6 SOTA submodules
-│   │   ├── data/                   # Dataset factory (all datasets)
-│   │   ├── evaluation/             # 6-metric harness + MainResultsTable
-│   │   ├── training/               # EncoderTrainer / FusionTrainer
-│   │   ├── visualization/          # Paper-figure plotters
-│   │   └── uncertainty/            # Stage E: conformal prediction
-│   └── services/
-│       └── grafana/                # Dashboard configs + provisioning
-├── external_methods/               # 6 SOTA baseline git submodules
-├── configs/                        # OmegaConf YAML configs (see configs/README.md)
-│   ├── stage_a/                    # Stage-A encoder configs (wifi/imu/odom/vision)
-│   ├── stage_c/fusion.yaml         # Stage B+C fusion transformer + training
-│   └── data/                       # One yaml per selectable dataset (filename = name)
-├── notebooks/
-│   ├── run2_walkthrough.ipynb      # Full experiment-campaign walkthrough (live numbers)
-│   ├── paper_results.ipynb         # Paper-scoped results (WiFi+IMU, set-transformer)
-│   ├── reproduce_paper.ipynb       # Public reproducibility notebook
-│   ├── encoder_workbench.ipynb     # Stage-A encoder exploration
-│   └── data_exploration.ipynb      # Data analysis + visualizations
-├── scripts/
-│   ├── services.ps1                # Start/stop InfluxDB + Grafana
-│   ├── launch_webots.ps1           # Launch Webots in interactive session
-│   ├── convert_*.py                # External-dataset converters
-│   ├── eval_*.py                   # Per-dataset / per-baseline evaluation
-│   ├── replay_site.py              # Site-generic replay pipeline: raw -> world -> gates -> replay -> package
-│   ├── run_replay.py               # Stage a Webots replay (config + world patch, resume-aware)
-│   ├── verify_replay.py            # Gate a finished replay (per-path or --all + manifest)
-│   ├── replay_rig.py               # Shared physics-less TIAGO-shell replay robot
-│   ├── render_replay_video.py      # Per-path 4-panel realtime videos (IMU+odom/camera/WiFi/map)
-│   └── optuna_fusion.py            # Hyperparameter search
-├── data/                           # 7 datasets, all DVC-pinned (store: X:\navlori-data)
-│   ├── async_collection/           # Webots sim collection (per path)
-│   ├── msiln_site1_b1/ ...         # + MSILN, IMUWiFine fl.4, UJI, RoNIN, IPIN fl.0, TartanAir
-├── tests/
-├── pyproject.toml
-└── .gitignore
+src/pipeline/       encoders, fusion transformer, trainers, dataset loaders, evaluation, conformal intervals
+src/simulation/     Webots worlds and controllers (TIAGo++ data collection, replay of real walks)
+configs/            OmegaConf configs: data/ (one file per dataset), stage_a/ (encoders), stage_c/ (fusion)
+scripts/            training and evaluation entry points, dataset converters
+scripts/dataset/    pipeline that turns TurtleBot3 rosbags into a dataset with ground truth
+external_methods/   published baselines as git submodules (RoNIN, DPVO, TartanVO, wlan_localization, IMUWiFine, ILC 2.0)
+notebooks/, colab/  analysis and paper-result notebooks
+docs/               pipeline walkthrough, notes on the external baselines
 ```
 
----
+## Data
 
-## Setup (one-time)
+The data is not in this repository. It lives in a separate data vault (git + DVC). `data/` is expected to point to that vault's `datasets/` folder: on the lab machine it is a link to `X:\navlori-data\datasets`. Configs also honour the `NAVLORI_DATA_ROOT` environment variable.
 
-### 1. Clone and create environment
+Every dataset uses the same per-path layout (`path_XX/` holding `ground_truth.csv`, `imu.csv`, `odometry.csv`, `wifi.csv`, `camera.csv`), so a model trains on any of them by changing one config name:
 
-```powershell
+| Config (`configs/data/`) | Data |
+|---|---|
+| `side_golden` | 12 real TurtleBot3 runs in our building: WiFi, IMU, wheel odometry, camera. Ground truth from lidar SLAM + gyroscope, placed on 26 surveyed AprilTags. |
+| `simulation` | Webots collection with a TIAGo++ robot, 18 paths, all four sensors |
+| `msiln_site1_b1` | Microsoft Indoor Location Competition 2.0, site 1 floor B1 (smartphone WiFi + IMU) |
+| `imuwifine` | IMUWiFine, floor 4 (smartphone WiFi + IMU) |
+| `ipin2024_floor0` | IPIN 2024 competition, floor 0 |
+| `iln20_5d27099f_F2_replay` | real ILC 2.0 walks re-driven in a Webots model of the floor, which adds camera and odometry |
+
+The converters for the public datasets are `scripts/convert_*.py`.
+
+## Setup
+
+Python 3.11+ and a CUDA GPU are recommended; the code has run on a GTX 1080 and a Quadro P4000.
+
+```bash
 git clone https://github.com/moebachar/navlori-fusion.git
 cd navlori-fusion
-git submodule update --init --recursive
+git submodule update --init --recursive      # the external baselines
 python -m venv .venv
-.venv\Scripts\activate
+.venv/Scripts/activate                        # Linux: source .venv/bin/activate
 pip install -e ".[dev]"
 ```
 
-The `git submodule update --init --recursive` step pulls the six
-SOTA baseline repositories (wlan_localization, ronin, tartanvo,
-dpvo, imuwifine, indoor_location_competition_20) under
-`external_methods/`. See
-[docs/EXTERNAL_DEPENDENCIES.md](docs/EXTERNAL_DEPENDENCIES.md) for
-the per-submodule setup notes (TartanVO weights, RoNIN pretrained
-ResNet1D, DPVO Windows-build limitation).
+Point `data/` at the dataset folder (a link, or `NAVLORI_DATA_ROOT`). The baselines need a few extras such as pretrained weights and build steps, listed in [docs/EXTERNAL_DEPENDENCIES.md](docs/EXTERNAL_DEPENDENCIES.md).
 
-### 2. Register Jupyter kernel
+## Running
 
-```powershell
-python -m ipykernel install --user --name navlori-fusion --display-name "NavLoRI Fusion"
+Train the fusion model on the real robot runs and evaluate every sensor subset on the test runs:
+
+```bash
+python scripts/_train_side_golden.py --epochs 60 --no-camera --wifi wifi_net
 ```
 
-### 3. Restore the datasets (DVC)
+This writes `runs/side_golden/fusion_3mod/`: `results.json` (test error per sensor subset), a training curve, per-run trajectory plots and a video.
 
-The repo pins all 7 datasets with DVC; the store is `X:\navlori-data`
-(config already in `.dvc/config`):
+One published baseline per sensor, on the same split:
 
-```powershell
-dvc pull
+```bash
+python scripts/_eval_wlanloc_side_golden.py   # WiFi: wlan_localization kNN
+python scripts/_eval_ronin_side_golden.py     # IMU: RoNIN ResNet-1D
+python scripts/_eval_odom_dr_side_golden.py   # wheel-odometry dead reckoning
 ```
 
-After changing a dataset: `dvc add data\<name>`, `dvc push`, then commit the
-updated `.dvc` file.
+The other `scripts/_train_*.py` and `scripts/_eval_*.py` do the same for the other datasets. `colab/` holds the multi-seed runs behind the paper tables. Tests: `pytest`.
 
-### 4. Install services (InfluxDB + Grafana)
+## Building the robot dataset
 
-Download and extract into the project:
+`scripts/dataset/` rebuilds `side_golden` from the raw rosbags:
 
-- **InfluxDB v2.7**: extract to `src/services/influxdb/` (needs `influxd.exe`)
-- **Grafana v11**: extract to `src/services/grafana/` (needs `bin/grafana-server.exe`)
+- **`export/`**: exporters and the loader. Rosbag goes to per-sensor CSVs, camera frames and lidar scans; a lidar scan-to-map SLAM gives the trajectory.
+- **`golden/`**: the ground-truth pipeline:
+  - AprilTag detection with OpenCV;
+  - gyroscope heading with bias estimation;
+  - a joint alignment of all runs on the tag network, with a soft prior toward the floor-plan coordinates;
+  - map matching for runs that see a single tag;
+  - packaging, and plots on the floor plan.
 
-These binaries are gitignored. First-time InfluxDB setup:
+  The shell scripts are meant for WSL/Linux.
 
-```powershell
-# Start InfluxDB
-.\src\services\influxdb\influxd.exe
+Then `scripts/convert_side_golden.py` turns the packaged runs into the format above.
 
-# In another terminal, set up org/bucket/token (pick your own secrets,
-# then mirror them in the local .env file — never commit them):
-.\src\services\influxdb\influx.exe setup `
-  --org navlori --bucket async_data `
-  --username <user> --password <password> `
-  --token <token> --force
-```
+## What to expect
 
-### 5. Configure Webots
-
-Open the world file in Webots:
-```
-src/simulation/worlds/Tiago++'s world.wbt
-```
-
-Set the TIAGO++ robot's `controller` field to `async_collector` and the Python command to:
-```
-X:\navlori-fusion\.venv\Scripts\python.exe
-```
-
----
-
-## Daily Usage
-
-### Start services (InfluxDB + Grafana)
-
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts\services.ps1 start
-```
-
-- InfluxDB: http://localhost:8086
-- Grafana: http://localhost:3000 (admin / admin)
-
-### Stop services
-
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts\services.ps1 stop
-```
-
-### Run data collection
-
-1. Edit batch range in `src/simulation/controllers/async_collector/async_collector.py`:
-   ```python
-   BATCH_START = 0    # First path (inclusive)
-   BATCH_END = 9      # Last path (inclusive)
-   ```
-
-2. Open the world in Webots and press **Play** (or **>>** for fast mode).
-
-3. Data saves to `data/async_collection/path_XX/` with separate CSVs per modality:
-   - `imu.csv` — accelerometer + gyroscope + orientation (~31 Hz)
-   - `odometry.csv` — wheel encoders + dead reckoning (~15 Hz)
-   - `wifi.csv` — per-AP RSSI fingerprints (~1 Hz)
-   - `ground_truth.csv` — supervisor position (~10 Hz)
-   - `camera/` — RGB + depth PNGs (~0.5 Hz)
-
-4. After collection, version with DVC:
-   ```powershell
-   dvc add data/async_collection
-   git add data/async_collection.dvc data/.gitignore
-   git commit -m "data: batch 0-9 collection"
-   ```
-
-### Run training
-
-Stage-A encoders train via `EncoderTrainer` (see the per-encoder scripts in
-`scripts/`); the fusion pipeline builds through
-`src.pipeline.fusion.builder.load_config(dataset)` — used by the notebooks,
-the smoke harness (`scripts\_smoke_fusion.py`, 5 gated phases) and the
-hyperparameter search:
-
-```powershell
-.venv\Scripts\python.exe scripts\optuna_fusion.py --dataset simulation
-```
-
-### Run MLflow UI
-
-```powershell
-mlflow ui --backend-store-uri mlruns
-```
-Open http://localhost:5000
-
-### Run TensorBoard
-
-```powershell
-tensorboard --logdir tb_logs
-```
-Open http://localhost:6006
-
-### Run tests
-
-```powershell
-pytest
-```
-
-### Run linter
-
-```powershell
-ruff check src/ tests/
-```
-
----
-
-## Data Collection Details
-
-### Sensor rates (with ±20% jitter)
-
-| Modality | Nominal Rate | Interval (sim steps) |
-|----------|-------------|---------------------|
-| IMU | ~31 Hz | 1 step (32ms) |
-| Odometry | ~15 Hz | 2 steps |
-| Ground Truth | ~10 Hz | 3 steps |
-| WiFi | ~1 Hz | 31 steps |
-| Camera | ~0.5 Hz | 62 steps |
-
-### Navigation
-
-Uses the **Dynamic Window Approach (DWA)** for obstacle-aware navigation. The planner (adapted from [PythonRobotics](https://github.com/AtsushiSakai/PythonRobotics), MIT license) samples velocity commands, simulates trajectories, and picks the one that best balances goal-seeking and obstacle clearance.
-
-Obstacle detection uses the TIAGO++ depth camera (Astra depth sensor).
-
-### Paths
-
-30 predefined paths in `paths.json`. Waypoints are corrected with `fix_paths.py` to enforce a safety clearance of **0.855m** (robot_radius=0.55 × 1.1 + 0.25m extra margin) from all walls. Visualize with `viz_paths.py` which outputs to `viz/`.
-
-The robot's actual collision radius is measured dynamically after `tuck_arms()` by reading the world positions of `ARM_LEFT_4` and `ARM_RIGHT_4` joints, plus a safety margin.
-
----
-
-## Remote Access (from laptop)
-
-Everything runs on the desktop. From the laptop:
-
-1. **VS Code Remote SSH** → connect to `navlori-gpu` (100.126.253.37 via Tailscline)
-2. Open folder: `X:\navlori-fusion`
-3. **Parsec** for Webots GUI (cameras need a real GPU session — SSH has no display context)
-4. Access services via browser:
-   - Grafana: http://100.126.253.37:3000
-   - InfluxDB: http://100.126.253.37:8086
-   - MLflow: http://100.126.253.37:5000
-   - TensorBoard: http://100.126.253.37:6006
-
----
-
-## Hardware
-
-- **GPU**: Quadro P4000 (8GB VRAM, sm_61)
-- **PyTorch**: 2.4.1+cu124
-- **Webots**: R2025a
-- **Python**: 3.11
-
----
-
-## SSH to GitHub
-
-Port 22 is blocked on this network. GitHub SSH goes through port 443:
-
-```
-# ~/.ssh/config
-Host github.com
-    Hostname ssh.github.com
-    Port 443
-    User git
-```
+- **WiFi carries the absolute position.** Without it, no combination of motion sensors can say where the robot is, only how it moved.
+- **Simulated WiFi is optimistic.** On Webots data the model reaches sub-metre error, but that WiFi is synthesized. On real, cross-session data the errors are metres, and the WiFi encoder is the bottleneck.
+- **Simple baselines are strong on real data.** The main strength of the method is graceful behaviour when sensors are late or missing, not absolute accuracy on every dataset.
