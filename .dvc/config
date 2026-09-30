@@ -1,6 +1,0 @@
-[core]
-    remote = local
-[cache]
-    type = "hardlink,copy"
-['remote "local"']
-    url = X:/navlori-data
